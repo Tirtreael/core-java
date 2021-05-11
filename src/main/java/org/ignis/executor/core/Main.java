@@ -1,4 +1,4 @@
-package org.ignis.core;
+package org.ignis.executor.core;
 
 import org.slf4j.LoggerFactory;
 
