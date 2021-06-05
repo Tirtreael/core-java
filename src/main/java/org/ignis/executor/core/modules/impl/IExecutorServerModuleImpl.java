@@ -23,7 +23,7 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
 
 
     public void serve(String name, int port, int compression) throws TTransportException {
-        if(this.server!=null){
+        //if(this.server!=null){
 
 //            this.processor = new TMultiplexedProcessor();
 //            this.server = new IThreadedServer(this.processor, new TServerSocket(port), TCompactProtocol(),
@@ -35,12 +35,12 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
 //            self.__server.serve()
 //            logger.info("ServerModule: python executor stopped")
 //            self.__server.stop()
-        }
+        //}
 
     }
 
     public void start(Properties properties) {
-
+        //this.getExecutorData().
     }
 
     public void stop() {
@@ -49,5 +49,8 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
 
     public boolean test() {
         return false;
+    }
+
+    public void createServices() {
     }
 }
