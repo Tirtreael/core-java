@@ -18,7 +18,7 @@ public enum IEnumTypes {
     I_PAIR_LIST(0xd),
     I_JSON(0xe);
 
-    private final int value;
+    public final int value;
 
     IEnumTypes(int i) {
         this.value = i;

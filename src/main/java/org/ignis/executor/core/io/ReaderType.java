@@ -1,14 +1,22 @@
 package org.ignis.executor.core.io;
 
-public class ReaderType {
+import java.util.concurrent.Callable;
 
-    Class<?> type;
-    Runnable read;
+public class ReaderType<K> {
 
-    public ReaderType(Class<?> type, Runnable read) {
+    private final Class<K> type;
+    private final Callable<K> read;
+
+    public ReaderType(Class<K> type, Callable<K> read) {
         this.type = type;
         this.read = read;
     }
 
+    public Class<K> getType() {
+        return type;
+    }
 
+    public Callable<K> getRead() {
+        return read;
+    }
 }
