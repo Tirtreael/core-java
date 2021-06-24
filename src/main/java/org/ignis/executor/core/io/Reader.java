@@ -3,14 +3,14 @@ package org.ignis.executor.core.io;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TMap;
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TSet;
-import org.ignis.executor.core.protocol.IObjectProtocol;
 
 import java.util.*;
 
 public class Reader implements IReader {
 
-    private IObjectProtocol protocol;
+    private TProtocol protocol;
     private final ReaderType<?>[] readers = {
             new ReaderType<>(void.class, () -> null),
             new ReaderType<>(boolean.class, () -> protocol.readBool()),
@@ -25,24 +25,15 @@ public class Reader implements IReader {
             new ReaderType<>(Map.class, () -> this.readMap(protocol)),
             new ReaderType<>(AbstractMap.SimpleEntry.class, () -> this.readPair(protocol)),
             new ReaderType<>(byte[].class, () -> this.readBinary(protocol)),
-            new ReaderType<>(List.class, () -> this.readPairList(protocol)),
-//            new ReaderType<>(JSONObject.class, () -> protocol.readByte())
+            new ReaderType<>(List.class, () -> this.readPairList(protocol))
     };
 
-//    private final Callable<Boolean> readBool = () -> protocol.readBool();
-//    private final Callable<Byte> readByte = () -> protocol.readByte();
-//    private final Callable<Short> readShort = () -> protocol.readI16();
-//    private final Callable<Integer> readInteger = () -> protocol.readI32();
-//    private final Callable<Long> readLong = () -> protocol.readI64();
-//    private final Callable<Double> readDouble = () -> protocol.readDouble();
-//    private final Callable<String> readString = () -> protocol.readString();
-
-    public Reader(IObjectProtocol protocol) {
+    public Reader(TProtocol protocol) {
         this.protocol = protocol;
     }
 
     @Override
-    public byte readTypeAux(IObjectProtocol protocol) throws TException {
+    public byte readTypeAux(TProtocol protocol) throws TException {
         return protocol.readByte();
     }
 
@@ -57,13 +48,13 @@ public class Reader implements IReader {
     }
 
     @Override
-    public long readSizeAux(IObjectProtocol protocol) throws TException {
+    public long readSizeAux(TProtocol protocol) throws TException {
         return protocol.readI64();
     }
 
 
     @Override
-    public List<Object> readList(IObjectProtocol protocol) throws Exception {
+    public List<Object> readList(TProtocol protocol) throws Exception {
         TList tList = protocol.readListBegin();
         long size = tList.size;
         byte elemType = tList.elemType;
@@ -75,7 +66,7 @@ public class Reader implements IReader {
     }
 
     @Override
-    public Set<Object> readSet(IObjectProtocol protocol) throws Exception {
+    public Set<Object> readSet(TProtocol protocol) throws Exception {
         TSet tSet = protocol.readSetBegin();
         long size = tSet.size;
         byte elemType = tSet.elemType;
@@ -87,7 +78,7 @@ public class Reader implements IReader {
     }
 
     @Override
-    public Map<Object, Object> readMap(IObjectProtocol protocol) throws Exception {
+    public Map<Object, Object> readMap(TProtocol protocol) throws Exception {
         TMap tMap = protocol.readMapBegin();
         long size = tMap.size;
         byte keyType = tMap.keyType;
@@ -100,7 +91,7 @@ public class Reader implements IReader {
     }
 
     @Override
-    public AbstractMap.SimpleEntry<Object, Object> readPair(IObjectProtocol protocol) throws Exception {
+    public AbstractMap.SimpleEntry<Object, Object> readPair(TProtocol protocol) throws Exception {
         byte keyType = this.readTypeAux(protocol);
         byte valueType = this.readTypeAux(protocol);
         return new AbstractMap.SimpleEntry<>(
@@ -110,12 +101,12 @@ public class Reader implements IReader {
     }
 
     @Override
-    public byte[] readBinary(IObjectProtocol protocol) throws Exception {
+    public byte[] readBinary(TProtocol protocol) throws Exception {
         return protocol.readBinary().array().clone();
     }
 
     @Override
-    public List<AbstractMap.SimpleEntry<Object, Object>> readPairList(IObjectProtocol protocol) throws Exception {
+    public List<AbstractMap.SimpleEntry<Object, Object>> readPairList(TProtocol protocol) throws Exception {
         TList tList = protocol.readListBegin();
         long size = tList.size;
         byte keyType = this.readTypeAux(protocol);
