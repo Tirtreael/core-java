@@ -41,28 +41,12 @@ public enum IEnumTypes {
         return clazz;
     }
 
-    public IEnumTypes getIEnumType(Class<?> clazz) {
+    public static IEnumTypes getIEnumType(Class<?> clazz) {
         for (IEnumTypes iEnumType : IEnumTypes.values()) {
             if (iEnumType.clazz.equals(clazz))
                 return iEnumType;
         }
         return I_VOID;
     }
-//        switch (clazz){
-//            case clazz == Void.TYPE: return I_VOID;
-//            case Boolean.TYPE: return I_BOOL;
-//            case Byte.TYPE: return I_I08;
-//            case Short.TYPE: return I_I16;
-//            case Integer.TYPE: return I_I32;
-//            case Long.TYPE: return I_I64;
-//            case double.class: return I_DOUBLE;
-//            case String.class: return I_STRING;
-//            case List.class : return I_LIST;
-//            case Set.class : return I_SET;
-//            case Map.class: return I_MAP;
-//            case AbstractMap.SimpleEntry.class : return I_PAIR;
-//            case Byte[].class : return I_BINARY;
-//            case List< : return I_PAIR_LIST;
-//            case JSONObject.class : return I_JSON;
-//        }
+
 }
