@@ -7,6 +7,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TSet;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class Reader implements IReader {
 
@@ -59,9 +60,12 @@ public class Reader implements IReader {
         long size = tList.size;
         byte elemType = tList.elemType;
         List<Object> obj = new ArrayList<>();
+        Callable<?> readerFunction = this.readers[elemType].read();
         for (int i = 0; i < size; i++) {
-            obj.add(this.readers[elemType].getRead().call());
+            readerFunction.call();
+//            obj.add(this.readers[elemType].getRead().call());
         }
+        protocol.readListEnd();
         return obj;
     }
 
@@ -72,7 +76,7 @@ public class Reader implements IReader {
         byte elemType = tSet.elemType;
         Set<Object> obj = new HashSet<>();
         for (int i = 0; i < size; i++) {
-            obj.add(this.readers[elemType].getRead().call());
+            obj.add(this.readers[elemType].read().call());
         }
         return obj;
     }
@@ -85,7 +89,7 @@ public class Reader implements IReader {
         byte valueType = tMap.valueType;
         Map<Object, Object> obj = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            obj.put(this.readers[keyType].getRead().call(), this.readers[valueType].getRead().call());
+            obj.put(this.readers[keyType].read().call(), this.readers[valueType].read().call());
         }
         return obj;
     }
@@ -95,8 +99,8 @@ public class Reader implements IReader {
         byte keyType = this.readTypeAux(protocol);
         byte valueType = this.readTypeAux(protocol);
         return new AbstractMap.SimpleEntry<>(
-                this.readers[keyType].getRead().call(),
-                this.readers[valueType].getRead().call()
+                this.readers[keyType].read().call(),
+                this.readers[valueType].read().call()
         );
     }
 
@@ -114,8 +118,8 @@ public class Reader implements IReader {
         List<AbstractMap.SimpleEntry<Object, Object>> obj = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             obj.add(new AbstractMap.SimpleEntry<>(
-                    this.readers[keyType].getRead().call(),
-                    this.readers[valueType].getRead().call()
+                    this.readers[keyType].read().call(),
+                    this.readers[valueType].read().call()
             ));
         }
         return obj;

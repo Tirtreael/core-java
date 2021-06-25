@@ -2,12 +2,13 @@ package org.ignis.executor.core.io;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public enum IEnumTypes {
+public enum IEnumTypes implements Type {
 
     I_VOID(0x0, void.class),
     I_BOOL(0x1, boolean.class),
@@ -25,28 +26,30 @@ public enum IEnumTypes {
     I_PAIR_LIST(0xd, List.class),
     I_JSON(0xe, JSONObject.class);
 
-    public final int value;
-    public final Class<?> clazz;
+    public final byte id;
+    public final Type type;
 
-    IEnumTypes(int i, Class<?> clazz) {
-        this.value = i;
-        this.clazz = clazz;
+    IEnumTypes(int id, Type type) {
+        this.id = (byte) id;
+        this.type = type;
     }
 
-    public int getValue() {
-        return value;
-    }
+    /*
+        public byte getId() {
+            return id;
+        }
 
-    public Class<?> getClazz() {
-        return clazz;
-    }
-
+        public Class<?> getClazz() {
+            return clazz;
+        }
+    */
     public static IEnumTypes getIEnumType(Class<?> clazz) {
         for (IEnumTypes iEnumType : IEnumTypes.values()) {
-            if (iEnumType.clazz.equals(clazz))
+            if (iEnumType.type.equals(clazz))
                 return iEnumType;
         }
         return I_VOID;
     }
+
 
 }
