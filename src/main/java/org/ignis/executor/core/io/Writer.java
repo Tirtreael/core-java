@@ -1,26 +1,45 @@
 package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TProtocol;
-import org.json.JSONObject;
+import org.apache.thrift.protocol.TSet;
 
-import java.nio.ByteBuffer;
-import java.util.*;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class Writer implements IWriter {
 
-    final WriterType<Void> I_VOID = new WriterType<>((TProtocol protocol, Void obj) -> {
-    });
+    public final Map<Type, WriterType> writers = Map.ofEntries(
+            Map.entry(IType.I_VOID.type(), new WriterType((protocol, obj) -> {
+            })),
+            Map.entry(IType.I_BOOL.type(), new WriterType((protocol, obj) -> {
+                try {
+                    this.writeBoolean(protocol, (boolean) obj);
+                } catch (TException e) {
+                    e.printStackTrace();
+                }
+            }))
+    );
 
-    final WriterType<Boolean> I_BOOL = new WriterType<>((TProtocol protocol, Boolean obj) -> {
-        try {
-            this.writeBoolean(protocol, obj);
-        } catch (TException e) {
-            e.printStackTrace();
-        }
-    });
-    final WriterType<Byte> I_I08 = new WriterType<>((TProtocol protocol, Byte obj) -> {
+//            new WriterType((protocol, obj) -> {
+//                try {
+//                    this.writeBoolean(protocol, (boolean) obj);
+//                } catch (TException e) {
+//                    e.printStackTrace();
+//                }
+//            }),
+//            new WriterType((protocol, obj) -> {
+//                try {
+//                    this.writeByte(protocol, (byte) obj);
+//                } catch (TException e) {
+//                    e.printStackTrace();
+//                }
+//            };
+    /*final WriterType<Byte> I_I08 = new WriterType<>((TProtocol protocol, Byte obj) -> {
         try {
             this.writeByte(protocol, obj);
         } catch (TException e) {
@@ -62,7 +81,7 @@ public class Writer implements IWriter {
             e.printStackTrace();
         }
     });
-    final WriterType<List<?>> I_LIST = new WriterType<>((TProtocol protocol, List<?> obj) -> {
+    final WriterType<List<?>> I_LIST = new WriterType<Type>((TProtocol protocol, List<Type> obj) -> {
         try {
             this.writeList(protocol, obj);
         } catch (TException e) {
@@ -97,7 +116,7 @@ public class Writer implements IWriter {
             e.printStackTrace();
         }
     });
-    final WriterType<List> I_PAIR_LIST = new WriterType<>((TProtocol protocol, List obj) -> {
+    final WriterType<List<AbstractMap.SimpleEntry<?, ?>>> I_PAIR_LIST = new WriterType<>((TProtocol protocol, List<AbstractMap.SimpleEntry<?, ?>> obj) -> {
         try {
             this.writePairList(protocol, obj);
         } catch (TException e) {
@@ -110,7 +129,7 @@ public class Writer implements IWriter {
         } catch (TException e) {
             e.printStackTrace();
         }
-    });
+    });*/
 //    }
 
 
@@ -118,126 +137,77 @@ public class Writer implements IWriter {
         protocol.writeI64(s);
     }
 
-    public <T> WriterType getWriterType(Object obj) {
-        Class<?> clazz = obj.getClass();
-        if (clazz.equals(ITypes.TYPES[ITypes.I_VOID])) {
-            return this.I_VOID;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_BOOL])) {
-            return this.I_BOOL;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_I08])) {
-            return this.I_I08;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_I16])) {
-            return this.I_I16;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_I32])) {
-            return this.I_I32;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_I64])) {
-            return this.I_I64;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_DOUBLE])) {
-            return this.I_DOUBLE;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_STRING])) {
-            return this.I_STRING;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_LIST])) {
-            return this.I_LIST;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_SET])) {
-            return this.I_SET;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_MAP])) {
-            return this.I_MAP;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_PAIR])) {
-            return this.I_PAIR;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_BINARY])) {
-            return this.I_BINARY;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_PAIR_LIST])) {
-            return this.I_PAIR_LIST;
-        }
-        if (clazz.equals(ITypes.TYPES[ITypes.I_JSON])) {
-            return this.I_JSON;
-        }
-        return this.I_VOID;
+    public WriterType getWriterType(Type type) {
+        return this.writers.get(type);
     }
-
-    void writeType(TProtocol protocol, Class<?> clazz) throws TException {
-        protocol.writeByte(ITypes.getTypeIndex(clazz));
-    }
+/*
+    void writeType(TProtocol protocol, Type type) throws TException {
+        protocol.writeByte();
+    }*/
 
     public void writeSizeAux(TProtocol protocol, long i64) throws TException {
         protocol.writeI64(i64);
     }
 
-    @Override
+
     public void writeBoolean(TProtocol protocol, boolean obj) throws TException {
         protocol.writeBool(obj);
     }
 
-    @Override
     public void writeByte(TProtocol protocol, byte obj) throws TException {
         protocol.writeByte(obj);
     }
 
-    @Override
     public void writeShort(TProtocol protocol, short obj) throws TException {
         protocol.writeI16(obj);
     }
 
-    @Override
     public void writeInt(TProtocol protocol, int obj) throws TException {
         protocol.writeI32(obj);
     }
 
-    @Override
     public void writeLong(TProtocol protocol, long obj) throws TException {
         protocol.writeI64(obj);
     }
 
-    @Override
     public void writeDouble(TProtocol protocol, double obj) throws TException {
         protocol.writeDouble(obj);
     }
 
-    @Override
     public void writeString(TProtocol protocol, String obj) throws TException {
         protocol.writeString(obj);
     }
 
     public <T> void writeList(TProtocol protocol, List<T> list) throws TException {
-        long size = list.size();
-        this.writeSizeAux(protocol, size);
-        WriterType<T> wt;
+        int size = list.size();
+        TList tList = new TList(IType.I_LIST.id(), size);
+//        this.writeSizeAux(protocol, size);
+        protocol.writeListBegin(tList);
+        WriterType wt;
         if (size == 0)
-            wt = getWriterType(null);
-        else wt = getWriterType(list.get(0));
-
-        this.writeType(protocol, list.getClass());
+            wt = getWriterType(IType.I_VOID.type());
+        else
+            wt = getWriterType(list.get(0).getClass());
         for (T obj : list)
             wt.getWrite().accept(protocol, obj);
+        protocol.writeListEnd();
     }
 
-    @Override
-    public <T> void writeSet(TProtocol protocol, Set<T> set) throws TException {
-        long size = set.size();
-        this.writeSizeAux(protocol, size);
-        WriterType<T> wt;
+    public void writeSet(TProtocol protocol, Set<Object> set) throws TException {
+        int size = set.size();
+        TSet tSet = new TSet(IType.I_SET.id(), size);
+//        this.writeSizeAux(protocol, size);
+        protocol.writeSetBegin(tSet);
+        WriterType wt;
         if (size == 0)
-            wt = getWriterType(null);
-        else wt = getWriterType(set.stream().findAny().get());
-
-        this.writeType(protocol, set.getClass());
-        for (T obj : set)
+            wt = getWriterType(IType.I_VOID.type());
+        else
+            wt = getWriterType(set.toArray()[0].getClass());
+        for (Object obj : set)
             wt.getWrite().accept(protocol, obj);
+        protocol.writeSetEnd();
     }
-
+/*
     public <K, V> void writeMap(TProtocol protocol, Map<K, V> map) throws TException {
         long size = map.size();
         this.writeSizeAux(protocol, size);
@@ -259,7 +229,6 @@ public class Writer implements IWriter {
         }
     }
 
-    @Override
     public <K, V> void writePair(TProtocol protocol, AbstractMap.SimpleEntry<K, V> pair) throws TException {
         WriterType<K> writerTypeKey;
         WriterType<V> writerTypeValue;
@@ -271,15 +240,13 @@ public class Writer implements IWriter {
         writerTypeValue.getWrite().accept(protocol, pair.getValue());
     }
 
-    @Override
     public void writeBinary(TProtocol protocol, byte[] binary) throws TException {
         long size = binary.length;
         this.writeSizeAux(protocol, size);
         protocol.writeBinary(ByteBuffer.wrap(binary));
     }
 
-    @Override
-    public <K,V,T extends Map.Entry<K,V>> void writePairList(TProtocol protocol, List<T> pairList) throws TException {
+    public void writePairList(TProtocol protocol, List<AbstractMap.SimpleEntry<?, ?>> pairList) throws TException {
         long size = pairList.size();
         this.writeSizeAux(protocol, size);
         WriterType<K> writerTypeKey;
@@ -300,9 +267,8 @@ public class Writer implements IWriter {
         }
     }
 
-    @Override
     public void writeJSON(TProtocol protocol, JSONObject obj) throws TException {
 
     }
-
+*/
 }

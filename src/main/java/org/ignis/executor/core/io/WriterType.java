@@ -5,16 +5,10 @@ import org.apache.thrift.protocol.TProtocol;
 
 import java.util.function.BiConsumer;
 
-public class WriterType<T> {
-
-    public final BiConsumer<TProtocol, T> write;
-
-    public WriterType (BiConsumer<TProtocol, T> write) {
-        this.write = write;
-    }
+public record WriterType(BiConsumer<TProtocol, Object> write) {
 
 
-    public BiConsumer<TProtocol, T> getWrite() {
+    public BiConsumer<TProtocol, Object> getWrite() {
         return write;
     }
 }
