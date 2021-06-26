@@ -3,7 +3,10 @@ package org.ignis.executor.core.io;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class IType implements Type {
 
@@ -55,27 +58,6 @@ public class IType implements Type {
 
     public Type type() {
         return type;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (IType) obj;
-        return this.id == that.id &&
-                Objects.equals(this.type, that.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, type);
-    }
-
-    @Override
-    public String toString() {
-        return "IType[" +
-                "id=" + id + ", " +
-                "type=" + type + ']';
     }
 
 
