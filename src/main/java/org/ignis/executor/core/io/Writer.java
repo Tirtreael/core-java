@@ -17,90 +17,18 @@ public class Writer implements IWriter {
     public final Map<Type, WriterType> writers = Map.ofEntries(
             Map.entry(IType.I_VOID.type(), new WriterType((protocol, obj) -> {
             })),
-            Map.entry(IType.I_BOOL.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeBoolean(protocol, (boolean) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_I08.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeByte(protocol, (byte) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_I16.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeShort(protocol, (short) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_I32.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeInt(protocol, (int) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_I64.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeLong(protocol, (long) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_DOUBLE.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeDouble(protocol, (double) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_STRING.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeString(protocol, (String) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_LIST.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeList(protocol, (List<?>) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_SET.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeSet(protocol, (Set<?>) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_MAP.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeMap(protocol, (Map<?, ?>) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_PAIR.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writePair(protocol, (Map.Entry<?, ?>) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
-            Map.entry(IType.I_BINARY.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writeBinary(protocol, (byte[]) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            }))
+            Map.entry(IType.I_BOOL.type(), new WriterType((protocol, obj) -> this.writeBoolean(protocol, (boolean) obj))),
+            Map.entry(IType.I_I08.type(), new WriterType((protocol, obj) -> this.writeByte(protocol, (byte) obj))),
+            Map.entry(IType.I_I16.type(), new WriterType((protocol, obj) -> this.writeShort(protocol, (short) obj))),
+            Map.entry(IType.I_I32.type(), new WriterType((protocol, obj) -> this.writeInt(protocol, (int) obj))),
+            Map.entry(IType.I_I64.type(), new WriterType((protocol, obj) -> this.writeLong(protocol, (long) obj))),
+            Map.entry(IType.I_DOUBLE.type(), new WriterType((protocol, obj) -> this.writeDouble(protocol, (double) obj))),
+            Map.entry(IType.I_STRING.type(), new WriterType((protocol, obj) -> this.writeString(protocol, (String) obj))),
+            Map.entry(IType.I_LIST.type(), new WriterType((protocol, obj) -> this.writeList(protocol, (List<?>) obj))),
+            Map.entry(IType.I_SET.type(), new WriterType((protocol, obj) -> this.writeSet(protocol, (Set<?>) obj))),
+            Map.entry(IType.I_MAP.type(), new WriterType((protocol, obj) -> this.writeMap(protocol, (Map<?, ?>) obj))),
+            Map.entry(IType.I_PAIR.type(), new WriterType((protocol, obj) -> this.writePair(protocol, (Map.Entry<?, ?>) obj))),
+            Map.entry(IType.I_BINARY.type(), new WriterType((protocol, obj) -> this.writeBinary(protocol, (byte[]) obj)))
             /*,
             Map.entry(IType.I_PAIR_LIST.type(), new WriterType((protocol, obj) -> {
                 try {
@@ -172,7 +100,7 @@ public class Writer implements IWriter {
         this.writeSize(protocol, size);
         this.writeType(protocol, IType.types.get(elemType).id());
         for (T obj : list)
-            wt.getWrite().accept(protocol, obj);
+            wt.getWrite().apply(protocol, obj);
 //        protocol.writeListEnd();
     }
 
@@ -188,7 +116,7 @@ public class Writer implements IWriter {
         this.writeSize(protocol, size);
         this.writeType(protocol, IType.types.get(elemType).id());
         for (T obj : set)
-            wt.getWrite().accept(protocol, obj);
+            wt.getWrite().apply(protocol, obj);
 //        protocol.writeSetEnd();
     }
 
@@ -210,8 +138,8 @@ public class Writer implements IWriter {
         this.writeType(protocol, IType.types.get(elemTypeKey).id());
         this.writeType(protocol, IType.types.get(elemTypeValue).id());
         for (Map.Entry<K, V> e : map.entrySet()) {
-            wtKey.getWrite().accept(protocol, e.getKey());
-            wtValue.getWrite().accept(protocol, e.getValue());
+            wtKey.getWrite().apply(protocol, e.getKey());
+            wtValue.getWrite().apply(protocol, e.getValue());
         }
     }
 
@@ -223,15 +151,15 @@ public class Writer implements IWriter {
 
         this.writeType(protocol, IType.types.get(elemTypeKey).id());
         this.writeType(protocol, IType.types.get(elemTypeValue).id());
-        writerTypeKey.getWrite().accept(protocol, pair.getKey());
-        writerTypeValue.getWrite().accept(protocol, pair.getValue());
+        writerTypeKey.getWrite().apply(protocol, pair.getKey());
+        writerTypeValue.getWrite().apply(protocol, pair.getValue());
     }
 
     public void writeBinary(TProtocol protocol, byte[] binary) throws TException {
         protocol.writeBinary(ByteBuffer.wrap(binary));
     }
 
-    public <V, K> void writePairList(TProtocol protocol, List<Map.Entry<K, V>> pairList) throws TException {
+    public <K, V> void writePairList(TProtocol protocol, List<Map.Entry<K, V>> pairList) throws TException {
 
     }
 

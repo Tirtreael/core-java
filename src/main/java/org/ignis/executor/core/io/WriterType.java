@@ -1,24 +1,26 @@
 package org.ignis.executor.core.io;
 
 
+import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 
-import java.util.function.BiConsumer;
 
 public class WriterType {
-    private final BiConsumer<TProtocol, Object> write;
+    private final CheckedFunction<TProtocol, Object> write;
 
-    public WriterType(BiConsumer<TProtocol, Object> write) {
+
+    public WriterType(CheckedFunction<TProtocol, Object> write) {
         this.write = write;
     }
 
-
-    public BiConsumer<TProtocol, Object> getWrite() {
+    public CheckedFunction<TProtocol, Object> getWrite() {
         return write;
     }
 
-    public BiConsumer<TProtocol, Object> write() {
-        return write;
+
+    @FunctionalInterface
+    public interface CheckedFunction<T1, T2> {
+        void apply(T1 protocol, T2 object) throws TException;
     }
 
 

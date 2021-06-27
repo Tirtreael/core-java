@@ -1,22 +1,24 @@
 package org.ignis.executor.core.io;
 
-import java.util.concurrent.Callable;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TProtocol;
 
-public class ReaderType<K> {
-    private final Class<K> type;
-    private final Callable<K> read;
 
-    public ReaderType(Class<K> type, Callable<K> read) {
-        this.type = type;
+public class ReaderType {
+
+    private final CheckedFunction<Object> read;
+
+    public ReaderType(CheckedFunction<Object> read) {
         this.read = read;
     }
 
-    public Class<K> type() {
-        return type;
+    public CheckedFunction<Object> getRead() {
+        return read;
     }
 
-    public Callable<K> read() {
-        return read;
+    @FunctionalInterface
+    public interface CheckedFunction<R> {
+        R apply(TProtocol protocol) throws TException;
     }
 
 
