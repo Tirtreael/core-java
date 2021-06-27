@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class Writer implements IWriter {
+public class Writer {
 
     public final Map<Type, WriterType> writers = Map.ofEntries(
             Map.entry(IType.I_VOID.type(), new WriterType((protocol, obj) -> {

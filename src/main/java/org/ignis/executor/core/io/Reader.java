@@ -8,7 +8,7 @@ import org.apache.thrift.protocol.TSet;
 
 import java.util.*;
 
-public class Reader implements IReader {
+public class Reader {
 
     public final Map<Byte, ReaderType> readers = Map.ofEntries(
             Map.entry(IType.I_VOID.id(), new ReaderType((protocol) -> null)),
