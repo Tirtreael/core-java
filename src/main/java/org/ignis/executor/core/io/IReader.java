@@ -8,9 +8,9 @@ import org.apache.thrift.protocol.TSet;
 
 import java.util.*;
 
-public class Reader {
+public interface IReader {
 
-    public final Map<Byte, ReaderType> readers = Map.ofEntries(
+    Map<Byte, ReaderType> readers = Map.ofEntries(
             Map.entry(IType.I_VOID.id(), new ReaderType((protocol) -> null)),
             Map.entry(IType.I_BOOL.id(), new ReaderType(TProtocol::readBool)),
             Map.entry(IType.I_I08.id(), new ReaderType(TProtocol::readByte)),
@@ -19,33 +19,37 @@ public class Reader {
             Map.entry(IType.I_I64.id(), new ReaderType(TProtocol::readI64)),
             Map.entry(IType.I_DOUBLE.id(), new ReaderType(TProtocol::readDouble)),
             Map.entry(IType.I_STRING.id(), new ReaderType(TProtocol::readString)),
-            Map.entry(IType.I_LIST.id(), new ReaderType(this::readList)),
-            Map.entry(IType.I_SET.id(), new ReaderType(this::readSet)),
-            Map.entry(IType.I_MAP.id(), new ReaderType(this::readMap)),
-            Map.entry(IType.I_PAIR.id(), new ReaderType(this::readPair)),
+            Map.entry(IType.I_LIST.id(), new ReaderType(IReader::readList)),
+            Map.entry(IType.I_SET.id(), new ReaderType(IReader::readSet)),
+            Map.entry(IType.I_MAP.id(), new ReaderType(IReader::readMap)),
+            Map.entry(IType.I_PAIR.id(), new ReaderType(IReader::readPair)),
             Map.entry(IType.I_BINARY.id(), new ReaderType(TProtocol::readBinary)),
-            Map.entry(IType.I_PAIR_LIST.id(), new ReaderType(this::readPairList))
+            Map.entry(IType.I_PAIR_LIST.id(), new ReaderType(IReader::readPairList))
     );
 
 
-    public byte readType(TProtocol protocol) throws TException {
+    static byte readType(TProtocol protocol) throws TException {
         return protocol.readByte();
     }
 
-    public ReaderType getReaderType(byte type) {
+    static Object read(TProtocol protocol) throws TException {
+        ReaderType readerType = IReader.getReaderType(IReader.readType(protocol));
+        return readerType.getRead().apply(protocol);
+    }
+
+    static ReaderType getReaderType(byte type) {
         return readers.get(type);
     }
 
-    public long readSize(TProtocol protocol) throws TException {
+    static long readSize(TProtocol protocol) throws TException {
         return protocol.readI64();
     }
 
-
-    public List<Object> readList(TProtocol protocol) throws TException {
+    static List<Object> readList(TProtocol protocol) throws TException {
         TList tList = protocol.readListBegin();
         long size = tList.size;
         byte elemType = tList.elemType;
-        ReaderType readerType = this.getReaderType(elemType);
+        ReaderType readerType = getReaderType(elemType);
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             list.add(readerType.getRead().apply(protocol));
@@ -54,11 +58,11 @@ public class Reader {
         return list;
     }
 
-    public Set<Object> readSet(TProtocol protocol) throws TException {
+    static Set<Object> readSet(TProtocol protocol) throws TException {
         TSet tSet = protocol.readSetBegin();
         long size = tSet.size;
         byte elemType = tSet.elemType;
-        ReaderType readerType = this.getReaderType(elemType);
+        ReaderType readerType = getReaderType(elemType);
         Set<Object> set = new HashSet<>();
         for (int i = 0; i < size; i++) {
             set.add(readerType.getRead().apply(protocol));
@@ -67,13 +71,13 @@ public class Reader {
         return set;
     }
 
-    public Map<Object, Object> readMap(TProtocol protocol) throws TException {
+    static Map<Object, Object> readMap(TProtocol protocol) throws TException {
         TMap tMap = protocol.readMapBegin();
         long size = tMap.size;
         byte keyType = tMap.keyType;
         byte valueType = tMap.valueType;
-        ReaderType readerTypeKey = this.getReaderType(keyType);
-        ReaderType readerTypeValue = this.getReaderType(valueType);
+        ReaderType readerTypeKey = getReaderType(keyType);
+        ReaderType readerTypeValue = getReaderType(valueType);
         Map<Object, Object> obj = new HashMap<>();
         for (int i = 0; i < size; i++) {
             obj.put(readerTypeKey.getRead().apply(protocol), readerTypeValue.getRead().apply(protocol));
@@ -81,28 +85,27 @@ public class Reader {
         return obj;
     }
 
-    public AbstractMap.SimpleEntry<Object, Object> readPair(TProtocol protocol) throws TException {
-        byte keyType = this.readType(protocol);
-        byte valueType = this.readType(protocol);
-        ReaderType readerTypeKey = this.getReaderType(keyType);
-        ReaderType readerTypeValue = this.getReaderType(valueType);
+    static AbstractMap.SimpleEntry<Object, Object> readPair(TProtocol protocol) throws TException {
+        byte keyType = readType(protocol);
+        byte valueType = readType(protocol);
+        ReaderType readerTypeKey = getReaderType(keyType);
+        ReaderType readerTypeValue = getReaderType(valueType);
         return new AbstractMap.SimpleEntry<>(
                 readerTypeKey.getRead().apply(protocol), readerTypeValue.getRead().apply(protocol)
         );
     }
 
-
-    public byte[] readBinary(TProtocol protocol) throws TException {
-        return protocol.readBinary().array().clone();
+    static byte[] readBinary(TProtocol protocol) throws TException {
+        return protocol.readBinary().array();
     }
 
-    public List<Map.Entry<Object, Object>> readPairList(TProtocol protocol) throws TException {
+    static List<Map.Entry<Object, Object>> readPairList(TProtocol protocol) throws TException {
         TList tList = protocol.readListBegin();
         long size = tList.size;
-        byte keyType = this.readType(protocol);
-        byte valueType = this.readType(protocol);
-        ReaderType readerTypeKey = this.getReaderType(keyType);
-        ReaderType readerTypeValue = this.getReaderType(valueType);
+        byte keyType = readType(protocol);
+        byte valueType = readType(protocol);
+        ReaderType readerTypeKey = getReaderType(keyType);
+        ReaderType readerTypeValue = getReaderType(valueType);
         List<Map.Entry<Object, Object>> obj = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             obj.add(new AbstractMap.SimpleEntry<>(

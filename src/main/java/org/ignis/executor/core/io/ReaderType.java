@@ -6,7 +6,7 @@ import org.apache.thrift.protocol.TProtocol;
 
 public class ReaderType {
 
-    private final CheckedFunction<Object> read;
+    public final CheckedFunction<Object> read;
 
     public ReaderType(CheckedFunction<Object> read) {
         this.read = read;

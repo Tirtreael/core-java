@@ -7,9 +7,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-public class NativeWriter {
+public interface INativeWriter {
 
-    public void write(TProtocol protocol, Object obj) {
+    static void write(TProtocol protocol, Object obj) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             ObjectOutputStream out = new ObjectOutputStream(bos);
