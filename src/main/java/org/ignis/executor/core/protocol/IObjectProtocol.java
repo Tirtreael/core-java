@@ -14,8 +14,7 @@ public class IObjectProtocol extends TCompactProtocol {
 
     public static final byte IGNIS_PROTOCOL = 0;
 
-    //@Todo check java protocol id
-    public static final byte JAVA_PROTOCOL = 3;
+    public static final byte JAVA_PROTOCOL = 4;
 
 
     public IObjectProtocol(TTransport transport, long stringLengthLimit, long containerLengthLimit) {
