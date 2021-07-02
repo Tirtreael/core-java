@@ -28,22 +28,15 @@ public interface IWriter {
             Map.entry(IType.I_SET.type(), new WriterType((protocol, obj) -> writeSet(protocol, (Set<?>) obj))),
             Map.entry(IType.I_MAP.type(), new WriterType((protocol, obj) -> writeMap(protocol, (Map<?, ?>) obj))),
             Map.entry(IType.I_PAIR.type(), new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
-            Map.entry(IType.I_BINARY.type(), new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj)))
-            /*,
-            Map.entry(IType.I_PAIR_LIST.type(), new WriterType((protocol, obj) -> {
-                try {
-                    this.writePairList(protocol, (List<Map.Entry<?,?>>) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            })),
+            Map.entry(IType.I_BINARY.type(), new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
+            Map.entry(IType.I_PAIR_LIST.type(), new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<Object, Object>>) obj))),
             Map.entry(IType.I_JSON.type(), new WriterType((protocol, obj) -> {
                 try {
-                    this.writeJSON(protocol, (JSONObject) obj);
+                    writeJSON(protocol, (JSONObject) obj);
                 } catch (TException e) {
                     e.printStackTrace();
                 }
-            }))*/
+            }))
     );
 
 
@@ -77,7 +70,6 @@ public interface IWriter {
         writeType(protocol, IType.types.get(elemType).id());
         for (T obj : list)
             wt.getWrite().apply(protocol, obj);
-//        protocol.writeListEnd();
     }
 
     static <T> void writeSet(TProtocol protocol, Set<T> set) throws TException {
@@ -134,8 +126,23 @@ public interface IWriter {
         protocol.writeBinary(ByteBuffer.wrap(binary));
     }
 
-    static <K, V> void writePairList(TProtocol protocol, List<Map.Entry<K, V>> pairList) throws TException {
-
+    static void writePairList(TProtocol protocol, List<Map.Entry<Object, Object>> pairList) throws TException {
+        long size = pairList.size();
+        Type elemTypeKey = IType.I_VOID.type();
+        Type elemTypeValue = IType.I_VOID.type();
+        if (size != 0) {
+            Map.Entry<Object, Object> pair1 = pairList.get(0);
+            elemTypeKey = pair1.getKey().getClass();
+            elemTypeValue = pair1.getValue().getClass();
+        }
+        WriterType writerTypeKey = getWriterType(elemTypeKey);
+        WriterType writerTypeValue = getWriterType(elemTypeValue);
+        writeSize(protocol, size);
+        writeType(protocol, IType.I_PAIR_LIST.id());
+        for (Map.Entry<Object, Object> pair : pairList) {
+            writerTypeKey.getWrite().apply(protocol, pair.getKey());
+            writerTypeValue.getWrite().apply(protocol, pair.getValue());
+        }
     }
 
     static void writeJSON(TProtocol protocol, JSONObject obj) throws TException {
