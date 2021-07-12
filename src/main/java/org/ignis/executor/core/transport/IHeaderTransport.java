@@ -7,8 +7,8 @@ import org.apache.thrift.transport.TTransportException;
 public class IHeaderTransport extends TTransport {
 
     private final TTransport transport;
-    private final String header;
-    private final int position = 0;
+    private String header;
+    private int position = 0;
 
 
     public IHeaderTransport(TTransport transport, String header) {
@@ -18,7 +18,7 @@ public class IHeaderTransport extends TTransport {
 
     @Override
     public boolean isOpen() {
-        return false;
+        return true;
     }
 
     @Override
@@ -32,13 +32,19 @@ public class IHeaderTransport extends TTransport {
     }
 
     @Override
-    //@Todo check
     public int read(byte[] buf, int off, int len) throws TTransportException {
-        return transport.readAll(buf, off, len);
+        if (header.isEmpty())
+            return transport.readAll(buf, off, len);
+        int bytes = Integer.min(header.length() - position, len);
+        header += transport.readAll(buf, off, bytes);
+        position += bytes;
+        if (position == header.length())
+            header = "";
+        return bytes;
     }
 
     @Override
     public void write(byte[] buf, int off, int len) throws TTransportException {
-        transport.readAll(buf, off, len);
+        transport.write(buf, off, len);
     }
 }
