@@ -6,15 +6,16 @@ import org.apache.thrift.transport.TTransport;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.Serializable;
-import java.lang.reflect.Type;
 
 public interface IPartition extends Iterable<Object>, Serializable {
 
     void read(TTransport transport) throws TException, NotSerializableException;
 
-    void write(TTransport transport, int compression);
+    void write(TTransport transport, int compression, boolean nativ) throws TException;
 
-    void write(TTransport transport);
+    void write(TTransport transport, int compression) throws TException;
+
+    void write(TTransport transport) throws TException;
 
     void readIterator(IPartition partition);
 
@@ -46,7 +47,7 @@ public interface IPartition extends Iterable<Object>, Serializable {
 
     void fit();
 
-    Type type();
+    String type();
 
 
 }

@@ -10,7 +10,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,16 +40,30 @@ public class IMemoryPartition implements IPartition {
         IObjectProtocol proto = new IObjectProtocol(trans);
         Object elems = proto.readObject();
         elements.add(elems);
+        /*if (elems.getClass() == elements.get(0).getClass()) {
+            elements.add(elems);
+        } else {
+            elements.add(elems);
+        }*/
     }
 
     @Override
-    public void write(TTransport transport, int compression) {
+    public void write(TTransport transport, int compression, boolean nativ) throws TException {
+        IZlibTransport trans = new IZlibTransport(transport, compression);
+        IObjectProtocol proto = new IObjectProtocol(transport);
+        proto.writeObject(elements, nativ);
+        trans.flush();
+    }
+
+    @Override
+    public void write(TTransport transport, int compression) throws TException {
+        write(transport, compression, false);
 
     }
 
     @Override
-    public void write(TTransport transport) {
-
+    public void write(TTransport transport) throws TException {
+        write(transport, 0, false);
     }
 
     @Override
@@ -69,13 +82,23 @@ public class IMemoryPartition implements IPartition {
                 ((IMemoryPartition) source).elements.getClass() == this.elements.getClass()) {
             this.elements.addAll(((IMemoryPartition) source).elements);
         } else {
-
+            for (Object o : source) {
+                elements.add(o);
+            }
         }
     }
 
     @Override
     public void moveFrom(IPartition source) {
-
+        if (source instanceof IMemoryPartition && elements.size() == 0 &&
+                ((IMemoryPartition) source).elements.getClass() == this.elements.getClass()) {
+            List<Object> elementsTmp = this.elements;
+            this.elements = ((IMemoryPartition) source).elements;
+            ((IMemoryPartition) source).elements = elementsTmp;
+        } else {
+            this.copyFrom(source);
+            source.clear();
+        }
     }
 
     @Override
@@ -96,7 +119,7 @@ public class IMemoryPartition implements IPartition {
 
     @Override
     public void clear() {
-
+        this.elements.clear();
     }
 
     @Override
@@ -105,15 +128,8 @@ public class IMemoryPartition implements IPartition {
     }
 
     @Override
-    public Type type() {
-        return null;
-    }
-
-    public void write(TTransport transport, int compression, boolean nativ) throws TException {
-        IZlibTransport trans = new IZlibTransport(transport, compression);
-        IObjectProtocol proto = new IObjectProtocol(transport);
-        proto.writeObject(elements, nativ);
-        trans.flush();
+    public String type() {
+        return IMemoryPartition.TYPE;
     }
 
 
