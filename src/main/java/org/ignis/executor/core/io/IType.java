@@ -14,7 +14,7 @@ public class IType implements Type {
     public static final IType I_BOOL = new IType((byte) 0x1, boolean.class);
     public static final IType I_I08 = new IType((byte) 0x2, byte.class);
     public static final IType I_I16 = new IType((byte) 0x3, short.class);
-    public static final IType I_I32 = new IType((byte) 0x4, int.class);
+    public static final IType I_I32 = new IType((byte) 0x4, Integer.class);
     public static final IType I_I64 = new IType((byte) 0x5, long.class);
     public static final IType I_DOUBLE = new IType((byte) 0x6, double.class);
     public static final IType I_STRING = new IType((byte) 0x7, String.class);
@@ -39,7 +39,7 @@ public class IType implements Type {
             Map.entry(IType.I_MAP.type(), IType.I_MAP),
             Map.entry(IType.I_PAIR.type(), IType.I_PAIR),
             Map.entry(IType.I_BINARY.type(), IType.I_BINARY),
-            Map.entry(IType.I_PAIR_LIST.type(), IType.I_PAIR_LIST),
+            //Map.entry(IType.I_PAIR_LIST.type(), IType.I_PAIR_LIST),
             Map.entry(IType.I_JSON.type(), IType.I_JSON)
 
     );
