@@ -9,13 +9,13 @@ import java.util.Set;
 
 public enum IType {
 
-    I_VOID(0x0, void.class),
-    I_BOOL(0x1, boolean.class),
-    I_I08(0x2, byte.class),
-    I_I16(0x3, short.class),
-    I_I32(0x4, int.class),
-    I_I64(0x5, long.class),
-    I_DOUBLE(0x6, double.class),
+    I_VOID(0x0, Void.class),
+    I_BOOL(0x1, Boolean.class),
+    I_I08(0x2, Byte.class),
+    I_I16(0x3, Short.class),
+    I_I32(0x4, Integer.class),
+    I_I64(0x5, Long.class),
+    I_DOUBLE(0x6, Double.class),
     I_STRING(0x7, String.class),
     I_LIST(0x8, List.class),
     I_SET(0x9, Set.class),
@@ -59,7 +59,7 @@ public enum IType {
         return 0x0; // Return void id
     }
 
-    public static byte getId(Class<?> clazz) {
+    public static byte getIdClazz(Class<?> clazz) {
         for(IType t1 : IType.values()) {
             if (t1.type.isAssignableFrom(clazz)){
                 return t1.id;
