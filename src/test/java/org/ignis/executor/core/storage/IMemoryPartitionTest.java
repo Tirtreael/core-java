@@ -8,7 +8,9 @@ import org.ignis.executor.core.transport.IZlibTransport;
 import org.junit.jupiter.api.Test;
 
 import java.io.NotSerializableException;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 
 class IMemoryPartitionTest {
 
@@ -21,12 +23,14 @@ class IMemoryPartitionTest {
 
         Object result;
         boolean nativ = true;
-        List<Integer> elements = List.of(66,77,1254,4535,7);
+        List<Map.Entry<Integer, String>> elements = List.of(new AbstractMap.SimpleEntry<>(1, "Mateo"),
+                new AbstractMap.SimpleEntry<>(3, "Tomas"),
+                new AbstractMap.SimpleEntry<>(17, "Berto"));
 
         IMemoryPartition partition = new IMemoryPartition(0);
 
         try {
-            for(Integer element : elements)
+            for(Map.Entry<Integer, String> element : elements)
                 read(element, partition, nativ);
             assert elements.size() == partition.size();
             System.out.println(elements.size());
