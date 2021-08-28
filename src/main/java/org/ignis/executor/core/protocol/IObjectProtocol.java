@@ -10,6 +10,7 @@ import org.ignis.executor.core.io.IWriter;
 
 import java.io.NotSerializableException;
 
+//@Todo: add all methods
 public class IObjectProtocol extends TCompactProtocol {
 
     public static final byte IGNIS_PROTOCOL = 0;

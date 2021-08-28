@@ -40,7 +40,7 @@ public interface IWriter {
 
 
     static WriterType getWriterType(Class<?> clazz) {
-        return writers.get(IType.getId(clazz));
+        return writers.get(IType.getIdClazz(clazz));
     }
 
     static <T> void write(TProtocol protocol, T obj) throws TException {
@@ -57,7 +57,7 @@ public interface IWriter {
     }
 
     static void writeI32(TProtocol protocol, Integer obj) throws TException {
-        writeType(protocol, IType.getId(obj.getClass()));
+        writeType(protocol, IType.getIdClazz(obj.getClass()));
     }
 
     static <T> void writeList(TProtocol protocol, List<T> list) throws TException {

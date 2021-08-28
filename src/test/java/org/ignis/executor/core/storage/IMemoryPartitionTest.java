@@ -5,12 +5,16 @@ import org.apache.thrift.transport.TMemoryBuffer;
 import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.NotSerializableException;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class IMemoryPartitionTest {
 
@@ -18,24 +22,95 @@ class IMemoryPartitionTest {
 //    void exampleData(){
 //    }
 
-    @Test
-    void readWriteNativ(){
+    static Stream<Object> createBoolean() {
+        return Stream.of(new Random(12345678).nextBoolean());
+    }
 
-        Object result;
-        boolean nativ = true;
+    static Stream<Object> createByte() {
+        return Stream.of(new Random(12345678).nextInt(16));
+    }
+
+    static Stream<Object> createShort() {
+        return Stream.of(new Random(12345678).nextInt(128));
+    }
+
+    static Stream<Object> createInteger() {
+        return Stream.of(new Random(12345678).nextInt());
+    }
+
+    static Stream<Object> createLong() {
+        return Stream.of(new Random(12345678).nextLong());
+    }
+
+    static Stream<Object> createDouble() {
+        return Stream.of(new Random(12345678).nextDouble());
+    }
+
+    static Stream<Object> createString() {
+        return Stream.of(new Random(12345678).ints().toString());
+    }
+
+    static Stream<Object> createList() {
+        Random random = new Random(12345678);
+        return Stream.of(List.of(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+    }
+
+    static Stream<Object> createSet() {
+        Random random = new Random(12345678);
+        return Stream.of(Set.of(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+    }
+
+    static Stream<Object> createMap() {
+        Random random = new Random(12345678);
+        return Stream.of(Map.of(random.nextInt(), random.nextDouble(), random.nextInt(), random.nextDouble(),
+                random.nextInt(), random.nextDouble()));
+    }
+
+    static Stream<Object> createPair() {
+        Random random = new Random(12345678);
+        return Stream.of(new AbstractMap.SimpleEntry<>(random.nextInt(), random.nextDouble()));
+    }
+
+    static Stream<Object> createBinary() {
+        Random random = new Random(12345678);
+        return Stream.of(new byte[]{
+                (byte) random.nextInt(16), (byte) random.nextInt(16),
+                (byte) random.nextInt(16), (byte) random.nextInt(16)
+        });
+    }
+
+    static Stream<Object> createPairList() {
         List<Map.Entry<Integer, String>> elements = List.of(new AbstractMap.SimpleEntry<>(1, "Mateo"),
-                new AbstractMap.SimpleEntry<>(3, "Tomas"),
-                new AbstractMap.SimpleEntry<>(17, "Berto"));
+                new AbstractMap.SimpleEntry<>(3, "Tomas"), new AbstractMap.SimpleEntry<>(17, "Berto"));
+        return Stream.of(elements);
+    }
+
+    static Stream<Object> createJson() {
+        return Stream.of(new JSONObject());
+    }
+
+    @ParameterizedTest
+    @MethodSource({"createBoolean"/*, "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary", "createPairList",
+            /*"createJson"*/})
+    void readWriteNativ(Object method) {
+        int size = 10;
+        List<Object> elements = new ArrayList<>(size);
+        Object result;
+        boolean nativ = false;
+        for (int i = 0; i < size; i++) {
+            elements.add(method);
+        }
 
         IMemoryPartition partition = new IMemoryPartition(0);
 
         try {
-            for(Map.Entry<Integer, String> element : elements)
+            for (Object element : elements) {
                 read(element, partition, nativ);
-            assert elements.size() == partition.size();
-            System.out.println(elements.size());
-//            result = write(partition, nativ);
-//            assert element.equals(result);
+            }
+            assertEquals(elements.size(), partition.size());
+            result = write(partition, nativ);
+            assert partition.elements == result;
         } catch (TException | NotSerializableException e) {
             e.printStackTrace();
         }
@@ -45,6 +120,18 @@ class IMemoryPartitionTest {
     void iterator() {
     }
 
+
+
+
+
+
+
+
+
+    /*
+    UTILITY METHODS
+     */
+
     @Test
     void testClone() {
     }
@@ -53,23 +140,19 @@ class IMemoryPartitionTest {
         Read from protocol to partitions
      */
     void read(Object elements, IMemoryPartition partition, boolean nativ) throws TException, NotSerializableException {
-        TMemoryBuffer memoryBuffer = new TMemoryBuffer(0);
+        TMemoryBuffer memoryBuffer = new TMemoryBuffer(partition.size());
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
 
         proto.writeObject(elements, nativ);
-        
         zlib.flush();
-
-        partition.read(zlib);
-        
+        partition.read(memoryBuffer);
         //proto.readByte();
-
     }
 
     Object write(IMemoryPartition partition, boolean nativ) throws TException, NotSerializableException {
         TMemoryBuffer memoryBuffer = new TMemoryBuffer(partition.size());
-        partition.write(memoryBuffer, 6);
+        partition.write(memoryBuffer);
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
         return proto.readObject();
@@ -118,4 +201,6 @@ class IMemoryPartitionTest {
     @Test
     void type() {
     }
+
+
 }
