@@ -2,6 +2,7 @@ package org.ignis.executor.core.protocol;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.core.io.INativeReader;
 import org.ignis.executor.core.io.INativeWriter;
@@ -9,6 +10,9 @@ import org.ignis.executor.core.io.IReader;
 import org.ignis.executor.core.io.IWriter;
 
 import java.io.NotSerializableException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 //@Todo: add all methods
 public class IObjectProtocol extends TCompactProtocol {
@@ -29,19 +33,35 @@ public class IObjectProtocol extends TCompactProtocol {
 
     public Object readObject() throws TException, NotSerializableException {
         boolean nativ = this.readSerialization();
-        long elements = IReader.readSize(this);
         if (nativ) {
-            return INativeReader.read(this, (int) elements);
+            boolean header = readBool();
+            if (header) {
+                long elements = IReader.readSize(this);
+                List<Object> list = new ArrayList<>((int) elements);
+                for (int i = 0; i < elements; i++) {
+                    list.add(INativeReader.read(this));
+                }
+                return list;
+            } else {
+            return INativeReader.read(this);
+            }
         } else {
             return IReader.read(this);
         }
     }
 
-
-    public void writeObject(Object obj, boolean nativ) throws TException {
+    public void writeObject(Object obj, boolean nativ, boolean listHeader) throws TException {
         this.writeSerialization(nativ);
         if (nativ) {
+            this.writeBool(obj instanceof Collection && listHeader);
+            if (obj instanceof Collection && listHeader) {
+                IWriter.writeSize(this, ((Collection<?>) obj).size());
+                for(Object element : (Collection<?>) obj){
+                    INativeWriter.write(this, element);
+                }
+            } else {
             INativeWriter.write(this, obj);
+            }
         } else {
             IWriter.write(this, obj);
         }
@@ -49,12 +69,13 @@ public class IObjectProtocol extends TCompactProtocol {
 
 
     public boolean readSerialization() throws TException, NotSerializableException {
+        this.readByte();
         byte id = this.readByte();
         if (id == IGNIS_PROTOCOL)
             return false;
         else if (id == JAVA_PROTOCOL)
             return true;
-        else throw new NotSerializableException("Serialization is not compatible with Java");
+        else throw new NotSerializableException("Serialization " + id + " is not compatible with Java");
     }
 
     public void writeSerialization(boolean nativ) throws TException {

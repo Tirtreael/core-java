@@ -1,7 +1,11 @@
 package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TField;
+import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.protocol.TStruct;
+import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
@@ -19,7 +23,7 @@ public interface IWriter {
             Map.entry(IType.I_BOOL.id(), new WriterType((protocol, obj) -> protocol.writeBool((boolean) obj))),
             Map.entry(IType.I_I08.id(), new WriterType((protocol, obj) -> protocol.writeByte((byte) obj))),
             Map.entry(IType.I_I16.id(), new WriterType((protocol, obj) -> protocol.writeI16((short) obj))),
-            Map.entry(IType.I_I32.id(), new WriterType((protocol, obj) -> writeI32(protocol, (Integer) obj))),
+            Map.entry(IType.I_I32.id(), new WriterType((protocol, obj) -> protocol.writeI32((int) obj))),
             Map.entry(IType.I_I64.id(), new WriterType((protocol, obj) -> protocol.writeI64((long) obj))),
             Map.entry(IType.I_DOUBLE.id(), new WriterType((protocol, obj) -> protocol.writeDouble((double) obj))),
             Map.entry(IType.I_STRING.id(), new WriterType((protocol, obj) -> protocol.writeString((String) obj))),
@@ -29,13 +33,7 @@ public interface IWriter {
             Map.entry(IType.I_PAIR.id(), new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
             Map.entry(IType.I_BINARY.id(), new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
             Map.entry(IType.I_PAIR_LIST.id(), new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<Object, Object>>) obj))),
-            Map.entry(IType.I_JSON.id(), new WriterType((protocol, obj) -> {
-                try {
-                    writeJSON(protocol, (JSONObject) obj);
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
-            }))
+            Map.entry(IType.I_JSON.id(), new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
     );
 
 
@@ -43,7 +41,9 @@ public interface IWriter {
         return writers.get(IType.getIdClazz(clazz));
     }
 
-    static <T> void write(TProtocol protocol, T obj) throws TException {
+    static void write(TProtocol protocol, Object obj) throws TException {
+        writeType(protocol, IType.getId(obj));
+
         WriterType writerType = getWriterType(obj.getClass());
         writerType.getWrite().apply(protocol, obj);
     }
@@ -70,7 +70,7 @@ public interface IWriter {
         }
         WriterType wt = getWriterType(elemType);
         writeSize(protocol, size);
-        writeType(protocol, IType.getId(elemType));
+        writeType(protocol, IType.getIdClazz(elemType));
         for (T obj : list)
             wt.getWrite().apply(protocol, obj);
     }

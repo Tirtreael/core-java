@@ -50,10 +50,8 @@ public class IMemoryPartition implements IPartition {
     @Override
     public void write(TTransport transport, int compression, boolean nativ) throws TException {
         IZlibTransport trans = new IZlibTransport(transport, compression);
-        IObjectProtocol proto = new IObjectProtocol(transport);
-        for(Object element : elements)
-            proto.writeObject(element, nativ);
-        trans.flush();
+        IObjectProtocol proto = new IObjectProtocol(trans);
+        proto.writeObject(elements, nativ, true);
     }
 
     @Override
@@ -64,7 +62,12 @@ public class IMemoryPartition implements IPartition {
 
     @Override
     public void write(TTransport transport) throws TException {
-        write(transport, 6, false);
+        write(transport, 0, false);
+    }
+
+    @Override
+    public List<Object> getElements() {
+        return this.elements;
     }
 
     @Override
@@ -83,9 +86,7 @@ public class IMemoryPartition implements IPartition {
                 ((IMemoryPartition) source).elements.getClass() == this.elements.getClass()) {
             this.elements.addAll(((IMemoryPartition) source).elements);
         } else {
-            for (Object o : source) {
-                elements.add(o);
-            }
+            elements.addAll(source.getElements());
         }
     }
 

@@ -6,8 +6,9 @@ import org.apache.thrift.transport.TTransport;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.Serializable;
+import java.util.List;
 
-public interface IPartition extends Iterable<Object>, Serializable {
+public interface IPartition /*extends Iterable<Object>, Serializable */{
 
     void read(TTransport transport) throws TException, NotSerializableException;
 
@@ -16,6 +17,8 @@ public interface IPartition extends Iterable<Object>, Serializable {
     void write(TTransport transport, int compression) throws TException;
 
     void write(TTransport transport) throws TException;
+
+    List<Object> getElements();
 
     void readIterator(IPartition partition);
 

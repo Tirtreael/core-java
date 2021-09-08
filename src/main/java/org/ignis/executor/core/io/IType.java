@@ -61,7 +61,7 @@ public enum IType {
 
     public static byte getIdClazz(Class<?> clazz) {
         for(IType t1 : IType.values()) {
-            if (t1.type.isAssignableFrom(clazz)){
+            if (t1.type == clazz || t1.type.isAssignableFrom(clazz)){
                 return t1.id;
             }
         }

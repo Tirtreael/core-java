@@ -1,8 +1,8 @@
 package org.ignis.executor.core.storage;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TMemoryBuffer;
-import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.*;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
 import org.json.JSONObject;
@@ -11,10 +11,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.NotSerializableException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class IMemoryPartitionTest {
 
@@ -23,11 +25,11 @@ class IMemoryPartitionTest {
 //    }
 
     static Stream<Object> createBoolean() {
-        return Stream.of(new Random(12345678).nextBoolean());
+        return Stream.of(new Random().nextBoolean());
     }
 
     static Stream<Object> createByte() {
-        return Stream.of(new Random(12345678).nextInt(16));
+        return Stream.of(new Random().nextInt(16));
     }
 
     static Stream<Object> createShort() {
@@ -90,29 +92,29 @@ class IMemoryPartitionTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"createBoolean"/*, "createByte", "createShort", "createInteger", "createLong", "createDouble",
-            "createString", "createList", "createSet", "createMap", "createPair", "createBinary", "createPairList",
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary", "createPairList"
             /*"createJson"*/})
     void readWriteNativ(Object method) {
-        int size = 10;
-        List<Object> elements = new ArrayList<>(size);
-        Object result;
-        boolean nativ = false;
-        for (int i = 0; i < size; i++) {
-            elements.add(method);
-        }
-
-        IMemoryPartition partition = new IMemoryPartition(0);
+        int size = 1;
+        boolean rNativ = true;
+        boolean wNativ = false;
+        IMemoryPartition partition1 = new IMemoryPartition(10);
+//        partition1.getElements().add(method);
+        IMemoryPartition partition2 = new IMemoryPartition(5);
 
         try {
-            for (Object element : elements) {
-                read(element, partition, nativ);
-            }
-            assertEquals(elements.size(), partition.size());
-            result = write(partition, nativ);
-            assert partition.elements == result;
+
+            this.read(List.of(method), partition2, rNativ);
+//            this.write(partition2, wNativ);
+
+//            assertEquals(partition1.size(), partition2.size());
+//            assertEquals(partition1.getElements().get(0), partition2.getElements().get(0));
+            assertEquals(partition2.getElements().get(0), List.of(method));
+
         } catch (TException | NotSerializableException e) {
             e.printStackTrace();
+            assert false;
         }
     }
 
@@ -122,40 +124,34 @@ class IMemoryPartitionTest {
 
 
 
-
-
-
-
-
-
     /*
     UTILITY METHODS
      */
-
-    @Test
-    void testClone() {
-    }
-
     /*
         Read from protocol to partitions
      */
     void read(Object elements, IMemoryPartition partition, boolean nativ) throws TException, NotSerializableException {
-        TMemoryBuffer memoryBuffer = new TMemoryBuffer(partition.size());
+        TTransport memoryBuffer = new TMemoryBuffer(4096);
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
 
-        proto.writeObject(elements, nativ);
+        proto.writeObject(elements, nativ, true);
         zlib.flush();
         partition.read(memoryBuffer);
-        //proto.readByte();
     }
 
     Object write(IMemoryPartition partition, boolean nativ) throws TException, NotSerializableException {
-        TMemoryBuffer memoryBuffer = new TMemoryBuffer(partition.size());
-        partition.write(memoryBuffer);
+        TTransport memoryBuffer = new TMemoryBuffer(4096);
+        partition.write(memoryBuffer, 0, nativ);
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
         return proto.readObject();
+    }
+
+/*
+
+    @Test
+    void testClone() {
     }
 
     @Test
@@ -202,5 +198,6 @@ class IMemoryPartitionTest {
     void type() {
     }
 
+*/
 
 }

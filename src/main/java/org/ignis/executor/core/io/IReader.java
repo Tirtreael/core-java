@@ -5,6 +5,7 @@ import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TMap;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TSet;
+import org.ignis.executor.core.protocol.IObjectProtocol;
 
 import java.util.*;
 
@@ -12,7 +13,7 @@ public interface IReader {
 
     Map<Byte, ReaderType> readers = Map.ofEntries(
             Map.entry(IType.I_VOID.id(), new ReaderType((protocol) -> null)),
-            Map.entry(IType.I_BOOL.id(), new ReaderType(TProtocol::readBool)),
+            Map.entry(IType.I_BOOL.id(), new ReaderType((TProtocol::readBool))),
             Map.entry(IType.I_I08.id(), new ReaderType(TProtocol::readByte)),
             Map.entry(IType.I_I16.id(), new ReaderType(TProtocol::readI16)),
             Map.entry(IType.I_I32.id(), new ReaderType(TProtocol::readI32)),
@@ -23,7 +24,7 @@ public interface IReader {
             Map.entry(IType.I_SET.id(), new ReaderType(IReader::readSet)),
             Map.entry(IType.I_MAP.id(), new ReaderType(IReader::readMap)),
             Map.entry(IType.I_PAIR.id(), new ReaderType(IReader::readPair)),
-            Map.entry(IType.I_BINARY.id(), new ReaderType(TProtocol::readBinary)),
+            Map.entry(IType.I_BINARY.id(), new ReaderType(IReader::readBinary)),
             Map.entry(IType.I_PAIR_LIST.id(), new ReaderType(IReader::readPairList))
     );
 
@@ -33,7 +34,7 @@ public interface IReader {
     }
 
     static Object read(TProtocol protocol) throws TException {
-        ReaderType readerType = IReader.getReaderType(IReader.readType(protocol));
+        ReaderType readerType = getReaderType(readType(protocol));
         return readerType.getRead().apply(protocol);
     }
 
@@ -46,15 +47,13 @@ public interface IReader {
     }
 
     static List<Object> readList(TProtocol protocol) throws TException {
-        TList tList = protocol.readListBegin();
-        long size = tList.size;
-        byte elemType = tList.elemType;
+        long size = readSize(protocol);
+        byte elemType = readType(protocol);
         ReaderType readerType = getReaderType(elemType);
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             list.add(readerType.getRead().apply(protocol));
         }
-        protocol.readListEnd();
         return list;
     }
 
