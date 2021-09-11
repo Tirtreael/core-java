@@ -16,7 +16,7 @@ public class IThreadedServer extends TServer {
     org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Module.class);
 
     private boolean stop;
-    private List<TTransport> clients;
+    private final List<TTransport> clients;
 
     public IThreadedServer(AbstractServerArgs args) {
         super(args);

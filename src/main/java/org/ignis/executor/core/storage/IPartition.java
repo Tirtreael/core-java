@@ -5,10 +5,9 @@ import org.apache.thrift.transport.TTransport;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
-import java.io.Serializable;
 import java.util.List;
 
-public interface IPartition /*extends Iterable<Object>, Serializable */{
+public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
     void read(TTransport transport) throws TException, NotSerializableException;
 

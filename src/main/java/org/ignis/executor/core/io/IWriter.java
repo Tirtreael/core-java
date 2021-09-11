@@ -1,15 +1,10 @@
 package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TField;
-import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.protocol.TStruct;
-import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,19 +27,21 @@ public interface IWriter {
             Map.entry(IType.I_MAP.id(), new WriterType((protocol, obj) -> writeMap(protocol, (Map<?, ?>) obj))),
             Map.entry(IType.I_PAIR.id(), new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
             Map.entry(IType.I_BINARY.id(), new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
-            Map.entry(IType.I_PAIR_LIST.id(), new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<Object, Object>>) obj))),
+            Map.entry(IType.I_PAIR_LIST.id(), new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<?, ?>>) obj))),
             Map.entry(IType.I_JSON.id(), new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
     );
 
-
-    static WriterType getWriterType(Class<?> clazz) {
-        return writers.get(IType.getIdClazz(clazz));
+    //    static WriterType getWriterType(Class<?> clazz) {
+//        return writers.get(IType.getIdClazz(clazz));
+//    }
+    static WriterType getWriterType(byte id) {
+        return writers.get(id);
     }
 
     static void write(TProtocol protocol, Object obj) throws TException {
         writeType(protocol, IType.getId(obj));
 
-        WriterType writerType = getWriterType(obj.getClass());
+        WriterType writerType = getWriterType(IType.getId(obj));
         writerType.getWrite().apply(protocol, obj);
     }
 
@@ -57,70 +54,65 @@ public interface IWriter {
     }
 
     static void writeI32(TProtocol protocol, Integer obj) throws TException {
-        writeType(protocol, IType.getIdClazz(obj.getClass()));
+        writeType(protocol, IType.getId(obj));
     }
 
     static <T> void writeList(TProtocol protocol, List<T> list) throws TException {
         long size = list.size();
-        Class<?> elemType;
-        if (size == 0) {
-            elemType = IType.I_VOID.type();
-        } else {
-            elemType = list.get(0).getClass();
-        }
-        WriterType wt = getWriterType(elemType);
+        IType elemType = IType.I_VOID;
+        WriterType wt = getWriterType(IType.I_VOID.id);
+
         writeSize(protocol, size);
-        writeType(protocol, IType.getIdClazz(elemType));
+        if (size > 0) {
+            elemType = IType.getIType(list.get(0));
+            wt = getWriterType(elemType.id);
+        }
+        writeType(protocol, elemType.id);
         for (T obj : list)
             wt.getWrite().apply(protocol, obj);
     }
 
     static <T> void writeSet(TProtocol protocol, Set<T> set) throws TException {
         long size = set.size();
-        Class<?> elemType;
-        if (size == 0) {
-            elemType = IType.I_VOID.type();
-        } else {
-            elemType = set.toArray()[0].getClass();
+        IType elemType = IType.I_VOID;
+        if (size > 0) {
+            elemType = IType.getIType(set.toArray()[0]);
         }
-        WriterType wt = getWriterType(elemType);
+        WriterType wt = getWriterType(elemType.id);
         writeSize(protocol, size);
-        writeType(protocol, IType.getId(elemType));
+        writeType(protocol, elemType.id);
         for (T obj : set)
             wt.getWrite().apply(protocol, obj);
     }
 
     static <K, V> void writeMap(TProtocol protocol, Map<K, V> map) throws TException {
         long size = map.size();
-        Class<?> elemTypeKey;
-        Class<?> elemTypeValue;
-        if (size == 0) {
-            elemTypeKey = IType.I_VOID.type();
-            elemTypeValue = IType.I_VOID.type();
-        } else {
+        IType elemTypeKey = IType.I_VOID;
+        IType elemTypeValue = IType.I_VOID;
+        if (size > 0) {
             Map.Entry<K, V> entry = map.entrySet().iterator().next();
-            elemTypeKey = entry.getKey().getClass();
-            elemTypeValue = entry.getValue().getClass();
+            elemTypeKey = IType.getIType(entry.getKey());
+            elemTypeValue = IType.getIType(entry.getValue());
         }
-        WriterType wtKey = getWriterType(elemTypeKey);
-        WriterType wtValue = getWriterType(elemTypeValue);
+        WriterType wtKey = getWriterType(elemTypeKey.id);
+        WriterType wtValue = getWriterType(elemTypeValue.id);
         writeSize(protocol, size);
-        writeType(protocol, IType.getId(elemTypeKey));
-        writeType(protocol, IType.getId(elemTypeValue));
+        writeType(protocol, elemTypeKey.id);
+        writeType(protocol, elemTypeValue.id);
         for (Map.Entry<K, V> e : map.entrySet()) {
             wtKey.getWrite().apply(protocol, e.getKey());
             wtValue.getWrite().apply(protocol, e.getValue());
         }
     }
 
-    static <K, V> void writePair(TProtocol protocol, AbstractMap.Entry<K, V> pair) throws TException {
-        Class<?> elemTypeKey = pair.getKey().getClass();
-        Class<?> elemTypeValue = pair.getValue().getClass();
-        WriterType writerTypeKey = getWriterType(elemTypeKey);
-        WriterType writerTypeValue = getWriterType(elemTypeValue);
+    static <K, V> void writePair(TProtocol protocol, Map.Entry<K, V> pair) throws TException {
+        IType elemTypeKey = IType.getIType(pair.getKey());
+        IType elemTypeValue = IType.getIType(pair.getValue());
+        WriterType writerTypeKey = getWriterType(elemTypeKey.id);
+        WriterType writerTypeValue = getWriterType(elemTypeValue.id);
 
-        writeType(protocol, IType.getId(elemTypeKey));
-        writeType(protocol, IType.getId(elemTypeValue));
+        writeType(protocol, elemTypeKey.id);
+        writeType(protocol, elemTypeValue.id);
         writerTypeKey.getWrite().apply(protocol, pair.getKey());
         writerTypeValue.getWrite().apply(protocol, pair.getValue());
     }
@@ -129,22 +121,25 @@ public interface IWriter {
         protocol.writeBinary(ByteBuffer.wrap(binary));
     }
 
-    static void writePairList(TProtocol protocol, List<Map.Entry<Object, Object>> pairList) throws TException {
+    static void writePairList(TProtocol protocol, List<Map.Entry<?, ?>> pairList) throws TException {
         long size = pairList.size();
-        Class<?> elemTypeKey = IType.I_VOID.type();
-        Class<?> elemTypeValue = IType.I_VOID.type();
-        if (size != 0) {
-            Map.Entry<Object, Object> pair1 = pairList.get(0);
-            elemTypeKey = pair1.getKey().getClass();
-            elemTypeValue = pair1.getValue().getClass();
-        }
-        WriterType writerTypeKey = getWriterType(elemTypeKey);
-        WriterType writerTypeValue = getWriterType(elemTypeValue);
+        IType elemTypeKey = IType.I_VOID;
+        IType elemTypeValue = IType.I_VOID;
+        WriterType wtKey = getWriterType(IType.I_VOID.id);
+        WriterType wtValue = getWriterType(IType.I_VOID.id);
+
         writeSize(protocol, size);
-        writeType(protocol, IType.I_PAIR_LIST.id());
-        for (Map.Entry<Object, Object> pair : pairList) {
-            writerTypeKey.getWrite().apply(protocol, pair.getKey());
-            writerTypeValue.getWrite().apply(protocol, pair.getValue());
+        if (size > 0) {
+            elemTypeKey = IType.getIType(pairList.get(0).getKey());
+            elemTypeValue = IType.getIType(pairList.get(0).getValue());
+            wtKey = getWriterType(elemTypeKey.id);
+            wtValue = getWriterType(elemTypeValue.id);
+        }
+        writeType(protocol, elemTypeKey.id);
+        writeType(protocol, elemTypeValue.id);
+        for (Map.Entry<?, ?> pair : pairList) {
+            wtKey.getWrite().apply(protocol, pair.getKey());
+            wtValue.getWrite().apply(protocol, pair.getValue());
         }
     }
 

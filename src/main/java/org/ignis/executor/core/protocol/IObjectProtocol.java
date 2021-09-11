@@ -2,7 +2,6 @@ package org.ignis.executor.core.protocol;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.core.io.INativeReader;
 import org.ignis.executor.core.io.INativeWriter;
@@ -43,7 +42,7 @@ public class IObjectProtocol extends TCompactProtocol {
                 }
                 return list;
             } else {
-            return INativeReader.read(this);
+                return INativeReader.read(this);
             }
         } else {
             return IReader.read(this);
@@ -56,11 +55,11 @@ public class IObjectProtocol extends TCompactProtocol {
             this.writeBool(obj instanceof Collection && listHeader);
             if (obj instanceof Collection && listHeader) {
                 IWriter.writeSize(this, ((Collection<?>) obj).size());
-                for(Object element : (Collection<?>) obj){
+                for (Object element : (Collection<?>) obj) {
                     INativeWriter.write(this, element);
                 }
             } else {
-            INativeWriter.write(this, obj);
+                INativeWriter.write(this, obj);
             }
         } else {
             IWriter.write(this, obj);

@@ -4,8 +4,8 @@ import org.ignis.executor.core.IExecutorData;
 import org.slf4j.Logger;
 
 public class Module {
-    private IExecutorData executorData;
-    private Logger logger;
+    private final IExecutorData executorData;
+    private final Logger logger;
 
 
     public Module(IExecutorData executorData, Logger logger) {

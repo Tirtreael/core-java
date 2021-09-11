@@ -7,17 +7,17 @@ import java.util.Properties;
 
 public class IExecutorData {
 
-//    private IContext context;
+    //    private IContext context;
     private Properties properties;
     // library_loader
     // partition_tools
-    private IMPI mpi = new IMPI();
+    private final IMPI mpi = new IMPI();
 //    private IPartition partitions;
 
-    public IExecutorData(){
+    public IExecutorData() {
 //        MPI.COMM_WORLD
-        
-        
+
+
     }
     /*
     self.__partition_tools = IPartitionTools(self.__properties, self.__context)

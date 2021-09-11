@@ -2,7 +2,6 @@ package org.ignis.executor.core.io;
 
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +32,35 @@ public enum IType {
         this.type = type;
     }
 
+    public static IType getIType(Object obj) {
+        if (obj instanceof List) {
+            if (((List<?>) obj).size() > 0 && ((List<?>) obj).get(0) instanceof Map.Entry) {
+                return IType.I_PAIR_LIST;
+            } else {
+                return IType.I_LIST;
+            }
+        } else for (IType t1 : IType.values()) {
+            if (t1.type == obj.getClass() || t1.type.isAssignableFrom(obj.getClass())) {
+                return t1;
+            }
+        }
+
+        return IType.I_VOID;
+    }
+
+    public static byte getId(Object obj) {
+        return getIType(obj).id;
+    }
+
+    public static byte getIdClazz(Class<?> clazz) {
+        for (IType t1 : IType.values()) {
+            if (t1.type == clazz || t1.type.isAssignableFrom(clazz)) {
+                return t1.id;
+            }
+        }
+        return 0x0; // Return void id
+    }
+
     public byte id() {
         return id;
     }
@@ -40,34 +68,6 @@ public enum IType {
     public Class<?> type() {
         return type;
     }
-
-    public static byte getId(Object obj) {
-        if(obj instanceof List){
-            if(((List<?>) obj).size()>0 && ((List<?>) obj).get(0) instanceof AbstractMap.SimpleEntry){
-                return IType.I_PAIR_LIST.id;
-            }
-            else {
-                return IType.I_LIST.id;
-            }
-        }
-        else for(IType t1 : IType.values()) {
-                if (t1.type.isInstance(obj)){
-                    return t1.id;
-                }
-        }
-
-        return 0x0; // Return void id
-    }
-
-    public static byte getIdClazz(Class<?> clazz) {
-        for(IType t1 : IType.values()) {
-            if (t1.type == clazz || t1.type.isAssignableFrom(clazz)){
-                return t1.id;
-            }
-        }
-        return 0x0; // Return void id
-    }
-
 
 
 }

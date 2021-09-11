@@ -1,11 +1,7 @@
 package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TList;
-import org.apache.thrift.protocol.TMap;
 import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.protocol.TSet;
-import org.ignis.executor.core.protocol.IObjectProtocol;
 
 import java.util.*;
 
@@ -58,23 +54,20 @@ public interface IReader {
     }
 
     static Set<Object> readSet(TProtocol protocol) throws TException {
-        TSet tSet = protocol.readSetBegin();
-        long size = tSet.size;
-        byte elemType = tSet.elemType;
+        long size = readSize(protocol);
+        byte elemType = readType(protocol);
         ReaderType readerType = getReaderType(elemType);
         Set<Object> set = new HashSet<>();
         for (int i = 0; i < size; i++) {
             set.add(readerType.getRead().apply(protocol));
         }
-        protocol.readSetEnd();
         return set;
     }
 
     static Map<Object, Object> readMap(TProtocol protocol) throws TException {
-        TMap tMap = protocol.readMapBegin();
-        long size = tMap.size;
-        byte keyType = tMap.keyType;
-        byte valueType = tMap.valueType;
+        long size = readSize(protocol);
+        byte keyType = readType(protocol);
+        byte valueType = readType(protocol);
         ReaderType readerTypeKey = getReaderType(keyType);
         ReaderType readerTypeValue = getReaderType(valueType);
         Map<Object, Object> obj = new HashMap<>();
@@ -84,7 +77,7 @@ public interface IReader {
         return obj;
     }
 
-    static AbstractMap.SimpleEntry<Object, Object> readPair(TProtocol protocol) throws TException {
+    static Map.Entry<Object, Object> readPair(TProtocol protocol) throws TException {
         byte keyType = readType(protocol);
         byte valueType = readType(protocol);
         ReaderType readerTypeKey = getReaderType(keyType);
@@ -99,8 +92,7 @@ public interface IReader {
     }
 
     static List<Map.Entry<Object, Object>> readPairList(TProtocol protocol) throws TException {
-        TList tList = protocol.readListBegin();
-        long size = tList.size;
+        long size = readSize(protocol);
         byte keyType = readType(protocol);
         byte valueType = readType(protocol);
         ReaderType readerTypeKey = getReaderType(keyType);

@@ -10,8 +10,8 @@ public class IZlibTransport extends TZlibTransport {
 
     private final TTransport transport;
     private boolean compBuffer = false;
-    private byte compressionLevel = 0;
-    private byte inCompressionLevel;
+    private final byte compressionLevel = 0;
+    private final byte inCompressionLevel;
     private boolean rInit = false;
     private boolean wInit = false;
 
@@ -62,13 +62,12 @@ public class IZlibTransport extends TZlibTransport {
         }
         if (this.compressionLevel > 0) {
             super.write(buf, off, len);
-            if(this.getBufferPosition() > getBuffer().length) {
+            if (this.getBufferPosition() > getBuffer().length) {
                 this.flush();
             }
-        }
-        else{
+        } else {
             this.transport.write(buf, off, len);
         }
     }
-    
+
 }
