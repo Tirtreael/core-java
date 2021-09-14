@@ -86,13 +86,13 @@ class IMemoryPartitionTest {
     }
 
     static Stream<Object> createJson() {
-        return Stream.of(new JSONObject());
+        return Stream.of(new JSONObject("{ raiz: { hijo1: 4, hijo2: 37 }, raiz2: { hijo1: 4, hijo2: 37 } }"));
     }
 
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair"/*, "createBinary"*/,
-            "createPairList"/*, "createJson"*/})
+            "createPairList", "createJson"})
     void readWriteNativ(Object method) {
         int size = 1;
         boolean rNativ = false;
@@ -102,13 +102,18 @@ class IMemoryPartitionTest {
 
             this.read(method, partition1, rNativ);
 
-            assertEquals(List.of(method), partition1.getElements());
+            assertEquals(partition1.size(), 1);
+            if (method instanceof JSONObject && partition1.getElements().get(0) instanceof JSONObject)
+                assertEquals(method.toString(), partition1.getElements().get(0).toString());
+
+            else assertEquals(method, partition1.getElements().get(0));
 
         } catch (TException | NotSerializableException e) {
             e.printStackTrace();
             assert false;
         }
     }
+
 
     @Test
     void iterator() {

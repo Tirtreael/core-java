@@ -31,9 +31,6 @@ public interface IWriter {
             Map.entry(IType.I_JSON.id(), new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
     );
 
-    //    static WriterType getWriterType(Class<?> clazz) {
-//        return writers.get(IType.getIdClazz(clazz));
-//    }
     static WriterType getWriterType(byte id) {
         return writers.get(id);
     }
@@ -144,7 +141,7 @@ public interface IWriter {
     }
 
     static void writeJSON(TProtocol protocol, JSONObject obj) throws TException {
-
+        write(protocol, obj.toMap());
     }
 
 }

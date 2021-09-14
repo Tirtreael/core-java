@@ -1,11 +1,13 @@
 package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TMemoryBuffer;
 import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -16,6 +18,34 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ISerializationTest {
+
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary", "createPairList",
+            "createJson"})
+    void serialDeserial(Object method) {
+        TMemoryBuffer memoryBuffer = new TMemoryBuffer(4096);
+        TTransport zlib = new IZlibTransport(memoryBuffer);
+        IObjectProtocol proto = new IObjectProtocol(zlib);
+
+//        boolean rNativ = false;
+//        boolean wNativ = false;
+
+        Object obj1 = List.of(method);
+        Object obj2;
+
+        try {
+            proto.writeObject(obj1, true, true);
+            obj2 = proto.readObject();
+            assertEquals(obj1, obj2);
+        } catch (TException | NotSerializableException e) {
+            e.printStackTrace();
+            assert false;
+        }
+
+    }
+
+
 
     static Stream<Object> createBoolean() {
 //        return Stream.of(new Random(12345678).nextBoolean());
@@ -83,31 +113,5 @@ class ISerializationTest {
 
     static Stream<Object> createJson() {
         return Stream.of(new JSONObject());
-    }
-
-    @ParameterizedTest
-    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
-            "createString", "createList", "createSet", "createMap", "createPair", "createBinary", "createPairList"
-            /*"createJson"*/})
-    void serialDeserial(Object method) {
-        TMemoryBuffer memoryBuffer = new TMemoryBuffer(4096);
-        TTransport zlib = new IZlibTransport(memoryBuffer);
-        IObjectProtocol proto = new IObjectProtocol(zlib);
-
-//        boolean rNativ = false;
-//        boolean wNativ = false;
-
-        Object obj1 = List.of(method);
-        Object obj2;
-
-        try {
-            proto.writeObject(obj1, true, true);
-            obj2 = proto.readObject();
-            assertEquals(obj1, obj2);
-        } catch (TException | NotSerializableException e) {
-            e.printStackTrace();
-            assert false;
-        }
-
     }
 }

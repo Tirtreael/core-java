@@ -1,7 +1,7 @@
 package org.ignis.executor.core.io;
 
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TTransportException;
-import org.ignis.executor.core.protocol.IObjectProtocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 
 public interface INativeWriter {
 
-    static void write(IObjectProtocol protocol, Object obj) {
+    static void write(TProtocol protocol, Object obj) {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream oos = null;
         byte[] data = new byte[4096];

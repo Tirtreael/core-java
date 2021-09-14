@@ -2,6 +2,8 @@ package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -21,7 +23,8 @@ public interface IReader {
             Map.entry(IType.I_MAP.id(), new ReaderType(IReader::readMap)),
             Map.entry(IType.I_PAIR.id(), new ReaderType(IReader::readPair)),
             Map.entry(IType.I_BINARY.id(), new ReaderType(IReader::readBinary)),
-            Map.entry(IType.I_PAIR_LIST.id(), new ReaderType(IReader::readPairList))
+            Map.entry(IType.I_PAIR_LIST.id(), new ReaderType(IReader::readPairList)),
+            Map.entry(IType.I_JSON.id(), new ReaderType(IReader::readJson))
     );
 
 
@@ -104,6 +107,20 @@ public interface IReader {
             ));
         }
         return obj;
+    }
+
+    static JSONObject readJson(TProtocol protocol) throws TException {
+        Object obj = read(protocol);
+        if(obj instanceof Map)
+            return new JSONObject((Map<?,?>) obj);
+        else return null;
+//        if(obj instanceof List) {
+//            JSONArray jsonArray = new JSONArray((List<?>) obj);
+////            JSONObject jsonObject = new JSONObject();
+////            jsonObject.append("r1", jsonArray.get(0));
+//            return new JSONObject(jsonArray);
+//        }
+//        else return null;
     }
 
 }

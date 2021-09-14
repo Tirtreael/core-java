@@ -1,7 +1,7 @@
 package org.ignis.executor.core.io;
 
+import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TTransportException;
-import org.ignis.executor.core.protocol.IObjectProtocol;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.io.ObjectInputStream;
 
 public interface INativeReader {
 
-    static Object read(IObjectProtocol protocol) {
+    static Object read(TProtocol protocol) {
         int size = 4096;
         byte[] data = new byte[size];
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
