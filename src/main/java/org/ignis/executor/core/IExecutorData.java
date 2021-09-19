@@ -2,86 +2,88 @@ package org.ignis.executor.core;
 
 //import mpi.MPI;
 
-import java.util.Properties;
+import org.ignis.executor.api.IContext;
+import org.ignis.executor.core.storage.IPartition;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class IExecutorData {
 
-    //    private IContext context;
-    private Properties properties;
-    // library_loader
-    // partition_tools
-    private final IMPI mpi = new IMPI();
-//    private IPartition partitions;
+    private IContext context;
+    private IPropertyParser properties;
+    private ILibraryLoader library_loader;
+    private IPartitionTools partitionTools;
+    private IMPI mpi;
+    private List<IPartition> partitions;
+    private Map<Object, Object> variables;
 
     public IExecutorData() {
-//        MPI.COMM_WORLD
-
-
     }
-    /*
-    self.__partition_tools = IPartitionTools(self.__properties, self.__context)
-    self.__mpi = IMpi(self.__properties, self.__partition_tools, self.__context)
-    self.__partitions = None
-    self.__variables = dict()
 
-    def getPartitions(self):
-            return self.__partitions
+    public Object getVariable(Object key) {
+        return variables.get(key);
+    }
 
-    def setPartitions(self, group):
-    old = self.__partitions
-    self.__partitions = group
-		return old
+    public void setVariable(Object key, Object value) {
+        variables.put(key, value);
+    }
 
-    def hasPartitions(self):
-            return self.__partitions is not None
+    public boolean hasVariable(Object key) {
+        return variables.containsKey(key);
+    }
 
-    def deletePartitions(self):
-    self.__partitions = None
+    public void removeVariable(Object key) {
+        variables.remove(key);
+    }
 
-    def setVariable(self, key, value):
-    self.__variables[key] = value
+    public void clearVariables() {
+        variables.clear();
+    }
 
-    def getVariable(self, key):
-            return self.__variables[key]
+    public IContext getContext() {
+        return context;
+    }
 
-    def removeVariable(self, key):
-    del self.__variables[key]
+    public IPropertyParser getProperties() {
+        return properties;
+    }
 
-    def clearVariables(self):
-            self.__variables.clear()
+    public IPartitionTools getPartitionTools() {
+        return partitionTools;
+    }
 
-    def infoDirectory(self):
-    info = self.__properties.executorDirectory() + "/info"
-            self.__partition_tools.createDirectoryIfNotExists(info)
-            return info
+    public IMPI getMpi() {
+        return mpi;
+    }
 
-    def loadLibrary(self, source):
-            logger.info("Loading function")
-            if source.obj.bytes is not None:
-    lib = self.__library_loader.unpickle(source.obj.bytes)
-            else:
-    lib = self.__library_loader.load(source.obj.name)
+    public List<IPartition> getPartitions() {
+        return partitions;
+    }
 
-            if source.params:
-            logger.info("Loading user variables")
-            for key, value in source.params.items():
-    self.__context.vars[key] = self.__library_loader.unpickle(value)
-            logger.info("Function loaded")
+    public List<IPartition> getAndDeletePartitions() {
+        return partitions;
+    }
 
-            return lib
+    public boolean hasPartitions() {
+        return !partitions.isEmpty();
+    }
 
-    def getContext(self):
-            return self.__context
+    public List<IPartition> setPartitions(List<IPartition> partitions) {
+        List<IPartition> old = this.partitions;
+        this.partitions = partitions;
+        return old;
+    }
 
-    def getProperties(self):
-            return self.__properties
+    public void deletePartitions() {
+        partitions = null;
+    }
 
-    def getPartitionTools(self):
-            return self.__partition_tools
+    public String infoDirectory() {
+        String info = this.properties.executorDirectory()+"/info";
+        this.partitionTools.createDirectoryIfNotExists(info);
+        return info;
+    }
 
-    def mpi(self):
-            return self.__mpi
-
-    */
 }

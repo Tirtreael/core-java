@@ -10,8 +10,8 @@ public class IZlibTransport extends TZlibTransport {
 
     private final TTransport transport;
     private boolean compBuffer = false;
-    private final byte compressionLevel = 0;
-    private final byte inCompressionLevel;
+    private byte compressionLevel = 0;
+    private byte inCompressionLevel;
     private boolean rInit = false;
     private boolean wInit = false;
 
@@ -32,11 +32,11 @@ public class IZlibTransport extends TZlibTransport {
 //        this.compressionLevel = this.defaultCompressionLevel;
     }
 
-//    @Override
-//    public void flush() throws TTransportException {
-//        super.flush();
-//        this.transport.flush();
-//    }
+    @Override
+    public void flush() throws TTransportException {
+        super.flush();
+        this.transport.flush();
+    }
 
     @Override
     public int read(byte[] buf, int off, int len) throws TTransportException {

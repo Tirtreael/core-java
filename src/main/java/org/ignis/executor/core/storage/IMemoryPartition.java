@@ -70,11 +70,13 @@ public class IMemoryPartition implements IPartition {
         return this.elements;
     }
 
+    //@Todo
     @Override
     public void readIterator(IPartition partition) {
 
     }
 
+    //@Todo
     @Override
     public void writeIterator(IPartition partition) {
 
@@ -124,6 +126,7 @@ public class IMemoryPartition implements IPartition {
         this.elements.clear();
     }
 
+    //@Todo
     @Override
     public void fit() {
 
