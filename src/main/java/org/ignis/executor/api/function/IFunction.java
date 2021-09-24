@@ -1,20 +1,27 @@
 package org.ignis.executor.api.function;
 
 
-import org.apache.thrift.TException;
 import org.ignis.executor.api.IContext;
 
 
 public interface IFunction {
 
-    void before(IContext context) throws TException;
+    void before(IContext context);
 
-    Object call(IContext context) throws TException;
+    void before(Object obj, IContext context);
 
-    Object call(Object elem, IContext context) throws TException;
+    void before(Object obj1, Object obj2, IContext context);
 
-    Object call(Object elemA, Object elemB, IContext context) throws TException;
+    Object call(IContext context);
 
-    void after(IContext context) throws TException;
+    Object call(Object obj, IContext context);
+
+    Object call(Object obj1, Object obj2, IContext context);
+
+    void after(Object obj, IContext context);
+
+    void after(IContext context);
+
+    void after(Object obj1, Object obj2, IContext context);
 
 }

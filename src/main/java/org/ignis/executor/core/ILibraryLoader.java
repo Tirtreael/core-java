@@ -2,6 +2,7 @@ package org.ignis.executor.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ignis.executor.api.function.IFunction;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -9,11 +10,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class ILibraryLoader {
 
     private static final Logger LOGGER = LogManager.getLogger();
+
+    private IPropertyParser properties;
+    private Map<String, IFunction> functionsMap;
+
+
+    ILibraryLoader(IPropertyParser properties) {
+        this.properties = properties;
+        this.functionsMap = new HashMap<>();
+    }
 
     public void loadFunction() {
 

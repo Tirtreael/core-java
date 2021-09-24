@@ -82,7 +82,7 @@ public class IExecutorData {
 
     public String infoDirectory() {
         String info = this.properties.executorDirectory()+"/info";
-        this.partitionTools.createDirectoryIfNotExists(info);
+//        this.partitionTools.createDirectoryIfNotExists(info);
         return info;
     }
 

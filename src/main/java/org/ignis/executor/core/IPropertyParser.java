@@ -7,12 +7,14 @@ import java.util.regex.Pattern;
 public class IPropertyParser {
 
     private final Properties properties;
-    private final Pattern bool;
+    private final Pattern bool = Pattern.compile("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON");
 
+    public IPropertyParser() {
+        this.properties = new Properties();
+    }
 
     public IPropertyParser(Properties properties) {
         this.properties = properties;
-        this.bool = Pattern.compile("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON");
     }
 
     public int cores() {

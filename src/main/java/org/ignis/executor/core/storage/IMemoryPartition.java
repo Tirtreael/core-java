@@ -20,6 +20,10 @@ public class IMemoryPartition implements IPartition {
 
     public List<Object> elements;
 
+    public IMemoryPartition() {
+        elements = new ArrayList<>();
+    }
+
     public IMemoryPartition(int nElements) {
         elements = new ArrayList<>(nElements);
     }
@@ -32,6 +36,11 @@ public class IMemoryPartition implements IPartition {
         IMemoryPartition newPartition = new IMemoryPartition(this.elements.size());
         this.copyTo(newPartition);
         return newPartition;
+    }
+
+    @Override
+    public String getTYPE() {
+        return IMemoryPartition.TYPE;
     }
 
     //@Todo check

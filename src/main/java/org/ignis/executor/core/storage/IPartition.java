@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
+    String getTYPE();
+
     void read(TTransport transport) throws TException, NotSerializableException;
 
     void write(TTransport transport, int compression, boolean nativ) throws TException;

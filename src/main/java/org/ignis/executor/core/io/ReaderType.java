@@ -6,18 +6,17 @@ import org.apache.thrift.protocol.TProtocol;
 
 public class ReaderType {
 
-    public final CheckedFunction<Object> read;
+    public final Function<Object> read;
 
-    public ReaderType(CheckedFunction<Object> read) {
+    public ReaderType(Function<Object> read) {
         this.read = read;
     }
 
-    public CheckedFunction<Object> getRead() {
+    public Function<Object> getRead() {
         return read;
     }
-
-    @FunctionalInterface
-    public interface CheckedFunction<R> {
+    
+    public interface Function<R> {
         R apply(TProtocol protocol) throws TException;
     }
 

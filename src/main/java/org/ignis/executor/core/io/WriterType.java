@@ -6,20 +6,19 @@ import org.apache.thrift.protocol.TProtocol;
 
 
 public class WriterType {
-    private final CheckedFunction<TProtocol, Object> write;
+    private final Function<TProtocol, Object> write;
 
 
-    public WriterType(CheckedFunction<TProtocol, Object> write) {
+    public WriterType(Function<TProtocol, Object> write) {
         this.write = write;
     }
 
-    public CheckedFunction<TProtocol, Object> getWrite() {
+    public Function<TProtocol, Object> getWrite() {
         return write;
     }
 
-
-    @FunctionalInterface
-    public interface CheckedFunction<T1, T2> {
+    
+    public interface Function<T1, T2> {
         void apply(T1 protocol, T2 object) throws TException;
     }
 
