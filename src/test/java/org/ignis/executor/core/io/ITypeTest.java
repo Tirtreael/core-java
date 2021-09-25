@@ -132,7 +132,7 @@ class ITypeTest {
 
         @Test
         void getIdBinary() {
-            Object obj = new Byte[]{0x3, 0x7, 0xa, 0x5};
+            Object obj = new byte[]{0x3, 0x7, 0xa, 0x5};
             byte id = IType.I_BINARY.id;
 
             byte id2 = IType.getId(obj);

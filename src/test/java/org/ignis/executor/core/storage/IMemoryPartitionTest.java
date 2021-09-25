@@ -6,7 +6,6 @@ import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -91,7 +90,7 @@ class IMemoryPartitionTest {
 
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
-            "createString", "createList", "createSet", "createMap", "createPair"/*, "createBinary"*/,
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
             "createPairList", "createJson"})
     void readWriteNativ(Object method) {
         int size = 1;
@@ -105,7 +104,11 @@ class IMemoryPartitionTest {
             assertEquals(partition1.size(), 1);
             if (method instanceof JSONObject && partition1.getElements().get(0) instanceof JSONObject)
                 assertEquals(method.toString(), partition1.getElements().get(0).toString());
-
+            else if (method instanceof byte[] && partition1.getElements().get(0) instanceof byte[]) {
+                assertEquals(((byte[]) method).length, ((byte[]) partition1.getElements().get(0)).length);
+                for (int i = 0; i < ((byte[]) method).length; i++)
+                    assertEquals(((byte[]) method)[i], ((byte[]) partition1.getElements().get(0))[i]);
+            }
             else assertEquals(method, partition1.getElements().get(0));
 
         } catch (TException | NotSerializableException e) {
@@ -114,10 +117,12 @@ class IMemoryPartitionTest {
         }
     }
 
+/*
 
     @Test
     void iterator() {
     }
+*/
 
 
     /*

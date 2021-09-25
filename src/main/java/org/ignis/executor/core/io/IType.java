@@ -20,7 +20,7 @@ public enum IType {
     I_SET(0x9, Set.class),
     I_MAP(0xa, Map.class),
     I_PAIR(0xb, Map.Entry.class),
-    I_BINARY(0xc, Byte[].class),
+    I_BINARY(0xc, byte[].class),
     I_PAIR_LIST(0xd, List.class),
     I_JSON(0xe, JSONObject.class);
 
