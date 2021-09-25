@@ -135,7 +135,6 @@ public class IPropertyParser {
 
     /* Auxiliary methods */
 
-    // @Todo KeyException
     public String getString(String key) throws InvalidKeyException {
         if (properties.containsKey(key))
             return this.properties.getProperty(key);

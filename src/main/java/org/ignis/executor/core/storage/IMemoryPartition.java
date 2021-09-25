@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// @Todo
 public class IMemoryPartition implements IPartition {
 
     public static final String TYPE = "Memory";
@@ -79,13 +80,11 @@ public class IMemoryPartition implements IPartition {
         return this.elements;
     }
 
-    //@Todo
     @Override
     public void readIterator(IPartition partition) {
 
     }
 
-    //@Todo
     @Override
     public void writeIterator(IPartition partition) {
 
@@ -135,7 +134,6 @@ public class IMemoryPartition implements IPartition {
         this.elements.clear();
     }
 
-    //@Todo
     @Override
     public void fit() {
 

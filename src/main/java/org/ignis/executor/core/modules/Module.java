@@ -1,28 +1,42 @@
 package org.ignis.executor.core.modules;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
-import org.slf4j.Logger;
+import org.ignis.rpc.IExecutorException;
 
-public class Module {
+import java.util.Arrays;
+
+public abstract class Module implements IModule {
+
     private final IExecutorData executorData;
-    private final Logger logger;
+    private static final Logger LOGGER = LogManager.getLogger();
 
 
-    public Module(IExecutorData executorData, Logger logger) {
+    public Module(IExecutorData executorData) {
         this.executorData = executorData;
-        this.logger = logger;
     }
 
     public IExecutorData getExecutorData() {
         return executorData;
     }
 
-    public Logger getLogger() {
-        return logger;
+
+    public void packException(Exception ex) throws IExecutorException {
+        String message = ex.getMessage();
+        StackTraceElement[] stack = ex.getStackTrace();
+        String cause = ex.getClass().getName() + ":" + message + "\n Caused by: \n" + Arrays.toString(stack);
+        LOGGER.error(cause);
+        throw new IExecutorException(message, cause);
     }
 
-//    public void useSource(Runnable src){
-//        src.run(this.executor_data.before(this.executor_data.getContext()));
-//    }
+    public void useSource(String src) throws IExecutorException {
+//        try {
+//            this.executorData.loadLibrary(src).before(this.executorData.getContext());
+//        } catch (Exception ex) {
+//            this.packException(ex);
+//        }
+    }
+
 
 }

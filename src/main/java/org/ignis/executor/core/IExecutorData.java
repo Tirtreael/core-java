@@ -3,6 +3,7 @@ package org.ignis.executor.core;
 //import mpi.MPI;
 
 import org.ignis.executor.api.IContext;
+import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.core.storage.IPartition;
 
 import java.util.List;
@@ -13,13 +14,15 @@ public class IExecutorData {
 
     private IContext context;
     private IPropertyParser properties;
-    private ILibraryLoader library_loader;
+    private ILibraryLoader libraryLoader;
     private IPartitionTools partitionTools;
     private IMPI mpi;
     private List<IPartition> partitions;
     private Map<Object, Object> variables;
 
     public IExecutorData() {
+        this.properties = new IPropertyParser();
+        this.libraryLoader = new ILibraryLoader(this.properties);
     }
 
     public Object getVariable(Object key) {
@@ -81,9 +84,17 @@ public class IExecutorData {
     }
 
     public String infoDirectory() {
-        String info = this.properties.executorDirectory()+"/info";
+        String info = this.properties.executorDirectory() + "/info";
 //        this.partitionTools.createDirectoryIfNotExists(info);
         return info;
     }
 
+    public Map<String, IFunction> loadLibrary(String src) throws ClassNotFoundException {
+        try {
+            return this.libraryLoader.loadLibrary(src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

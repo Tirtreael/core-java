@@ -1,12 +1,14 @@
 package org.ignis.executor.core.modules.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IExecutorServerModule;
 import org.ignis.executor.core.modules.Module;
-import org.slf4j.Logger;
+import org.ignis.rpc.IExecutorException;
 
 import java.util.Properties;
 
@@ -15,10 +17,11 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
 
     private TServer server;
     private TProcessor processor;
+    private static final Logger LOGGER = LogManager.getLogger();
 
 
-    public IExecutorServerModuleImpl(IExecutorData executorData, Logger logger) {
-        super(executorData, logger);
+    public IExecutorServerModuleImpl(IExecutorData executorData) {
+        super(executorData);
     }
 
 
@@ -52,5 +55,10 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
     }
 
     public void createServices() {
+    }
+
+    @Override
+    public void packException(Exception ex) throws IExecutorException {
+
     }
 }
