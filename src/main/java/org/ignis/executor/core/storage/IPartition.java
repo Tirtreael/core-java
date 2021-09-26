@@ -5,6 +5,8 @@ import org.apache.thrift.transport.TTransport;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
+import java.io.Serializable;
+import java.lang.instrument.Instrumentation;
 import java.util.List;
 
 public interface IPartition /*extends Iterable<Object>, Serializable */ {
@@ -21,9 +23,9 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
     List<Object> getElements();
 
-    void readIterator(IPartition partition);
+//    void readIterator(IPartition partition);
 
-    void writeIterator(IPartition partition);
+//    void writeIterator(IPartition partition);
 
     IPartition clone();
 
@@ -43,6 +45,24 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
     default boolean isEmpty() {
         return size() == 0;
+    }
+
+    default long bytes() {
+        if (this.size() == 0)
+            return 0;
+        else return IMemoryPartition.ObjectSizeFetcher.getObjectSize(this.getElements().get(0)) * this.size();
+    }
+
+    class ObjectSizeFetcher {
+        private static Instrumentation instrumentation;
+
+        public static void premain(String args, Instrumentation inst) {
+            instrumentation = inst;
+        }
+
+        public static long getObjectSize(Object o) {
+            return instrumentation.getObjectSize(o);
+        }
     }
 
     byte[] toBytes() throws IOException;

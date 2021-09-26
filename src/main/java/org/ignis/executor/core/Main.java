@@ -18,7 +18,7 @@ public final class Main {
 
         try {
 
-            Map<String, IFunction> myFuns = executorData.loadLibrary("out/artifacts/jarFuncEx.jar");
+            Map<String, IFunction> myFuns = executorData.loadLibrary("out/artifacts/jarFuncEx2/jarFuncEx2.jar");
             for (IFunction fun : myFuns.values()) {
                 fun.before(null);
             }

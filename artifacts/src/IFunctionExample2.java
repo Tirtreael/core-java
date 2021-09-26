@@ -1,6 +1,5 @@
-package org.ignis.executor.api.function;
-
 import org.ignis.executor.api.IContext;
+import org.ignis.executor.api.function.IFunction;
 
 public class IFunctionExample2 implements IFunction {
     @Override

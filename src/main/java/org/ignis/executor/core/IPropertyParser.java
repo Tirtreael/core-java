@@ -56,7 +56,7 @@ public class IPropertyParser {
         return false;
     }
 
-    public boolean isOverwrite() {
+    public boolean ioOverwrite() {
         try {
             return getBoolean("ignis.modules.io.overwrite");
         } catch (InvalidKeyException e) {

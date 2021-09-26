@@ -4,7 +4,6 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.ignis.executor.core.modules.Module;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;

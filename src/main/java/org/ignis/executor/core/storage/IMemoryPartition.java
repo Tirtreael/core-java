@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
+import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -80,15 +81,15 @@ public class IMemoryPartition implements IPartition {
         return this.elements;
     }
 
-    @Override
-    public void readIterator(IPartition partition) {
-
-    }
-
-    @Override
-    public void writeIterator(IPartition partition) {
-
-    }
+//    @Override
+//    public void readIterator(IPartition partition) {
+//
+//    }
+//
+//    @Override
+//    public void writeIterator(IPartition partition) {
+//
+//    }
 
     @Override
     public void copyFrom(IPartition source) {

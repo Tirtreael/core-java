@@ -1,20 +1,24 @@
-package org.ignis.executor.core.modules;
+package org.ignis.executor.core.modules.impl;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.modules.IModule;
+import org.ignis.executor.core.storage.IMemoryPartition;
+import org.ignis.executor.core.storage.IPartition;
 import org.ignis.rpc.IExecutorException;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public abstract class Module implements IModule {
 
-    private final IExecutorData executorData;
-    private static final Logger LOGGER = LogManager.getLogger();
+    IExecutorData executorData;
+    Logger logger;
 
 
-    public Module(IExecutorData executorData) {
+    public Module(IExecutorData executorData, Logger logger) {
         this.executorData = executorData;
+        this.logger = logger;
     }
 
     public IExecutorData getExecutorData() {
@@ -26,7 +30,7 @@ public abstract class Module implements IModule {
         String message = ex.getMessage();
         StackTraceElement[] stack = ex.getStackTrace();
         String cause = ex.getClass().getName() + ":" + message + "\n Caused by: \n" + Arrays.toString(stack);
-        LOGGER.error(cause);
+        this.logger.error(cause);
         throw new IExecutorException(message, cause);
     }
 
@@ -37,6 +41,19 @@ public abstract class Module implements IModule {
 //            this.packException(ex);
 //        }
     }
+
+
+    public void resizeMemoryPartition(IMemoryPartition part, int n) {
+        Collection<Object> inner = part.getElements();
+        IPartition newPart = new IMemoryPartition(n);
+        for(Object obj : part.getElements()){
+            newPart.getElements().add(obj);
+        }
+    }
+
+//    public void exchange(){
+//
+//    }
 
 
 }
