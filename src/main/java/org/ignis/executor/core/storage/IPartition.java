@@ -2,11 +2,14 @@ package org.ignis.executor.core.storage;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransport;
+import org.ignis.executor.api.IReadIterator;
+import org.ignis.executor.api.IWriteIterator;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.lang.instrument.Instrumentation;
+import java.util.Iterator;
 import java.util.List;
 
 public interface IPartition /*extends Iterable<Object>, Serializable */ {
@@ -23,9 +26,9 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
     List<Object> getElements();
 
-//    void readIterator(IPartition partition);
+    IReadIterator readIterator();
 
-//    void writeIterator(IPartition partition);
+    IWriteIterator writeIterator();
 
     IPartition clone();
 
@@ -52,6 +55,9 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
             return 0;
         else return IMemoryPartition.ObjectSizeFetcher.getObjectSize(this.getElements().get(0)) * this.size();
     }
+
+    Iterator<Object> iterator();
+
 
     class ObjectSizeFetcher {
         private static Instrumentation instrumentation;

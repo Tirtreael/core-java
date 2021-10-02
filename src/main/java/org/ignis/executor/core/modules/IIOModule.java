@@ -1,6 +1,6 @@
 package org.ignis.executor.core.modules;
 
-public interface IIOModule {
+public interface IIOModule extends IModule, org.ignis.rpc.executor.IIOModule.Iface {
 
     //void repartition(); //NO
     //void coalesce(); //NO

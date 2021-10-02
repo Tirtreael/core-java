@@ -1,26 +1,47 @@
 package org.ignis.executor.core.modules.impl;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.thrift.TException;
+import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.modules.IIOModule;
 import org.ignis.executor.core.storage.IPartition;
+import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.rpc.IExecutorException;
+import org.ignis.rpc.ISource;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
+import java.util.List;
 
 import static java.lang.Math.max;
 
-public class IOModule extends Module {
+public class IOModule extends Module implements IIOModule {
 
+    private final Logger logger;
 
     public IOModule(IExecutorData executorData, Logger logger) {
         super(executorData, logger);
+        this.logger = logger;
     }
 
+
+    @Override
+    public void loadClass(ISource src) throws TException {
+
+    }
+
+    @Override
+    public long partitionCount() throws TException {
+        return 0;
+    }
+
+    @Override
+    public List<Long> countByPartition() throws TException {
+        return null;
+    }
 
     public long partitionApproxSize() {
         logger.info("IO: calculating partition size");
@@ -29,9 +50,114 @@ public class IOModule extends Module {
                 .mapToLong(IPartition::bytes).sum();
     }
 
-    public void textFile(String path, int minPartitions) {
+    @Override
+    public void textFile(String path) throws TException {
+
+    }
+
+    @Override
+    public void textFile2(String path, long minPartitions) throws TException {
+
+    }
+
+    @Override
+    public void partitionObjectFile(String path, long first, long partitions) throws TException {
+
+    }
+
+    @Override
+    public void partitionObjectFile4(String path, long first, long partitions, ISource src) throws TException {
+
+    }
+
+    @Override
+    public void partitionTextFile(String path, long first, long partitions) throws TException {
+
+    }
+
+    @Override
+    public void partitionJsonFile4a(String path, long first, long partitions, boolean objectMapping) throws TException {
+
+    }
+
+    @Override
+    public void partitionJsonFile4b(String path, long first, long partitions, ISource src) throws TException {
+
+    }
+
+    @Override
+    public void saveAsObjectFile(String path, byte compression, long first) throws TException {
+
+    }
+
+    @Override
+    public void saveAsTextFile(String path, long first) throws TException {
+
+    }
+
+    @Override
+    public void saveAsJsonFile(String path, long first, boolean pretty) throws TException {
+
+    }
+
+    public void textFile(String path, int minPartitions) throws IOException {
         logger.info("IO: reading text file");
 
+        try (
+                FileInputStream fileIS = new FileInputStream(path);
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(fileIS, StandardCharsets.UTF_8))
+        ) {
+            long size = Files.size(Path.of(path));
+            int executorId = this.executorData.getContext().executorId();
+            int executors = this.executorData.getContext().executors();
+            long exChunk = (int) (size / executors);
+            long exChunkInit = executorId * exChunk;
+            long exChunkEnd = exChunkInit + exChunk;
+            long minPartitionsSize = this.executorData.getProperties().partitionMinimal();
+            minPartitions = (int) Math.ceil(minPartitions / executors);
+
+            logger.info("IO: file has " + size + " Bytes");
+
+            if (executorId > 0) {
+                if (exChunkInit > 0)
+                    br.skip(exChunkInit - 1);
+                else br.skip(exChunkInit);
+                if (executorId == executors - 1)
+                    exChunkEnd = (int) size;
+            }
+
+            if ((exChunk / minPartitionsSize) < minPartitions) {
+                minPartitionsSize = exChunk / minPartitions;
+            }
+
+            IPartitionGroup partitionGroup = this.executorData.getPartitionTools().newPartitionGroup();
+            this.executorData.setPartitions(partitionGroup);
+            IPartition partition = this.executorData.getPartitionTools().newPartition();
+            IWriteIterator writeIterator = partition.writeIterator();
+            partitionGroup.add(partition);
+            long partitionInit = exChunkInit;
+            long filePos = exChunkInit;
+            long elements = 0;
+            while (filePos < exChunkEnd) {
+                if ((filePos - partitionInit) > minPartitionsSize) {
+                    partition = this.executorData.getPartitionTools().newPartition();
+                    writeIterator = partition.writeIterator();
+                    partitionGroup.add(partition);
+                    partitionInit = filePos;
+                }
+
+                String bb = br.readLine();
+                writeIterator.write(new String(bb.getBytes(StandardCharsets.UTF_8)));
+                elements += 1;
+                filePos += bb.length();
+            }
+            exChunkEnd = fileIS.getChannel().position();
+
+            logger.info("IO: created " + partitionGroup.size() + " partitions, " + elements
+                    + " lines and " + (exChunkEnd - exChunkInit) + "Bytes read ");
+
+        }
     }
 
 
@@ -68,4 +194,28 @@ public class IOModule extends Module {
         return fileOS;
     }
 
+    @Override
+    public void partitions() {
+
+    }
+
+    @Override
+    public void saveAsObjectFile(String path, String compression, int first) {
+
+    }
+
+    @Override
+    public void saveAsTextFile(String path, int first) {
+
+    }
+
+    @Override
+    public void saveAsJsonFile(String path, int first, boolean pretty) {
+
+    }
+
+    @Override
+    public void packException(Exception ex) {
+
+    }
 }

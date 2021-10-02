@@ -13,17 +13,19 @@ public class IContext {
         return 1;
     }
 
-//    public int execturos(){
+    public int executors(){
 //        return this.mpiGroup.getSize();
-//    }
+        return 0;
+    }
 
-//    public int execturoId(){
+    public int executorId(){
 //        return this.mpiGroup.getRank();
-//    }
+        return 0;
+    }
 
-//    public int threadId(){
-//        return 0;
-//    }
+    public int threadId(){
+        return 0;
+    }
 
     public IPropertyParser props() {
         return this.properties;

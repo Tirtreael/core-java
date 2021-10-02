@@ -55,7 +55,7 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
     }
 
     @Override
-    public void packException(Exception ex) throws IExecutorException {
+    public void packException(Exception ex) {
 
     }
 }

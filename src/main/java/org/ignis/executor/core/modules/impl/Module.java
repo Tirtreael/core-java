@@ -1,5 +1,6 @@
 package org.ignis.executor.core.modules.impl;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IModule;
@@ -13,7 +14,7 @@ import java.util.Collection;
 public abstract class Module implements IModule {
 
     IExecutorData executorData;
-    Logger logger;
+    private Logger logger;
 
 
     public Module(IExecutorData executorData, Logger logger) {
@@ -26,12 +27,12 @@ public abstract class Module implements IModule {
     }
 
 
-    public void packException(Exception ex) throws IExecutorException {
+    public void packException(Exception ex) {
         String message = ex.getMessage();
         StackTraceElement[] stack = ex.getStackTrace();
         String cause = ex.getClass().getName() + ":" + message + "\n Caused by: \n" + Arrays.toString(stack);
         this.logger.error(cause);
-        throw new IExecutorException(message, cause);
+//        throw new IExecutorException(message, cause);
     }
 
     public void useSource(String src) throws IExecutorException {

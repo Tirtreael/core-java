@@ -3,6 +3,8 @@ package org.ignis.executor.core.storage;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransport;
+import org.ignis.executor.api.IReadIterator;
+import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
 
@@ -10,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
-import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -81,15 +82,15 @@ public class IMemoryPartition implements IPartition {
         return this.elements;
     }
 
-//    @Override
-//    public void readIterator(IPartition partition) {
-//
-//    }
-//
-//    @Override
-//    public void writeIterator(IPartition partition) {
-//
-//    }
+    @Override
+    public IMemoryReadIterator readIterator() {
+        return new IMemoryReadIterator(this.getElements());
+    }
+
+    @Override
+    public IMemoryWriteIterator writeIterator() {
+        return new IMemoryWriteIterator(this.getElements());
+    }
 
     @Override
     public void copyFrom(IPartition source) {
@@ -146,4 +147,42 @@ public class IMemoryPartition implements IPartition {
     }
 
 
+}
+
+
+class IMemoryReadIterator implements IReadIterator {
+
+    List<Object> elements;
+    int pos = 0;
+
+    IMemoryReadIterator(List<Object> elements) {
+        this.elements = elements;
+    }
+
+    @Override
+    public Object next() {
+        int pos0 = this.pos;
+        this.pos++;
+        return this.elements.get(pos0);
+    }
+
+    @Override
+    public boolean hasNext() {
+        return this.pos < this.elements.size();
+    }
+}
+
+
+class IMemoryWriteIterator implements IWriteIterator {
+
+    List<Object> elements;
+
+    IMemoryWriteIterator(List<Object> elements) {
+        this.elements = elements;
+    }
+
+    @Override
+    public void write(Object obj) {
+        this.elements.add(obj);
+    }
 }

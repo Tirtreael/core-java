@@ -1,4 +1,9 @@
 package org.ignis.executor.api;
 
-//public class IReadIterator implements Itera{
-//}
+public interface IReadIterator {
+
+    Object next();
+
+    boolean hasNext();
+
+}
