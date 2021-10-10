@@ -5,11 +5,13 @@ import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.io.IEnumTypes;
 import org.ignis.executor.core.modules.IIOModule;
 import org.ignis.executor.core.modules.impl.IOModule;
 import org.ignis.rpc.executor.IExecutorServerModule;
 
 import java.util.Map;
+import java.util.Queue;
 
 public final class Main {
 
@@ -19,6 +21,8 @@ public final class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
+        IEnumTypes.addType((byte) 0xfa, Queue.class);
 
         if (args.length < 2) {
             LOGGER.error("Executor need a server port and compression as argument");

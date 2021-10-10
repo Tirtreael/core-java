@@ -13,22 +13,22 @@ import java.util.Set;
 public interface IWriter {
 
     Map<Byte, WriterType> writers = Map.ofEntries(
-            Map.entry(IType.I_VOID.id(), new WriterType((protocol, obj) -> {
+            Map.entry(IEnumTypes.I_VOID.id, new WriterType((protocol, obj) -> {
             })),
-            Map.entry(IType.I_BOOL.id(), new WriterType((protocol, obj) -> protocol.writeBool((boolean) obj))),
-            Map.entry(IType.I_I08.id(), new WriterType((protocol, obj) -> protocol.writeByte((byte) obj))),
-            Map.entry(IType.I_I16.id(), new WriterType((protocol, obj) -> protocol.writeI16((short) obj))),
-            Map.entry(IType.I_I32.id(), new WriterType((protocol, obj) -> protocol.writeI32((int) obj))),
-            Map.entry(IType.I_I64.id(), new WriterType((protocol, obj) -> protocol.writeI64((long) obj))),
-            Map.entry(IType.I_DOUBLE.id(), new WriterType((protocol, obj) -> protocol.writeDouble((double) obj))),
-            Map.entry(IType.I_STRING.id(), new WriterType((protocol, obj) -> protocol.writeString((String) obj))),
-            Map.entry(IType.I_LIST.id(), new WriterType((protocol, obj) -> writeList(protocol, (List<?>) obj))),
-            Map.entry(IType.I_SET.id(), new WriterType((protocol, obj) -> writeSet(protocol, (Set<?>) obj))),
-            Map.entry(IType.I_MAP.id(), new WriterType((protocol, obj) -> writeMap(protocol, (Map<?, ?>) obj))),
-            Map.entry(IType.I_PAIR.id(), new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
-            Map.entry(IType.I_BINARY.id(), new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
-            Map.entry(IType.I_PAIR_LIST.id(), new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<?, ?>>) obj))),
-            Map.entry(IType.I_JSON.id(), new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
+            Map.entry(IEnumTypes.I_BOOL.id, new WriterType((protocol, obj) -> protocol.writeBool((boolean) obj))),
+            Map.entry(IEnumTypes.I_I08.id, new WriterType((protocol, obj) -> protocol.writeByte((byte) obj))),
+            Map.entry(IEnumTypes.I_I16.id, new WriterType((protocol, obj) -> protocol.writeI16((short) obj))),
+            Map.entry(IEnumTypes.I_I32.id, new WriterType((protocol, obj) -> protocol.writeI32((int) obj))),
+            Map.entry(IEnumTypes.I_I64.id, new WriterType((protocol, obj) -> protocol.writeI64((long) obj))),
+            Map.entry(IEnumTypes.I_DOUBLE.id, new WriterType((protocol, obj) -> protocol.writeDouble((double) obj))),
+            Map.entry(IEnumTypes.I_STRING.id, new WriterType((protocol, obj) -> protocol.writeString((String) obj))),
+            Map.entry(IEnumTypes.I_LIST.id, new WriterType((protocol, obj) -> writeList(protocol, (List<?>) obj))),
+            Map.entry(IEnumTypes.I_SET.id, new WriterType((protocol, obj) -> writeSet(protocol, (Set<?>) obj))),
+            Map.entry(IEnumTypes.I_MAP.id, new WriterType((protocol, obj) -> writeMap(protocol, (Map<?, ?>) obj))),
+            Map.entry(IEnumTypes.I_PAIR.id, new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
+            Map.entry(IEnumTypes.I_BINARY.id, new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
+            Map.entry(IEnumTypes.I_PAIR_LIST.id, new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<?, ?>>) obj))),
+            Map.entry(IEnumTypes.I_JSON.id, new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
     );
 
     static WriterType getWriterType(byte id) {
@@ -36,9 +36,9 @@ public interface IWriter {
     }
 
     static void write(TProtocol protocol, Object obj) throws TException {
-        writeType(protocol, IType.getId(obj));
+        writeType(protocol, IEnumTypes.getId(obj));
 
-        WriterType writerType = getWriterType(IType.getId(obj));
+        WriterType writerType = getWriterType(IEnumTypes.getId(obj));
         writerType.getWrite().apply(protocol, obj);
     }
 
@@ -51,17 +51,17 @@ public interface IWriter {
     }
 
     static void writeI32(TProtocol protocol, Integer obj) throws TException {
-        writeType(protocol, IType.getId(obj));
+        writeType(protocol, IEnumTypes.getId(obj));
     }
 
     static <T> void writeList(TProtocol protocol, List<T> list) throws TException {
         long size = list.size();
-        IType elemType = IType.I_VOID;
-        WriterType wt = getWriterType(IType.I_VOID.id);
+        IType elemType = IEnumTypes.I_VOID;
+        WriterType wt = getWriterType(IEnumTypes.I_VOID.id);
 
         writeSize(protocol, size);
         if (size > 0) {
-            elemType = IType.getIType(list.get(0));
+            elemType = IEnumTypes.getType(list.get(0));
             wt = getWriterType(elemType.id);
         }
         writeType(protocol, elemType.id);
@@ -71,9 +71,9 @@ public interface IWriter {
 
     static <T> void writeSet(TProtocol protocol, Set<T> set) throws TException {
         long size = set.size();
-        IType elemType = IType.I_VOID;
+        IType elemType = IEnumTypes.I_VOID;
         if (size > 0) {
-            elemType = IType.getIType(set.toArray()[0]);
+            elemType = IEnumTypes.getType(set.toArray()[0]);
         }
         WriterType wt = getWriterType(elemType.id);
         writeSize(protocol, size);
@@ -84,12 +84,12 @@ public interface IWriter {
 
     static <K, V> void writeMap(TProtocol protocol, Map<K, V> map) throws TException {
         long size = map.size();
-        IType elemTypeKey = IType.I_VOID;
-        IType elemTypeValue = IType.I_VOID;
+        IType elemTypeKey = IEnumTypes.I_VOID;
+        IType elemTypeValue = IEnumTypes.I_VOID;
         if (size > 0) {
             Map.Entry<K, V> entry = map.entrySet().iterator().next();
-            elemTypeKey = IType.getIType(entry.getKey());
-            elemTypeValue = IType.getIType(entry.getValue());
+            elemTypeKey = IEnumTypes.getType(entry.getKey());
+            elemTypeValue = IEnumTypes.getType(entry.getValue());
         }
         WriterType wtKey = getWriterType(elemTypeKey.id);
         WriterType wtValue = getWriterType(elemTypeValue.id);
@@ -103,8 +103,8 @@ public interface IWriter {
     }
 
     static <K, V> void writePair(TProtocol protocol, Map.Entry<K, V> pair) throws TException {
-        IType elemTypeKey = IType.getIType(pair.getKey());
-        IType elemTypeValue = IType.getIType(pair.getValue());
+        IType elemTypeKey = IEnumTypes.getType(pair.getKey());
+        IType elemTypeValue = IEnumTypes.getType(pair.getValue());
         WriterType writerTypeKey = getWriterType(elemTypeKey.id);
         WriterType writerTypeValue = getWriterType(elemTypeValue.id);
 
@@ -120,15 +120,15 @@ public interface IWriter {
 
     static void writePairList(TProtocol protocol, List<Map.Entry<?, ?>> pairList) throws TException {
         long size = pairList.size();
-        IType elemTypeKey = IType.I_VOID;
-        IType elemTypeValue = IType.I_VOID;
-        WriterType wtKey = getWriterType(IType.I_VOID.id);
-        WriterType wtValue = getWriterType(IType.I_VOID.id);
+        IType elemTypeKey = IEnumTypes.I_VOID;
+        IType elemTypeValue = IEnumTypes.I_VOID;
+        WriterType wtKey = getWriterType(IEnumTypes.I_VOID.id);
+        WriterType wtValue = getWriterType(IEnumTypes.I_VOID.id);
 
         writeSize(protocol, size);
         if (size > 0) {
-            elemTypeKey = IType.getIType(pairList.get(0).getKey());
-            elemTypeValue = IType.getIType(pairList.get(0).getValue());
+            elemTypeKey = IEnumTypes.getType(pairList.get(0).getKey());
+            elemTypeValue = IEnumTypes.getType(pairList.get(0).getValue());
             wtKey = getWriterType(elemTypeKey.id);
             wtValue = getWriterType(elemTypeValue.id);
         }
