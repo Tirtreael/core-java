@@ -17,9 +17,9 @@ public class WriterType {
         return write;
     }
 
-    
+
     public interface Function<T1, T2> {
-        void apply(T1 protocol, T2 object) throws TException;
+        void write(T1 protocol, T2 object) throws TException;
     }
 
 

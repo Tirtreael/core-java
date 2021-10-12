@@ -7,9 +7,9 @@ import org.ignis.executor.core.storage.IPartitionGroup;
 
 public class IPartitionTools {
 
-    private IPropertyParser properties;
-    private IContext context;
-    private int partition_id_gen;
+    private final IPropertyParser properties;
+    private final IContext context;
+    private final int partition_id_gen;
 
 
     public IPartitionTools(IPropertyParser properties, IContext context) {
@@ -50,7 +50,7 @@ public class IPartitionTools {
     }
 
     public IPartition newPartition(IPartition partition) {
-        return newPartition(partition.getTYPE(), partition.size());
+        return newPartition(partition.getType(), partition.size());
     }
 
     public IPartitionGroup newPartitionGroup() {
@@ -82,15 +82,13 @@ public class IPartitionTools {
         return new IMemoryPartition(elems);
     }
 
-    public boolean isMemory(IPartitionGroup partitionGroup){
+    public boolean isMemory(IPartitionGroup partitionGroup) {
         return partitionGroup.size() > 0 && partitionGroup.get(0) instanceof IMemoryPartition;
     }
 
-    public boolean isMemory(IPartition partition){
-        return IMemoryPartition.TYPE.equals(partition.getTYPE());
+    public boolean isMemory(IPartition partition) {
+        return IMemoryPartition.TYPE.equals(partition.getType());
     }
-
-
 
 
 }

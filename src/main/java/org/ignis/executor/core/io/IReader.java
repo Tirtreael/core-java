@@ -33,7 +33,7 @@ public interface IReader {
 
     static Object read(TProtocol protocol) throws TException {
         ReaderType readerType = getReaderType(readType(protocol));
-        return readerType.getRead().apply(protocol);
+        return readerType.getRead().read(protocol);
     }
 
     static ReaderType getReaderType(byte type) {
@@ -50,7 +50,7 @@ public interface IReader {
         ReaderType readerType = getReaderType(elemType);
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            list.add(readerType.getRead().apply(protocol));
+            list.add(readerType.getRead().read(protocol));
         }
         return list;
     }
@@ -61,7 +61,7 @@ public interface IReader {
         ReaderType readerType = getReaderType(elemType);
         Set<Object> set = new HashSet<>();
         for (int i = 0; i < size; i++) {
-            set.add(readerType.getRead().apply(protocol));
+            set.add(readerType.getRead().read(protocol));
         }
         return set;
     }
@@ -74,7 +74,7 @@ public interface IReader {
         ReaderType readerTypeValue = getReaderType(valueType);
         Map<Object, Object> obj = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            obj.put(readerTypeKey.getRead().apply(protocol), readerTypeValue.getRead().apply(protocol));
+            obj.put(readerTypeKey.getRead().read(protocol), readerTypeValue.getRead().read(protocol));
         }
         return obj;
     }
@@ -85,7 +85,7 @@ public interface IReader {
         ReaderType readerTypeKey = getReaderType(keyType);
         ReaderType readerTypeValue = getReaderType(valueType);
         return new AbstractMap.SimpleEntry<>(
-                readerTypeKey.getRead().apply(protocol), readerTypeValue.getRead().apply(protocol)
+                readerTypeKey.getRead().read(protocol), readerTypeValue.getRead().read(protocol)
         );
     }
 
@@ -102,7 +102,7 @@ public interface IReader {
         List<Map.Entry<Object, Object>> obj = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             obj.add(new AbstractMap.SimpleEntry<>(
-                    readerTypeKey.getRead().apply(protocol), readerTypeValue.getRead().apply(protocol)
+                    readerTypeKey.getRead().read(protocol), readerTypeValue.getRead().read(protocol)
             ));
         }
         return obj;
@@ -110,8 +110,8 @@ public interface IReader {
 
     static JSONObject readJson(TProtocol protocol) throws TException {
         Object obj = read(protocol);
-        if(obj instanceof Map)
-            return new JSONObject((Map<?,?>) obj);
+        if (obj instanceof Map)
+            return new JSONObject((Map<?, ?>) obj);
         else return null;
 //        if(obj instanceof List) {
 //            JSONArray jsonArray = new JSONArray((List<?>) obj);

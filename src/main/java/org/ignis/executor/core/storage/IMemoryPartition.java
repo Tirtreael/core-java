@@ -42,7 +42,7 @@ public class IMemoryPartition implements IPartition {
     }
 
     @Override
-    public String getTYPE() {
+    public String getType() {
         return IMemoryPartition.TYPE;
     }
 
@@ -147,42 +147,40 @@ public class IMemoryPartition implements IPartition {
     }
 
 
-}
+    private static class IMemoryReadIterator implements IReadIterator {
 
+        List<Object> elements;
+        int pos = 0;
 
-class IMemoryReadIterator implements IReadIterator {
+        IMemoryReadIterator(List<Object> elements) {
+            this.elements = elements;
+        }
 
-    List<Object> elements;
-    int pos = 0;
+        @Override
+        public Object next() {
+            int pos0 = this.pos;
+            this.pos++;
+            return this.elements.get(pos0);
+        }
 
-    IMemoryReadIterator(List<Object> elements) {
-        this.elements = elements;
+        @Override
+        public boolean hasNext() {
+            return this.pos < this.elements.size();
+        }
     }
 
-    @Override
-    public Object next() {
-        int pos0 = this.pos;
-        this.pos++;
-        return this.elements.get(pos0);
-    }
 
-    @Override
-    public boolean hasNext() {
-        return this.pos < this.elements.size();
-    }
-}
+    private static class IMemoryWriteIterator implements IWriteIterator {
 
+        List<Object> elements;
 
-class IMemoryWriteIterator implements IWriteIterator {
+        IMemoryWriteIterator(List<Object> elements) {
+            this.elements = elements;
+        }
 
-    List<Object> elements;
-
-    IMemoryWriteIterator(List<Object> elements) {
-        this.elements = elements;
-    }
-
-    @Override
-    public void write(Object obj) {
-        this.elements.add(obj);
+        @Override
+        public void write(Object obj) {
+            this.elements.add(obj);
+        }
     }
 }

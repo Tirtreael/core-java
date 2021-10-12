@@ -35,11 +35,15 @@ public interface IWriter {
         return writers.get(id);
     }
 
+    static WriterType getWriterType(Object obj) {
+        return writers.get(IEnumTypes.getId(obj));
+    }
+
     static void write(TProtocol protocol, Object obj) throws TException {
         writeType(protocol, IEnumTypes.getId(obj));
 
         WriterType writerType = getWriterType(IEnumTypes.getId(obj));
-        writerType.getWrite().apply(protocol, obj);
+        writerType.getWrite().write(protocol, obj);
     }
 
     static void writeSize(TProtocol protocol, long i64) throws TException {
@@ -66,7 +70,7 @@ public interface IWriter {
         }
         writeType(protocol, elemType.id);
         for (T obj : list)
-            wt.getWrite().apply(protocol, obj);
+            wt.getWrite().write(protocol, obj);
     }
 
     static <T> void writeSet(TProtocol protocol, Set<T> set) throws TException {
@@ -79,7 +83,7 @@ public interface IWriter {
         writeSize(protocol, size);
         writeType(protocol, elemType.id);
         for (T obj : set)
-            wt.getWrite().apply(protocol, obj);
+            wt.getWrite().write(protocol, obj);
     }
 
     static <K, V> void writeMap(TProtocol protocol, Map<K, V> map) throws TException {
@@ -97,8 +101,8 @@ public interface IWriter {
         writeType(protocol, elemTypeKey.id);
         writeType(protocol, elemTypeValue.id);
         for (Map.Entry<K, V> e : map.entrySet()) {
-            wtKey.getWrite().apply(protocol, e.getKey());
-            wtValue.getWrite().apply(protocol, e.getValue());
+            wtKey.getWrite().write(protocol, e.getKey());
+            wtValue.getWrite().write(protocol, e.getValue());
         }
     }
 
@@ -110,8 +114,8 @@ public interface IWriter {
 
         writeType(protocol, elemTypeKey.id);
         writeType(protocol, elemTypeValue.id);
-        writerTypeKey.getWrite().apply(protocol, pair.getKey());
-        writerTypeValue.getWrite().apply(protocol, pair.getValue());
+        writerTypeKey.getWrite().write(protocol, pair.getKey());
+        writerTypeValue.getWrite().write(protocol, pair.getValue());
     }
 
     static void writeBinary(TProtocol protocol, byte[] binary) throws TException {
@@ -135,8 +139,8 @@ public interface IWriter {
         writeType(protocol, elemTypeKey.id);
         writeType(protocol, elemTypeValue.id);
         for (Map.Entry<?, ?> pair : pairList) {
-            wtKey.getWrite().apply(protocol, pair.getKey());
-            wtValue.getWrite().apply(protocol, pair.getValue());
+            wtKey.getWrite().write(protocol, pair.getKey());
+            wtValue.getWrite().write(protocol, pair.getValue());
         }
     }
 

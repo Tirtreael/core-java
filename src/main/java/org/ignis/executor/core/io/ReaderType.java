@@ -15,9 +15,9 @@ public class ReaderType {
     public Function<Object> getRead() {
         return read;
     }
-    
+
     public interface Function<R> {
-        R apply(TProtocol protocol) throws TException;
+        R read(TProtocol protocol) throws TException;
     }
 
 
