@@ -1,5 +1,6 @@
 package org.ignis.executor.core.io;
 
+import org.ignis.executor.core.IIEnumTypes;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -7,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class IEnumTypes {
+public class IEnumTypes implements IIEnumTypes<IType> {
 
     public static final IType I_VOID = new IType(0x0, Void.class);
     public static final IType I_BOOL = new IType(0x1, Boolean.class);
@@ -53,26 +54,6 @@ public class IEnumTypes {
         types.put(iType.id, iType);
     }
 
-    public static void delType(IType iType) {
-        types.remove(iType.id);
-    }
-
-    public static void delType(byte id) {
-        types.remove(id);
-    }
-
-    public static void getType(byte id) {
-        types.get(id);
-    }
-
-    public static void setType(byte id, Class<?> clazz) {
-        addType(id, clazz);
-    }
-
-    public static void setType(IType iType) {
-        addType(iType);
-    }
-
     public static IType getType(Object obj) {
         if (obj instanceof List) {
             if (((List<?>) obj).size() > 0 && ((List<?>) obj).get(0) instanceof Map.Entry) {
@@ -89,7 +70,6 @@ public class IEnumTypes {
         return I_VOID;
     }
 
-
     public static byte getId(Object obj) {
         return getType(obj).id;
     }
@@ -101,6 +81,36 @@ public class IEnumTypes {
             }
         }
         return 0x0; // Return void id
+    }
+
+    @Override
+    public void addType(byte id, IType iType) {
+        types.put(id, iType);
+    }
+
+    public void delType(IType iType) {
+        types.remove(iType.id);
+    }
+
+    public void delType(byte id) {
+        types.remove(id);
+    }
+
+    public IType getType(byte id) {
+        return types.get(id);
+    }
+
+    public void setType(byte id, Class<?> clazz) {
+        addType(id, clazz);
+    }
+
+    public void setType(IType iType) {
+        addType(iType);
+    }
+
+    @Override
+    public byte getIdClazz(IType iType) {
+        return iType.id;
     }
 
 }
