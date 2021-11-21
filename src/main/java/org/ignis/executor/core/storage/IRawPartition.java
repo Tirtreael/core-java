@@ -6,6 +6,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.core.io.IEnumTypes;
+import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
 
 import java.io.NotSerializableException;
@@ -28,6 +29,7 @@ public abstract class IRawPartition implements IPartition {
         this.transport = transport;
         this.compression = compression;
         this.nativ = nativ;
+        this.clear();
     }
 
 
@@ -105,10 +107,7 @@ public abstract class IRawPartition implements IPartition {
 
     public abstract void fit();
 
-    @Override
-    public String type() {
-        return null;
-    }
+    public abstract String type();
 
     public void sync() throws TTransportException {
         if (this.getElements().size() > 0)
@@ -119,7 +118,13 @@ public abstract class IRawPartition implements IPartition {
     public abstract TTransport readTransport();
 
 
-    public Object readHeader() {
+    public Object readHeader(TTransport transport) throws TException, NotSerializableException {
+        IObjectProtocol protocol = new IObjectProtocol(transport);
+        boolean nativ = protocol.readSerialization();
+        boolean compatible = this.nativ == nativ;
+//        IHeader = IEnumHeaders
+
+
         return null;
     }
 

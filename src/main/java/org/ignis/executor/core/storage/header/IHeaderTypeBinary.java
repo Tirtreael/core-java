@@ -1,4 +1,4 @@
-package org.ignis.executor.core.storage.headerType;
+package org.ignis.executor.core.storage.header;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
@@ -7,7 +7,11 @@ import org.ignis.executor.core.io.IWriter;
 import org.ignis.executor.core.io.ReaderType;
 import org.ignis.executor.core.io.WriterType;
 
-public class IHeaderTypeNative implements IHeaderType {
+public class IHeaderTypeBinary extends IHeader {
+
+    protected IHeaderTypeBinary(byte id, Class<?> type) {
+        super(id, type);
+    }
 
     @Override
     public ContainedLongType read(TProtocol protocol, byte headerType) throws TException {
@@ -28,6 +32,5 @@ public class IHeaderTypeNative implements IHeaderType {
     public WriterType[] getElemWrite(Object obj) {
         return new WriterType[]{IWriter.getWriterType(obj)};
     }
-
 
 }

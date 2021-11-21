@@ -1,10 +1,14 @@
-package org.ignis.executor.core.storage.headerType;
+package org.ignis.executor.core.storage.header;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 import org.ignis.executor.core.io.*;
 
-public class IHeaderTypePairList implements IHeaderType {
+public class IHeaderTypePairList extends IHeader {
+
+    protected IHeaderTypePairList(byte id, Class<?> type) {
+        super(id, type);
+    }
 
     @Override
     public ContainedLongType read(TProtocol protocol, byte headerType) throws TException {
