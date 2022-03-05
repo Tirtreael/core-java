@@ -36,13 +36,13 @@ public interface IWriter {
     }
 
     static WriterType getWriterType(Object obj) {
-        return writers.get(IEnumTypes.getId(obj));
+        return writers.get(IEnumTypes.getInstance().getId(obj));
     }
 
     static void write(TProtocol protocol, Object obj) throws TException {
-        writeType(protocol, IEnumTypes.getId(obj));
+        writeType(protocol, IEnumTypes.getInstance().getId(obj));
 
-        WriterType writerType = getWriterType(IEnumTypes.getId(obj));
+        WriterType writerType = getWriterType(IEnumTypes.getInstance().getId(obj));
         writerType.getWrite().write(protocol, obj);
     }
 
@@ -55,7 +55,7 @@ public interface IWriter {
     }
 
     static void writeI32(TProtocol protocol, Integer obj) throws TException {
-        writeType(protocol, IEnumTypes.getId(obj));
+        writeType(protocol, IEnumTypes.getInstance().getId(obj));
     }
 
     static <T> void writeList(TProtocol protocol, List<T> list) throws TException {
@@ -65,7 +65,7 @@ public interface IWriter {
 
         writeSize(protocol, size);
         if (size > 0) {
-            elemType = IEnumTypes.getType(list.get(0));
+            elemType = IEnumTypes.getInstance().getType(list.get(0));
             wt = getWriterType(elemType.id);
         }
         writeType(protocol, elemType.id);
@@ -77,7 +77,7 @@ public interface IWriter {
         long size = set.size();
         IType elemType = IEnumTypes.I_VOID;
         if (size > 0) {
-            elemType = IEnumTypes.getType(set.toArray()[0]);
+            elemType = IEnumTypes.getInstance().getType(set.toArray()[0]);
         }
         WriterType wt = getWriterType(elemType.id);
         writeSize(protocol, size);
@@ -92,8 +92,8 @@ public interface IWriter {
         IType elemTypeValue = IEnumTypes.I_VOID;
         if (size > 0) {
             Map.Entry<K, V> entry = map.entrySet().iterator().next();
-            elemTypeKey = IEnumTypes.getType(entry.getKey());
-            elemTypeValue = IEnumTypes.getType(entry.getValue());
+            elemTypeKey = IEnumTypes.getInstance().getType(entry.getKey());
+            elemTypeValue = IEnumTypes.getInstance().getType(entry.getValue());
         }
         WriterType wtKey = getWriterType(elemTypeKey.id);
         WriterType wtValue = getWriterType(elemTypeValue.id);
@@ -107,8 +107,8 @@ public interface IWriter {
     }
 
     static <K, V> void writePair(TProtocol protocol, Map.Entry<K, V> pair) throws TException {
-        IType elemTypeKey = IEnumTypes.getType(pair.getKey());
-        IType elemTypeValue = IEnumTypes.getType(pair.getValue());
+        IType elemTypeKey = IEnumTypes.getInstance().getType(pair.getKey());
+        IType elemTypeValue = IEnumTypes.getInstance().getType(pair.getValue());
         WriterType writerTypeKey = getWriterType(elemTypeKey.id);
         WriterType writerTypeValue = getWriterType(elemTypeValue.id);
 
@@ -131,8 +131,8 @@ public interface IWriter {
 
         writeSize(protocol, size);
         if (size > 0) {
-            elemTypeKey = IEnumTypes.getType(pairList.get(0).getKey());
-            elemTypeValue = IEnumTypes.getType(pairList.get(0).getValue());
+            elemTypeKey = IEnumTypes.getInstance().getType(pairList.get(0).getKey());
+            elemTypeValue = IEnumTypes.getInstance().getType(pairList.get(0).getValue());
             wtKey = getWriterType(elemTypeKey.id);
             wtValue = getWriterType(elemTypeValue.id);
         }

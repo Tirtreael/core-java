@@ -4,6 +4,8 @@ public interface IIEnumTypes<T> {
 
     void addType(byte id, T iType);
 
+    void addType(T iType);
+
     void delType(T iType);
 
     void delType(byte id);
@@ -12,9 +14,9 @@ public interface IIEnumTypes<T> {
 
     void setType(T iType);
 
-//    T getType(Object obj);
+    T getType(Object obj);
 
-//    byte getId(Object obj);
+    byte getId(Object obj);
 
     byte getIdClazz(T iType);
 

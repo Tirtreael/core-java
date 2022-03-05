@@ -10,11 +10,21 @@ public class IEnumHeaders implements IIEnumTypes<IHeader> {
 
     public static final Map<Byte, IHeader> headers = new HashMap<>();
 
+    public static final IHeader headerVoid = new IHeaderTypeBinary(IEnumTypes.I_VOID.id, IEnumTypes.I_VOID.type);
     public static final IHeader headerBinary = new IHeaderTypeBinary(IEnumTypes.I_BINARY.id, IEnumTypes.I_BINARY.type);
     public static final IHeader headerList = new IHeaderTypeList(IEnumTypes.I_LIST.id, IEnumTypes.I_LIST.type);
     public static final IHeader headerPairList = new IHeaderTypePairList(IEnumTypes.I_PAIR_LIST.id, IEnumTypes.I_PAIR_LIST.type);
 
-    static {
+    private static IEnumHeaders instance = null;
+
+    public static IEnumHeaders getInstance(){
+        if (instance == null)
+            instance = new IEnumHeaders();
+        return instance;
+    }
+
+    private IEnumHeaders() {
+        headers.put(IEnumTypes.I_VOID.id, headerVoid);
         headers.put(IEnumTypes.I_BINARY.id, headerBinary);
         headers.put(IEnumTypes.I_LIST.id, headerList);
         headers.put(IEnumTypes.I_PAIR_LIST.id, headerPairList);
@@ -32,6 +42,11 @@ public class IEnumHeaders implements IIEnumTypes<IHeader> {
 
     public void addType(byte id, IHeader iType) {
         headers.put(id, iType);
+    }
+
+    @Override
+    public void addType(IHeader iType) {
+
     }
 
     @Override
@@ -55,6 +70,26 @@ public class IEnumHeaders implements IIEnumTypes<IHeader> {
     }
 
     @Override
+    public IHeader getType(Object obj) {
+        for (IHeader t1 : headers.values()) {
+            if (t1.type == obj.getClass() || t1.type.isAssignableFrom(obj.getClass())) {
+                return t1;
+            }
+        }
+        throw new IllegalArgumentException("IHeader not implemented for obj " + obj);
+    }
+
+    @Override
+    public byte getId(Object obj) {
+        for (IHeader t1 : headers.values()) {
+            if (t1.type == obj.getClass() || t1.type.isAssignableFrom(obj.getClass())) {
+                return t1.id;
+            }
+        }
+        return 0x0; // Return void id
+    }
+
+    @Override
     public byte getIdClazz(IHeader iHeader) {
         return iHeader.id;
     }
@@ -65,6 +100,6 @@ public class IEnumHeaders implements IIEnumTypes<IHeader> {
                 return t1.id;
             }
         }
-        return 0x0; // Return void id
+        return headerVoid.id; // Return void id
     }
 }

@@ -28,7 +28,15 @@ public class IEnumTypes implements IIEnumTypes<IType> {
 
     public static final Map<Byte, IType> types = new HashMap<>();
 
-    static {
+    private static IEnumTypes instance = null;
+
+    public static IEnumTypes getInstance(){
+        if (instance == null)
+            instance = new IEnumTypes();
+        return instance;
+    }
+
+    private IEnumTypes() {
         addType(I_VOID);
         addType(I_BOOL);
         addType(I_I08);
@@ -46,15 +54,15 @@ public class IEnumTypes implements IIEnumTypes<IType> {
         addType(I_JSON);
     }
 
-    public static void addType(byte id, Class<?> clazz) {
+    public void addType(byte id, Class<?> clazz) {
         types.put(id, new IType(id, clazz));
     }
 
-    public static void addType(IType iType) {
+    public void addType(IType iType) {
         types.put(iType.id, iType);
     }
 
-    public static IType getType(Object obj) {
+    public IType getType(Object obj) {
         if (obj instanceof List) {
             if (((List<?>) obj).size() > 0 && ((List<?>) obj).get(0) instanceof Map.Entry) {
                 return IEnumTypes.I_PAIR_LIST;
@@ -70,11 +78,11 @@ public class IEnumTypes implements IIEnumTypes<IType> {
         return I_VOID;
     }
 
-    public static byte getId(Object obj) {
+    public byte getId(Object obj) {
         return getType(obj).id;
     }
 
-    public static byte getIdClazz(Class<?> clazz) {
+    public byte getIdClazz(Class<?> clazz) {
         for (IType t1 : types.values()) {
             if (t1.type == clazz || t1.type.isAssignableFrom(clazz)) {
                 return t1.id;
