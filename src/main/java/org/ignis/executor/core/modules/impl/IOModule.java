@@ -7,7 +7,6 @@ import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IIOModule;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
-import org.ignis.rpc.IExecutorException;
 import org.ignis.rpc.ISource;
 
 import java.io.*;
@@ -52,7 +51,11 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void textFile(String path) throws TException {
-
+        try {
+            textFile(path, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -62,6 +65,27 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void partitionObjectFile(String path, long first, long partitions) throws TException {
+        logger.info("IO: reading partitions object file");
+        IPartitionGroup partitionGroup = this.executorData.getPartitionTools().newPartitionGroup((int) partitions);
+        this.executorData.setPartitions(partitionGroup);
+
+        for(IPartition partition : partitionGroup){
+            try {
+                String fileName =  this.partitionFileName(path, (int) (first + partitionGroup.indexOf(partition)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try (
+                    FileInputStream fileIS = new FileInputStream(path);
+                    BufferedReader br = new BufferedReader(
+                            new InputStreamReader(fileIS, StandardCharsets.UTF_8))
+            ){
+                ;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
 
     }
 

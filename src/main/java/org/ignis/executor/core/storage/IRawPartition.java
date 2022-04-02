@@ -18,12 +18,63 @@ public abstract class IRawPartition implements IPartition {
     private final int headerSize = 0;
     private final TTransport transport;
     private IZlibTransport zlib;
-    private final int compression;
+
+    public int getHeaderSize() {
+        return headerSize;
+    }
+
+    public TTransport getTransport() {
+        return transport;
+    }
+
+    public IZlibTransport getZlib() {
+        return zlib;
+    }
+
+    public void setZlib(IZlibTransport zlib) {
+        this.zlib = zlib;
+    }
+
+    public void setElements(int elements) {
+        this.elements = elements;
+    }
+
+    public void setType(byte type) {
+        this.type = type;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public int getCompression() {
+        return compression;
+    }
+
+    public boolean isNativ() {
+        return nativ;
+    }
+
+    public String getHeader() {
+        return header;
+    }
+
+    public void setCompression(int compression) {
+        this.compression = compression;
+    }
+
+    private int compression;
     private final boolean nativ;
     private int elements = 0;
     private byte type = 0x0;
     private String header;
 
+    IRawPartition(int compression, boolean nativ) {
+        this.compression = compression;
+        this.nativ = nativ;
+        this.clear();
+        this.transport = null;
+    }
 
     IRawPartition(TTransport transport, int compression, boolean nativ) {
         this.transport = transport;

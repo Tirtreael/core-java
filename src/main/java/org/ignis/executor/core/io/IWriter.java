@@ -27,7 +27,7 @@ public interface IWriter {
             Map.entry(IEnumTypes.I_MAP.id, new WriterType((protocol, obj) -> writeMap(protocol, (Map<?, ?>) obj))),
             Map.entry(IEnumTypes.I_PAIR.id, new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
             Map.entry(IEnumTypes.I_BINARY.id, new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
-            Map.entry(IEnumTypes.I_PAIR_LIST.id, new WriterType((protocol, obj) -> writePairList(protocol, (List<Map.Entry<?, ?>>) obj))),
+            Map.entry(IEnumTypes.I_PAIR_LIST.id, new WriterType((protocol, obj) -> writePairList(protocol, (List<?>) obj))),
             Map.entry(IEnumTypes.I_JSON.id, new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
     );
 
@@ -122,7 +122,7 @@ public interface IWriter {
         protocol.writeBinary(ByteBuffer.wrap(binary));
     }
 
-    static void writePairList(TProtocol protocol, List<Map.Entry<?, ?>> pairList) throws TException {
+    static void writePairList(TProtocol protocol, List<?> pairList) throws TException {
         long size = pairList.size();
         IType elemTypeKey = IEnumTypes.I_VOID;
         IType elemTypeValue = IEnumTypes.I_VOID;
@@ -131,16 +131,16 @@ public interface IWriter {
 
         writeSize(protocol, size);
         if (size > 0) {
-            elemTypeKey = IEnumTypes.getInstance().getType(pairList.get(0).getKey());
-            elemTypeValue = IEnumTypes.getInstance().getType(pairList.get(0).getValue());
+            elemTypeKey = IEnumTypes.getInstance().getType(((Map.Entry<?, ?>) pairList.get(0)).getKey());
+            elemTypeValue = IEnumTypes.getInstance().getType(((Map.Entry<?, ?>) pairList.get(0)).getValue());
             wtKey = getWriterType(elemTypeKey.id);
             wtValue = getWriterType(elemTypeValue.id);
         }
         writeType(protocol, elemTypeKey.id);
         writeType(protocol, elemTypeValue.id);
-        for (Map.Entry<?, ?> pair : pairList) {
-            wtKey.getWrite().write(protocol, pair.getKey());
-            wtValue.getWrite().write(protocol, pair.getValue());
+        for (Object pair : pairList) {
+            wtKey.getWrite().write(protocol, ((Map.Entry<?, ?>) pair).getKey());
+            wtValue.getWrite().write(protocol, ((Map.Entry<?, ?>) pair).getValue());
         }
     }
 
