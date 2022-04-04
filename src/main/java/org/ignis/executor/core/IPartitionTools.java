@@ -5,6 +5,10 @@ import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class IPartitionTools {
 
     private final IPropertyParser properties;
@@ -90,5 +94,11 @@ public class IPartitionTools {
         return IMemoryPartition.TYPE.equals(partition.getType());
     }
 
-
+    public void createDirectoryIfNotExists(String path) {
+        try {
+            Files.createDirectories(Paths.get(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

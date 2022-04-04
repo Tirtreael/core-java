@@ -103,7 +103,7 @@ public class IMemoryPartition implements IPartition {
     }
 
     @Override
-    public void moveFrom(IPartition source) {
+    public void moveFrom(IPartition source) throws TException {
         if (source instanceof IMemoryPartition && elements.size() == 0 &&
                 ((IMemoryPartition) source).elements.getClass() == this.elements.getClass()) {
             List<Object> elementsTmp = this.elements;

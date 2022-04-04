@@ -2,11 +2,13 @@ package org.ignis.executor.api;
 
 import org.ignis.executor.core.IPropertyParser;
 
+import java.util.Map;
+
 // @Todo
 public class IContext {
 
     private IPropertyParser properties = new IPropertyParser();
-//    private Object variables;
+    private Map<String, Object> variables;
 //    private MPIGroup = mpi.MPI.COMM_WORLD;
 
     public int cores() {
@@ -31,8 +33,8 @@ public class IContext {
         return this.properties;
     }
 
-    public Object vars() {
-        return 1;
+    public Map<String, Object> vars() {
+        return this.variables;
     }
 
 //    public MPIGroup mpiGroup(){

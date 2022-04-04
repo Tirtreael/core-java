@@ -5,7 +5,15 @@ import java.util.Collection;
 
 public class IPartitionGroup extends ArrayList<IPartition> {
 
-    private final boolean cache = false;
+    public boolean isCache() {
+        return cache;
+    }
+
+    public void setCache(boolean cache) {
+        this.cache = cache;
+    }
+
+    private boolean cache = false;
 
     public IPartitionGroup(int initialCapacity) {
         super(initialCapacity);

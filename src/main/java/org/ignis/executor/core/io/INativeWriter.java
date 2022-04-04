@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 
 public interface INativeWriter {
 
+    WriterType write = new WriterType(INativeWriter::write);
+
     static void write(TProtocol protocol, Object obj) {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream oos = null;

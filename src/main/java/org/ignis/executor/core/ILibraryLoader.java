@@ -30,7 +30,9 @@ public class ILibraryLoader {
     public void loadFunction() {
 
     }
-
+    /*
+    * Loads functions inside a jar
+    */
     public Map<String, IFunction> loadLibrary(String src) throws Exception {
         File file = new File(src);
         URLClassLoader child = new URLClassLoader(

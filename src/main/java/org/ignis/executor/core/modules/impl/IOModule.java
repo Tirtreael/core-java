@@ -29,7 +29,15 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void loadClass(ISource src) throws TException {
+//        this.useSource(src);
+    }
 
+    public void loadLibrary(String path){
+        try{
+            this.executorData.loadLibraryFunctions(path);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -181,6 +189,8 @@ public class IOModule extends Module implements IIOModule {
             logger.info("IO: created " + partitionGroup.size() + " partitions, " + elements
                     + " lines and " + (exChunkEnd - exChunkInit) + "Bytes read ");
 
+        } catch (TException e) {
+            e.printStackTrace();
         }
     }
 

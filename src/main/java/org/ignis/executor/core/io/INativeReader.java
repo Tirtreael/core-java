@@ -9,6 +9,8 @@ import java.io.ObjectInputStream;
 
 public interface INativeReader {
 
+    ReaderType read = new ReaderType(INativeReader::read);
+
     static Object read(TProtocol protocol) {
         int size = 4096;
         byte[] data = new byte[size];

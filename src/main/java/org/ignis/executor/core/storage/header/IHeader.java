@@ -9,7 +9,12 @@ public abstract class IHeader {
 
     public final byte id;
     public final Class<?> type;
-    private final WriterType write;
+    private WriterType write;
+
+    public IHeader(byte id, Class<?> type) {
+        this.id = id;
+        this.type = type;
+    }
 
     public WriterType getWrite() {
         return write;

@@ -56,7 +56,7 @@ public final class Main {
         // =========================
         /* Testing */
         try {
-            Map<String, IFunction> myFuns = executorData.loadLibrary("artifacts/FunctionExample.jar");
+            Map<String, IFunction> myFuns = executorData.loadLibraryFunctions("artifacts/FunctionExample.jar");
             for (IFunction fun : myFuns.values()) {
                 fun.before(null);
             }

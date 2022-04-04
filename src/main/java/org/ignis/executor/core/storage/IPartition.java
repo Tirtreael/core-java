@@ -25,9 +25,9 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
     List<Object> getElements();
 
-    IReadIterator readIterator();
+    IReadIterator readIterator() throws TException;
 
-    IWriteIterator writeIterator();
+    IWriteIterator writeIterator() throws TException;
 
     IPartition clone();
 
@@ -37,7 +37,7 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
         target.copyFrom(this);
     }
 
-    void moveFrom(IPartition source);
+    void moveFrom(IPartition source) throws TException;
 
     default void moveTo(IPartition source, IPartition target) {
         target.copyFrom(source);
@@ -72,7 +72,7 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
 
     byte[] toBytes() throws IOException;
 
-    void clear();
+    void clear() throws TException;
 
     void fit();
 

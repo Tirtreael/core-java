@@ -1,5 +1,6 @@
 package org.ignis.executor.core.storage;
 
+import org.apache.thrift.TException;
 import org.apache.thrift.transport.TFileTransport;
 import org.apache.thrift.transport.TTransport;
 
@@ -13,7 +14,7 @@ public class IDiskPartition extends IRawPartition {
     private String path;
     private boolean destroy;
 
-    IDiskPartition(String path, int compression, boolean nativ, boolean persist, boolean read, Class<?> clazz) throws IOException {
+    IDiskPartition(String path, int compression, boolean nativ, boolean persist, boolean read, Class<?> clazz) throws IOException, TException {
         super(new TFileTransport(path, read), compression, nativ);
         this.path = path;
         this.setCompression(compression);
@@ -21,6 +22,11 @@ public class IDiskPartition extends IRawPartition {
 
     }
 
+
+    @Override
+    public String getType() {
+        return null;
+    }
 
     @Override
     public IPartition clone() {
@@ -33,10 +39,30 @@ public class IDiskPartition extends IRawPartition {
         try {
             newPartition = new IDiskPartition(newPath, this.getCompression(), this.isNativ(), false, false, List.class);
             this.copyTo(newPartition);
-        } catch (IOException e) {
+        } catch (IOException | TException e) {
             e.printStackTrace();
         }
         return newPartition;
+    }
+
+    @Override
+    public long bytes() {
+        return 0;
+    }
+
+    @Override
+    public void copyTo(IPartition target) {
+        super.copyTo(target);
+    }
+
+    @Override
+    public void moveTo(IPartition source, IPartition target) {
+        super.moveTo(source, target);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty();
     }
 
     @Override

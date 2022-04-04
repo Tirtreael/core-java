@@ -6,10 +6,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
-import org.ignis.executor.core.io.IEnumTypes;
-import org.ignis.executor.core.io.IReader;
-import org.ignis.executor.core.io.ReaderType;
-import org.ignis.executor.core.io.WriterType;
+import org.ignis.executor.core.io.*;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.storage.header.IEnumHeaders;
 import org.ignis.executor.core.storage.header.IHeader;
@@ -21,13 +18,14 @@ import java.util.List;
 
 public abstract class IRawPartition implements IPartition {
 
+    public static final int HEADER = 30;
     private final int headerSize = 0;
     private final TTransport transport;
     private IZlibTransport zlib;
     private int compression;
     private final boolean nativ;
     private int elements = 0;
-    private byte type = 0x0;
+    private byte nestedType = 0x0;
     private IHeader header;
 
     public int getHeaderSize() {
@@ -50,8 +48,8 @@ public abstract class IRawPartition implements IPartition {
         this.elements = elements;
     }
 
-    public void setType(byte type) {
-        this.type = type;
+    public void setNestedType(byte nestedType) {
+        this.nestedType = nestedType;
     }
 
     public void setHeader(IHeader header) {
@@ -75,24 +73,18 @@ public abstract class IRawPartition implements IPartition {
     }
 
 
-    IRawPartition(int compression, boolean nativ) {
+    IRawPartition(int compression, boolean nativ) throws TException {
         this.compression = compression;
         this.nativ = nativ;
         this.clear();
         this.transport = null;
     }
 
-    IRawPartition(TTransport transport, int compression, boolean nativ) {
+    IRawPartition(TTransport transport, int compression, boolean nativ) throws TException {
         this.transport = transport;
         this.compression = compression;
         this.nativ = nativ;
         this.clear();
-    }
-
-
-    @Override
-    public String getType() {
-        return null;
     }
 
     @Override
@@ -103,33 +95,91 @@ public abstract class IRawPartition implements IPartition {
         this.sync();
 
         if(compatible){
-            int bb = 1;
-            int tambuf = 256;
-            byte[] buf = new byte[tambuf];
-            while(bb>0){
-                bb = zlib_in.read(buf,0,tambuf);
-                this.zlib.write(buf, 0, bb);
-            }
+            writeBuf(zlib_in, this.zlib);
         }
         else{
             IWriteIterator writeIterator = this.writeIterator();
+            IObjectProtocol protoBuffer = new IObjectProtocol(zlib_in);
+            int elementsTmp = currentElements;
+            currentElements = this.elements;
+            this.elements = elementsTmp;
+            while(this.elements < currentElements){
+                writeIterator.write((this.header.getElemRead(nestedType)[0]).getRead().read(protoBuffer));
+            }
+
         }
 
     }
 
     @Override
     public void write(TTransport transport, int compression, boolean nativ) throws TException {
+        this.sync();
+        TTransport transportSrc = this.readTransport();
+        if(this.nativ == nativ){
+            if(this.compression == compression){
+                writeBuf(transportSrc, transport);
+                transport.flush();
+            }
+            else{
+                IZlibTransport zlib_in = new IZlibTransport(transportSrc);
+                IZlibTransport zlib_out = new IZlibTransport(transport, compression);
+                writeBuf(zlib_in, zlib_out);
+                zlib_out.flush();
+            }
+        }
+        else{
+            IZlibTransport zlib_out = new IZlibTransport(transport, compression);
+            IObjectProtocol proto_out = new IObjectProtocol(zlib_out);
+            proto_out.writeSerialization(nativ);
+            if(this.elements > 0){
+                if(!nativ){
+                    IReadIterator readIterator = this.readIterator();
+                    Object first = readIterator.next();
+                    WriterType writer = IWriter.getWriterType(this.nestedType);
+                    //writer = IWriter.getWriterType(first);
+                    IHeader header2 = IEnumHeaders.getInstance().getHeaderTypeById(this.nestedType, false);
+                    WriterType writerType = header2.getElemWrite(first)[0];
+                    header2.write(proto_out, this.elements);
+                    writerType.getWrite().write(proto_out, readIterator.next());
+                    while(iterator().hasNext())
+                        writerType.getWrite().write(proto_out, readIterator.next());
+                }
+                else {
+                    IHeader header2 = IEnumHeaders.headerNative;
+                    WriterType writerType = IEnumHeaders.headerNative.getWrite();
+                    header2.write(proto_out, this.elements);
+                    IReadIterator readIterator = this.readIterator();
+                    while(readIterator.hasNext()){
+                        writerType.getWrite().write(proto_out, readIterator.next());
+                    }
+                }
+            }
+            else{
+                header = IEnumHeaders.getInstance().getHeaderTypeById(this.nestedType, this.nativ);
+                header.write(proto_out, 0, this.nestedType);
+            }
+            zlib_out.flush();
+        }
+    }
 
+    private void writeBuf(TTransport zlib_in, TTransport zlib_out) throws TTransportException {
+        int bb = 1;
+        int tambuf = 256;
+        byte[] buf = new byte[tambuf];
+        while(bb>0) {
+            bb = zlib_in.read(buf, 0, tambuf);
+            zlib_out.write(buf, 0, bb);
+        }
     }
 
     @Override
     public void write(TTransport transport, int compression) throws TException {
-
+        this.write(transport, compression, false);
     }
 
     @Override
     public void write(TTransport transport) throws TException {
-
+        this.write(transport, 0, false);
     }
 
     @Override
@@ -138,12 +188,21 @@ public abstract class IRawPartition implements IPartition {
     }
 
     @Override
-    public IReadIterator readIterator() {
-        return null;
+    public IReadIterator readIterator() throws TException {
+        this.sync();
+        IZlibTransport zlibIt = new IZlibTransport(this.readTransport());
+        IObjectProtocol proto = new IObjectProtocol(zlibIt);
+        try {
+            proto.readSerialization();
+        } catch (TException | NotSerializableException e) {
+            e.printStackTrace();
+        }
+        this.header.read(proto, nestedType);
+        return new IRawReadIterator(proto, this);
     }
 
     @Override
-    public IWriteIterator writeIterator() {
+    public IWriteIterator writeIterator() throws TException {
         if(this.headerSize == 0){
             this.writeHeader();
         }
@@ -154,11 +213,11 @@ public abstract class IRawPartition implements IPartition {
 
     @Override
     public void copyFrom(IPartition source) {
-
+        //if(source.type() == )
     }
 
     @Override
-    public void moveFrom(IPartition source) {
+    public void moveFrom(IPartition source) throws TException {
         this.copyFrom(source);
         source.clear();
     }
@@ -173,20 +232,20 @@ public abstract class IRawPartition implements IPartition {
         return null;
     }
 
-    public abstract byte[] toBytes();
+    public abstract long bytes();
 
     @Override
-    public void clear() {
+    public void clear() throws TException {
         this.elements = 0;
-        this.type = IEnumTypes.I_VOID.id;
-//        this.header = IEnumHeaders
+        this.nestedType = IEnumTypes.I_VOID.id;
+        this.header = IEnumHeaders.getInstance().getHeaderTypeById(this.nestedType, this.nativ);
     }
 
     public abstract void fit();
 
     public abstract String type();
 
-    public void sync() throws TTransportException {
+    public void sync() throws TException {
         if (this.getElements().size() > 0)
             this.zlib.flush();
 
@@ -209,18 +268,22 @@ public abstract class IRawPartition implements IPartition {
         byte readedTypeId = containedLongType.typeID[0];
 
         if(this.elements > 0)
-            if(this.type !=readedTypeId && compatible)
+            if(this.nestedType !=readedTypeId && compatible)
                 throw new IllegalArgumentException("Ignis serialization does not support heterogeneous basic types");
         else{
             this.header = header;
-            this.type = readedTypeId;
+            this.nestedType = readedTypeId;
         }
         this.elements += readedElements;
 
         return compatible;
     }
 
-    public abstract void writeHeader();
+    public abstract void writeHeader() throws TException;
+
+    public byte getNestedType() {
+        return nestedType;
+    }
 
     private static class IRawReadIterator implements IReadIterator{
         private final TProtocol protocol;
@@ -229,10 +292,10 @@ public abstract class IRawPartition implements IPartition {
         private int pos;
         private boolean rInit = false;
 
-        private IRawReadIterator(TProtocol protocol, IRawPartition partition, ReaderType read) {
+        private IRawReadIterator(TProtocol protocol, IRawPartition partition) {
             this.protocol = protocol;
             this.partition = partition;
-            this.read = read = partition.header.getElemRead(partition.type)[0];
+            this.read = partition.header.getElemRead(partition.nestedType)[0];
         }
 
         @Override
@@ -251,7 +314,6 @@ public abstract class IRawPartition implements IPartition {
             return this.pos < this.partition.elements;
         }
     }
-
 
     private static class IRawWriteIterator implements IWriteIterator{
 
@@ -274,12 +336,12 @@ public abstract class IRawPartition implements IPartition {
         public void write(Object obj) {
             if(!this.wInit) {
                 if (this.partition.nativ) {
-                    this.partition.type = 0x0;
+                    this.partition.nestedType = 0x0;
                     this.write = this.partition.header.getElemWrite(obj)[0];
                 } else {
                     IHeader header = IEnumHeaders.getInstance().getType(obj);
                     this.write = this.partition.header.getElemWrite(obj)[0];
-                    if (this.partition.elements > 0 && this.partition.type != IEnumTypes.getInstance().getId(obj)) {
+                    if (this.partition.elements > 0 && this.partition.nestedType != IEnumTypes.getInstance().getId(obj)) {
                         throw new IllegalArgumentException("Ignis serialization does not support heterogeneous basic types");
                     }
                     this.partition.header = header;

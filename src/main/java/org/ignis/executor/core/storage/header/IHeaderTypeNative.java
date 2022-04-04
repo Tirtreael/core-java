@@ -2,10 +2,7 @@ package org.ignis.executor.core.storage.header;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
-import org.ignis.executor.core.io.IReader;
-import org.ignis.executor.core.io.IWriter;
-import org.ignis.executor.core.io.ReaderType;
-import org.ignis.executor.core.io.WriterType;
+import org.ignis.executor.core.io.*;
 
 public class IHeaderTypeNative extends IHeader {
 
@@ -25,12 +22,12 @@ public class IHeaderTypeNative extends IHeader {
 
     @Override
     public ReaderType[] getElemRead(byte typeId) {
-        return new ReaderType[]{IReader.getReaderType(typeId)};
+        return new ReaderType[]{INativeReader.read};
     }
 
     @Override
     public WriterType[] getElemWrite(Object obj) {
-        return new WriterType[]{IWriter.getWriterType(obj)};
+        return new WriterType[]{INativeWriter.write};
     }
 
 
