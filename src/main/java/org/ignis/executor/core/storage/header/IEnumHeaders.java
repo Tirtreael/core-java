@@ -14,6 +14,7 @@ public class IEnumHeaders implements IIEnumTypes<IHeader> {
     public static final IHeader headerBinary = new IHeaderTypeBinary(IEnumTypes.I_BINARY.id, IEnumTypes.I_BINARY.type);
     public static final IHeader headerList = new IHeaderTypeList(IEnumTypes.I_LIST.id, IEnumTypes.I_LIST.type);
     public static final IHeader headerPairList = new IHeaderTypePairList(IEnumTypes.I_PAIR_LIST.id, IEnumTypes.I_PAIR_LIST.type);
+    private IHeader headerTypeNative;
 
     private static IEnumHeaders instance = null;
 
@@ -30,9 +31,7 @@ public class IEnumHeaders implements IIEnumTypes<IHeader> {
         headers.put(IEnumTypes.I_PAIR_LIST.id, headerPairList);
     }
 
-    private IHeader headerTypeNative;
-
-    public IHeader getHeaderTypeId(byte id, boolean nativ) {
+    public IHeader getHeaderTypeById(byte id, boolean nativ) {
         if (nativ) return this.headerTypeNative;
         IHeader headerType = headers.get(id);
         if (headerType != null) return headerType;

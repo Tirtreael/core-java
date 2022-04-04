@@ -9,26 +9,32 @@ public abstract class IHeader {
 
     public final byte id;
     public final Class<?> type;
+    private final WriterType write;
 
-    protected IHeader(byte id, Class<?> type) {
-        this.id = id;
-        this.type = type;
+    public WriterType getWrite() {
+        return write;
     }
 
-    abstract ContainedLongType read(TProtocol protocol, byte headerType) throws TException;
+    protected IHeader(byte id, Class<?> type, WriterType write) {
+        this.id = id;
+        this.type = type;
+        this.write = write;
+    }
 
-    abstract void write(TProtocol protocol, int elems, byte... typeId) throws TException;
+    public abstract ContainedLongType read(TProtocol protocol, byte headerType) throws TException;
 
-    abstract ReaderType[] getElemRead(byte typeId);
+    public abstract void write(TProtocol protocol, int elems, byte... typeId) throws TException;
 
-    abstract WriterType[] getElemWrite(Object obj);
+    public abstract ReaderType[] getElemRead(byte typeId);
 
-    static class ContainedLongType {
-        public long elems;
+    public abstract WriterType[] getElemWrite(Object obj);
+
+    public static class ContainedLongType {
+        public long noElems;
         public byte[] typeID;
 
-        public ContainedLongType(long elems, byte... typeID) {
-            this.elems = elems;
+        public ContainedLongType(long noElems, byte... typeID) {
+            this.noElems = noElems;
             this.typeID = typeID;
         }
     }
