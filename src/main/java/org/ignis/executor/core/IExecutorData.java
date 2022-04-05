@@ -70,7 +70,11 @@ public class IExecutorData {
         return mpi;
     }
 
-    public IPartitionGroup getPartitions() {
+    public List<IPartition> getPartitions() {
+        return this.partitions;
+    }
+
+    public IPartitionGroup getPartitionGroup() {
         IPartitionGroup group = new IPartitionGroup(this.partitions);
         if(group.size() > 0 && this.properties.loadType()){
             IPartition partition = group.get(0);
@@ -82,7 +86,7 @@ public class IExecutorData {
     }
 
     public List<IPartition> getAndDeletePartitions() {
-        IPartitionGroup group = this.getPartitions();
+        IPartitionGroup group = this.getPartitionGroup();
         this.deletePartitions();
         if(group.isCache())
             group.shallowCopy();

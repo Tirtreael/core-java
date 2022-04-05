@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="IFunctionExample">
+    <output-path>$PROJECT_DIR$/out/artifacts/IFunctionExample</output-path>
+    <root id="archive" name="IFunctionExample.jar">
+      <element id="module-output" name="artifacts" />
+    </root>
+  </artifact>
+</component>

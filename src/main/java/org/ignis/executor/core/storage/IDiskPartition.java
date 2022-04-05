@@ -7,6 +7,7 @@ import org.apache.thrift.transport.TTransport;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class IDiskPartition extends IRawPartition {
@@ -14,7 +15,7 @@ public class IDiskPartition extends IRawPartition {
     private String path;
     private boolean destroy;
 
-    IDiskPartition(String path, int compression, boolean nativ, boolean persist, boolean read, Class<?> clazz) throws IOException, TException {
+    public IDiskPartition(String path, int compression, boolean nativ, boolean persist, boolean read) throws IOException, TException {
         super(new TFileTransport(path, read), compression, nativ);
         this.path = path;
         this.setCompression(compression);
@@ -29,6 +30,11 @@ public class IDiskPartition extends IRawPartition {
     }
 
     @Override
+    public List<Object> getElements() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public IPartition clone() {
         String newPath = this.path;
         int i = 0;
@@ -37,7 +43,7 @@ public class IDiskPartition extends IRawPartition {
         newPath += "." + i;
         IPartition newPartition = null;
         try {
-            newPartition = new IDiskPartition(newPath, this.getCompression(), this.isNativ(), false, false, List.class);
+            newPartition = new IDiskPartition(newPath, this.getCompression(), this.isNativ(), false, false);
             this.copyTo(newPartition);
         } catch (IOException | TException e) {
             e.printStackTrace();

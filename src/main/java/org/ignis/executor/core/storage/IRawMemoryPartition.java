@@ -3,8 +3,10 @@ package org.ignis.executor.core.storage;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TMemoryBuffer;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.protocol.IObjectProtocol;
+import org.ignis.executor.core.transport.IZlibTransport;
+
+import java.util.List;
 
 // @ToDo Add IMemoryBuffer
 public class IRawMemoryPartition extends IRawPartition{
@@ -13,6 +15,7 @@ public class IRawMemoryPartition extends IRawPartition{
 
     IRawMemoryPartition(long bytes, int compression, boolean nativ) throws TException {
         super(new TMemoryBuffer((int) bytes + IRawPartition.HEADER), compression, nativ);
+        this.setZlib(new IZlibTransport(this.getTransport()));
         this.clear();
     }
 
@@ -20,6 +23,16 @@ public class IRawMemoryPartition extends IRawPartition{
     public String getType() {
         return TYPE;
     }
+
+    @Override
+    public List<Object> getElements() {
+        return null;
+    }
+
+//    @Override
+//    public List<Object> getElements() {
+//        return null;
+//    }
 
     @Override
     public IPartition clone() {
@@ -62,11 +75,7 @@ public class IRawMemoryPartition extends IRawPartition{
     @Override
     public void clear() throws TException {
         super.clear();
-        try {
-            this.sync();
-        } catch (TTransportException e) {
-            e.printStackTrace();
-        }
+        ;//this.sync(); //
     }
 
     @Override
@@ -105,7 +114,7 @@ public class IRawMemoryPartition extends IRawPartition{
         this.getTransport().flush();
 
         proto.writeSerialization(this.isNativ());
-        this.getHeader().write(proto, this.getElements().size(), this.getNestedType());
+        this.getHeader().write(proto, super.getNElements(), this.getNestedType());
         this.getZlib().flush();
         // Align header to the left
 //        this.getHeaderSize() = this.getTransport().writeEnd();

@@ -5,14 +5,18 @@ import org.apache.thrift.TException;
 import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IIOModule;
+import org.ignis.executor.core.storage.IDiskPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 import org.ignis.rpc.ISource;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.lang.Math.max;
@@ -42,18 +46,21 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public long partitionCount() throws TException {
-        return 0;
+        return this.executorData.getPartitionGroup().size();
     }
 
     @Override
     public List<Long> countByPartition() throws TException {
-        return null;
+        List<Long> sizes = new ArrayList<>(this.executorData.getPartitions().size());
+        for(IPartition part : this.executorData.getPartitionGroup()){
+            sizes.add((long) part.size());
+        }
+        return sizes;
     }
 
     public long partitionApproxSize() {
         logger.info("IO: calculating partition size");
-
-        return this.getExecutorData().getPartitions().stream()
+        return this.getExecutorData().getPartitionGroup().stream()
                 .mapToLong(IPartition::bytes).sum();
     }
 
@@ -68,7 +75,11 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void textFile2(String path, long minPartitions) throws TException {
-
+        try {
+            textFile(path, (int) minPartitions);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -77,38 +88,76 @@ public class IOModule extends Module implements IIOModule {
         IPartitionGroup partitionGroup = this.executorData.getPartitionTools().newPartitionGroup((int) partitions);
         this.executorData.setPartitions(partitionGroup);
 
-        for(IPartition partition : partitionGroup){
+        for(int i=0;i<partitions; i++){
             try {
-                String fileName =  this.partitionFileName(path, (int) (first + partitionGroup.indexOf(partition)));
+                String fileName = this.partitionFileName(path, (int) (first+i));
+                FileInputStream fileIS = new FileInputStream(this.partitionFileName(path, (int) (first+i)));
+                BufferedReader br = new BufferedReader(new InputStreamReader(fileIS, StandardCharsets.UTF_8));
+                IPartition partition = new IDiskPartition(fileName, 0, false, true, true);
+                partition.copyTo(partition);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try (
-                    FileInputStream fileIS = new FileInputStream(path);
-                    BufferedReader br = new BufferedReader(
-                            new InputStreamReader(fileIS, StandardCharsets.UTF_8))
-            ){
-                ;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
         }
-
     }
 
     @Override
     public void partitionObjectFile4(String path, long first, long partitions, ISource src) throws TException {
-
+        this.partitionObjectFile(path, first, partitions);
     }
 
     @Override
     public void partitionTextFile(String path, long first, long partitions) throws TException {
+        logger.info("IO: reading partitions text file");
+        IPartitionGroup group = this.executorData.getPartitionTools().newPartitionGroup();
+        this.executorData.setPartitions(group);
 
+        for(int i=0;i<partitions; i++){
+            try (FileInputStream fileIS = new FileInputStream(this.partitionFileName(path, (int) (first+i)));
+                 BufferedReader br = new BufferedReader(new InputStreamReader(fileIS, StandardCharsets.UTF_8))
+            ){
+                IPartition partition = this.executorData.getPartitionTools().newPartition();
+                IWriteIterator writeIterator = partition.writeIterator();
+                writeIterator.write(br.lines().map(String::trim));
+                group.add(partition);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void partitionJsonFile4a(String path, long first, long partitions, boolean objectMapping) throws TException {
+        logger.info("IO: reading partitions json file");
+        IPartitionGroup group = this.executorData.getPartitionTools().newPartitionGroup();
+        this.executorData.setPartitions(group);
+
+        for(int i=0;i<partitions; i++){
+            try {
+                String fileName = this.partitionFileName(path, (int) (first+i))+".json";
+                FileInputStream fileIS = new FileInputStream(fileName);
+                BufferedReader br = new BufferedReader(new InputStreamReader(fileIS, StandardCharsets.UTF_8));
+                IPartition partition = this.executorData.getPartitionTools().newPartition();
+                IWriteIterator writeIterator = partition.writeIterator();
+                if(objectMapping){
+
+                }
+                else{
+                    JSONObject json = new JSONObject(br);
+                    Iterator<String> keys = json.keys();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        JSONObject value = json.getJSONObject(key);
+                        String component = value.getString("component");
+                        writeIterator.write(component);
+                    }
+                }
+
+                group.add(partition);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 

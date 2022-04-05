@@ -12,12 +12,14 @@ public class IHeaderTypeNative extends IHeader {
 
     @Override
     public ContainedLongType read(TProtocol protocol, byte headerType) throws TException {
-        return null;
+        protocol.readBool();
+        return new ContainedLongType(IReader.readSize(protocol), (byte) 0x0);
     }
 
     @Override
     public void write(TProtocol protocol, int elems, byte... typeId) throws TException {
-
+        protocol.writeBool(true);
+        IWriter.writeSize(protocol, elems);
     }
 
     @Override

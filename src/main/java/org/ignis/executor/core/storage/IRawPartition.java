@@ -14,7 +14,6 @@ import org.ignis.executor.core.transport.IZlibTransport;
 
 import java.io.NotSerializableException;
 import java.util.Iterator;
-import java.util.List;
 
 public abstract class IRawPartition implements IPartition {
 
@@ -24,7 +23,7 @@ public abstract class IRawPartition implements IPartition {
     private IZlibTransport zlib;
     private int compression;
     private final boolean nativ;
-    private int elements = 0;
+    private int noElements = 0;
     private byte nestedType = 0x0;
     private IHeader header;
 
@@ -44,8 +43,8 @@ public abstract class IRawPartition implements IPartition {
         this.zlib = zlib;
     }
 
-    public void setElements(int elements) {
-        this.elements = elements;
+    public void setNoElements(int noElements) {
+        this.noElements = noElements;
     }
 
     public void setNestedType(byte nestedType) {
@@ -90,7 +89,7 @@ public abstract class IRawPartition implements IPartition {
     @Override
     public void read(TTransport transport) throws TException, NotSerializableException {
         IZlibTransport zlib_in = new IZlibTransport(transport);
-        int currentElements = this.elements;
+        int currentElements = this.noElements;
         boolean compatible = this.readHeader(transport);
         this.sync();
 
@@ -101,9 +100,9 @@ public abstract class IRawPartition implements IPartition {
             IWriteIterator writeIterator = this.writeIterator();
             IObjectProtocol protoBuffer = new IObjectProtocol(zlib_in);
             int elementsTmp = currentElements;
-            currentElements = this.elements;
-            this.elements = elementsTmp;
-            while(this.elements < currentElements){
+            currentElements = this.noElements;
+            this.noElements = elementsTmp;
+            while(this.noElements < currentElements){
                 writeIterator.write((this.header.getElemRead(nestedType)[0]).getRead().read(protoBuffer));
             }
 
@@ -131,7 +130,7 @@ public abstract class IRawPartition implements IPartition {
             IZlibTransport zlib_out = new IZlibTransport(transport, compression);
             IObjectProtocol proto_out = new IObjectProtocol(zlib_out);
             proto_out.writeSerialization(nativ);
-            if(this.elements > 0){
+            if(this.noElements > 0){
                 if(!nativ){
                     IReadIterator readIterator = this.readIterator();
                     Object first = readIterator.next();
@@ -139,7 +138,7 @@ public abstract class IRawPartition implements IPartition {
                     //writer = IWriter.getWriterType(first);
                     IHeader header2 = IEnumHeaders.getInstance().getHeaderTypeById(this.nestedType, false);
                     WriterType writerType = header2.getElemWrite(first)[0];
-                    header2.write(proto_out, this.elements);
+                    header2.write(proto_out, this.noElements);
                     writerType.getWrite().write(proto_out, readIterator.next());
                     while(iterator().hasNext())
                         writerType.getWrite().write(proto_out, readIterator.next());
@@ -147,7 +146,7 @@ public abstract class IRawPartition implements IPartition {
                 else {
                     IHeader header2 = IEnumHeaders.headerNative;
                     WriterType writerType = IEnumHeaders.headerNative.getWrite();
-                    header2.write(proto_out, this.elements);
+                    header2.write(proto_out, this.noElements);
                     IReadIterator readIterator = this.readIterator();
                     while(readIterator.hasNext()){
                         writerType.getWrite().write(proto_out, readIterator.next());
@@ -182,9 +181,8 @@ public abstract class IRawPartition implements IPartition {
         this.write(transport, 0, false);
     }
 
-    @Override
-    public List<Object> getElements() {
-        return null;
+    public int getNElements() {
+        return this.noElements;
     }
 
     @Override
@@ -224,7 +222,7 @@ public abstract class IRawPartition implements IPartition {
 
     @Override
     public int size() {
-        return this.elements;
+        return this.noElements;
     }
 
     @Override
@@ -236,7 +234,7 @@ public abstract class IRawPartition implements IPartition {
 
     @Override
     public void clear() throws TException {
-        this.elements = 0;
+        this.noElements = 0;
         this.nestedType = IEnumTypes.I_VOID.id;
         this.header = IEnumHeaders.getInstance().getHeaderTypeById(this.nestedType, this.nativ);
     }
@@ -246,7 +244,7 @@ public abstract class IRawPartition implements IPartition {
     public abstract String type();
 
     public void sync() throws TException {
-        if (this.getElements().size() > 0)
+        if (this.getNElements() > 0)
             this.zlib.flush();
 
     }
@@ -267,14 +265,14 @@ public abstract class IRawPartition implements IPartition {
         long readedElements = containedLongType.noElems;
         byte readedTypeId = containedLongType.typeID[0];
 
-        if(this.elements > 0)
+        if(this.noElements > 0)
             if(this.nestedType !=readedTypeId && compatible)
                 throw new IllegalArgumentException("Ignis serialization does not support heterogeneous basic types");
         else{
             this.header = header;
             this.nestedType = readedTypeId;
         }
-        this.elements += readedElements;
+        this.noElements += readedElements;
 
         return compatible;
     }
@@ -311,7 +309,7 @@ public abstract class IRawPartition implements IPartition {
 
         @Override
         public boolean hasNext() {
-            return this.pos < this.partition.elements;
+            return this.pos < this.partition.noElements;
         }
     }
 
@@ -328,7 +326,7 @@ public abstract class IRawPartition implements IPartition {
         }
 
         public void fastWrite(Object obj) {
-            this.partition.elements += 1;
+            this.partition.noElements += 1;
             this.partition.getElements().add(obj);
         }
 
@@ -341,7 +339,7 @@ public abstract class IRawPartition implements IPartition {
                 } else {
                     IHeader header = IEnumHeaders.getInstance().getType(obj);
                     this.write = this.partition.header.getElemWrite(obj)[0];
-                    if (this.partition.elements > 0 && this.partition.nestedType != IEnumTypes.getInstance().getId(obj)) {
+                    if (this.partition.noElements > 0 && this.partition.nestedType != IEnumTypes.getInstance().getId(obj)) {
                         throw new IllegalArgumentException("Ignis serialization does not support heterogeneous basic types");
                     }
                     this.partition.header = header;

@@ -52,7 +52,8 @@ public interface IPartition /*extends Iterable<Object>, Serializable */ {
     default long bytes() {
         if (this.size() == 0)
             return 0;
-        else return IMemoryPartition.ObjectSizeFetcher.getObjectSize(this.getElements().get(0)) * this.size();
+        else return 0;
+//        else return IMemoryPartition.ObjectSizeFetcher.getObjectSize(this.getElements().get(0)) * this.size();
     }
 
     Iterator<Object> iterator();
