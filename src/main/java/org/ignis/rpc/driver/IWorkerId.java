@@ -256,8 +256,7 @@ public class IWorkerId implements org.apache.thrift.TBase<IWorkerId, IWorkerId._
     if (this_present_worker || that_present_worker) {
       if (!(this_present_worker && that_present_worker))
         return false;
-      if (this.worker != that.worker)
-        return false;
+        return this.worker == that.worker;
     }
 
     return true;
@@ -298,9 +297,7 @@ public class IWorkerId implements org.apache.thrift.TBase<IWorkerId, IWorkerId._
     }
     if (isSetWorker()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.worker, other.worker);
-      if (lastComparison != 0) {
         return lastComparison;
-      }
     }
     return 0;
   }
@@ -402,10 +399,10 @@ public class IWorkerId implements org.apache.thrift.TBase<IWorkerId, IWorkerId._
 
       // check for required fields of primitive type, which can't be checked in the validate method
       if (!struct.isSetCluster()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'cluster' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'cluster' was not found in serialized data! Struct: " + this);
       }
       if (!struct.isSetWorker()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'worker' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'worker' was not found in serialized data! Struct: " + this);
       }
       struct.validate();
     }

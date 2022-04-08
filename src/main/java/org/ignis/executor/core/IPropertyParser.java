@@ -6,6 +6,10 @@ import java.util.regex.Pattern;
 
 public class IPropertyParser {
 
+    public Properties getProperties() {
+        return properties;
+    }
+
     private final Properties properties;
     private final Pattern bool = Pattern.compile("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON");
 

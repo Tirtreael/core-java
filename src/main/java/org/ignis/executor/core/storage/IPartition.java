@@ -7,11 +7,12 @@ import org.ignis.executor.api.IWriteIterator;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
+import java.io.Serializable;
 import java.lang.instrument.Instrumentation;
 import java.util.Iterator;
 import java.util.List;
 
-public interface IPartition /*extends Iterable<Object>, Serializable */ {
+public interface IPartition extends Iterable<Object>, Serializable {
 
     String getType();
 

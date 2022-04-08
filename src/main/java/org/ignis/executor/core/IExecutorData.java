@@ -14,11 +14,11 @@ import java.util.Map;
 public class IExecutorData {
 
     private IContext context;
-    private IPropertyParser properties;
+    private IPropertyParser propertyParser;
     private ILibraryLoader libraryLoader;
     private IPartitionTools partitionTools;
     private IMPI mpi;
-    private List<IPartition> partitions;
+    private IPartitionGroup partitions;
     private Map<Object, Object> variables;
 
     public ILibraryLoader getLibraryLoader() {
@@ -30,8 +30,10 @@ public class IExecutorData {
     }
 
     public IExecutorData() {
-        this.properties = new IPropertyParser();
-        this.libraryLoader = new ILibraryLoader(this.properties);
+        this.propertyParser = new IPropertyParser();
+        this.context = new IContext(this.propertyParser);
+        this.libraryLoader = new ILibraryLoader(this.propertyParser);
+        this.partitionTools = new IPartitionTools(this.propertyParser, this.context);
     }
 
     public Object getVariable(String key) {
@@ -58,8 +60,8 @@ public class IExecutorData {
         return context;
     }
 
-    public IPropertyParser getProperties() {
-        return properties;
+    public IPropertyParser getPropertyParser() {
+        return propertyParser;
     }
 
     public IPartitionTools getPartitionTools() {
@@ -76,7 +78,7 @@ public class IExecutorData {
 
     public IPartitionGroup getPartitionGroup() {
         IPartitionGroup group = new IPartitionGroup(this.partitions);
-        if(group.size() > 0 && this.properties.loadType()){
+        if(group.size() > 0 && this.propertyParser.loadType()){
             IPartition partition = group.get(0);
             if(this.partitionTools.isMemory(partition)){
                 this.context.vars().put("STORAGE_CLASS", partition.getClass());
@@ -85,20 +87,20 @@ public class IExecutorData {
         return group;
     }
 
-    public List<IPartition> getAndDeletePartitions() {
+    public IPartitionGroup getAndDeletePartitions() {
         IPartitionGroup group = this.getPartitionGroup();
         this.deletePartitions();
         if(group.isCache())
             group.shallowCopy();
-        return partitions;
+        return group;
     }
 
     public boolean hasPartitions() {
         return !partitions.isEmpty();
     }
 
-    public List<IPartition> setPartitions(List<IPartition> partitions) {
-        List<IPartition> old = this.partitions;
+    public IPartitionGroup setPartitions(IPartitionGroup partitions) {
+        IPartitionGroup old = this.partitions;
         this.partitions = partitions;
         return old;
     }
@@ -108,7 +110,7 @@ public class IExecutorData {
     }
 
     public String infoDirectory() {
-        String info = this.properties.executorDirectory() + "/info";
+        String info = this.propertyParser.executorDirectory() + "/info";
         this.partitionTools.createDirectoryIfNotExists(info);
         return info;
     }

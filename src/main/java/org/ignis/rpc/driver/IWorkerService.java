@@ -18883,9 +18883,7 @@ public class IWorkerService {
       }
       if (isSetEx()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -19376,8 +19374,7 @@ public class IWorkerService {
       if (this_present_src || that_present_src) {
         if (!(this_present_src && that_present_src))
           return false;
-        if (!this.src.equals(that.src))
-          return false;
+          return this.src.equals(that.src);
       }
 
       return true;
@@ -19436,9 +19433,7 @@ public class IWorkerService {
       }
       if (isSetSrc()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.src, other.src);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -19903,8 +19898,7 @@ public class IWorkerService {
       if (this_present_ex || that_present_ex) {
         if (!(this_present_ex && that_present_ex))
           return false;
-        if (!this.ex.equals(that.ex))
-          return false;
+          return this.ex.equals(that.ex);
       }
 
       return true;
@@ -19949,9 +19943,7 @@ public class IWorkerService {
       }
       if (isSetEx()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -20382,8 +20374,7 @@ public class IWorkerService {
       if (this_present_path || that_present_path) {
         if (!(this_present_path && that_present_path))
           return false;
-        if (!this.path.equals(that.path))
-          return false;
+          return this.path.equals(that.path);
       }
 
       return true;
@@ -20428,9 +20419,7 @@ public class IWorkerService {
       }
       if (isSetPath()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -20859,8 +20848,7 @@ public class IWorkerService {
       if (this_present_ex || that_present_ex) {
         if (!(this_present_ex && that_present_ex))
           return false;
-        if (!this.ex.equals(that.ex))
-          return false;
+          return this.ex.equals(that.ex);
       }
 
       return true;
@@ -20905,9 +20893,7 @@ public class IWorkerService {
       }
       if (isSetEx()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -21399,8 +21385,7 @@ public class IWorkerService {
       if (this_present_objectMapping || that_present_objectMapping) {
         if (!(this_present_objectMapping && that_present_objectMapping))
           return false;
-        if (this.objectMapping != that.objectMapping)
-          return false;
+          return this.objectMapping == that.objectMapping;
       }
 
       return true;
@@ -21457,9 +21442,7 @@ public class IWorkerService {
       }
       if (isSetObjectMapping()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.objectMapping, other.objectMapping);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -21915,8 +21898,7 @@ public class IWorkerService {
       if (this_present_ex || that_present_ex) {
         if (!(this_present_ex && that_present_ex))
           return false;
-        if (!this.ex.equals(that.ex))
-          return false;
+          return this.ex.equals(that.ex);
       }
 
       return true;
@@ -21961,9 +21943,7 @@ public class IWorkerService {
       }
       if (isSetEx()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -22454,8 +22434,7 @@ public class IWorkerService {
       if (this_present_src || that_present_src) {
         if (!(this_present_src && that_present_src))
           return false;
-        if (!this.src.equals(that.src))
-          return false;
+          return this.src.equals(that.src);
       }
 
       return true;
@@ -22514,9 +22493,7 @@ public class IWorkerService {
       }
       if (isSetSrc()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.src, other.src);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }
@@ -22981,8 +22958,7 @@ public class IWorkerService {
       if (this_present_ex || that_present_ex) {
         if (!(this_present_ex && that_present_ex))
           return false;
-        if (!this.ex.equals(that.ex))
-          return false;
+          return this.ex.equals(that.ex);
       }
 
       return true;
@@ -23027,9 +23003,7 @@ public class IWorkerService {
       }
       if (isSetEx()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
-        if (lastComparison != 0) {
           return lastComparison;
-        }
       }
       return 0;
     }

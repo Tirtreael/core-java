@@ -70,9 +70,9 @@ public class IPartitionTools {
     }
 
     public IPartitionGroup newPartitionGroup(IPartitionGroup partitionGroup) {
-        IPartitionGroup group = new IPartitionGroup(partitionGroup);
-        for (IPartition ignored : partitionGroup) {
-            group.add(this.newPartition());
+        IPartitionGroup group = new IPartitionGroup();
+        for (IPartition partition : partitionGroup) {
+            group.add(this.newPartition(partition));
         }
         return group;
     }

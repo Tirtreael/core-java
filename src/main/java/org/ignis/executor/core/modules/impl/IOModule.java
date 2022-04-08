@@ -30,7 +30,7 @@ public class IOModule extends Module implements IIOModule {
         this.logger = logger;
     }
 
-
+    //@ToDo
     @Override
     public void loadClass(ISource src) throws TException {
 //        this.useSource(src);
@@ -82,6 +82,7 @@ public class IOModule extends Module implements IIOModule {
         }
     }
 
+    // @ToDo with IDiskPartition
     @Override
     public void partitionObjectFile(String path, long first, long partitions) throws TException {
         logger.info("IO: reading partitions object file");
@@ -195,7 +196,7 @@ public class IOModule extends Module implements IIOModule {
             long exChunk = (int) (size / executors);
             long exChunkInit = executorId * exChunk;
             long exChunkEnd = exChunkInit + exChunk;
-            long minPartitionsSize = this.executorData.getProperties().partitionMinimal();
+            long minPartitionsSize = this.executorData.getPropertyParser().partitionMinimal();
             minPartitions = (int) Math.ceil(minPartitions / executors);
 
             logger.info("IO: file has " + size + " Bytes");
@@ -266,7 +267,7 @@ public class IOModule extends Module implements IIOModule {
         logger.info("IO: opening file " + path);
         Path pathz = Path.of(path);
         if (Files.exists(pathz)) {
-            if (executorData.getProperties().ioOverwrite()) {
+            if (executorData.getPropertyParser().ioOverwrite()) {
                 logger.warn("IO: " + path + " already exists");
                 Files.delete(pathz);
             } else throw new IOException(path + " already exists");

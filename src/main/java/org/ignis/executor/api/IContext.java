@@ -7,9 +7,14 @@ import java.util.Map;
 // @Todo
 public class IContext {
 
-    private IPropertyParser properties = new IPropertyParser();
+    private IPropertyParser properties;
     private Map<String, Object> variables;
-//    private MPIGroup = mpi.MPI.COMM_WORLD;
+
+    public IContext(IPropertyParser properties) {
+        this.properties = properties;
+    }
+
+    //    private MPIGroup = mpi.MPI.COMM_WORLD;
 
     public int cores() {
         return 1;

@@ -57,6 +57,7 @@ public final class Main {
         /* Testing */
         try {
             Map<String, IFunction> myFuns = executorData.loadLibraryFunctions("artifacts/FunctionExample.jar");
+            System.out.println(myFuns.keySet());
             for (IFunction fun : myFuns.values()) {
                 fun.before(null);
             }
