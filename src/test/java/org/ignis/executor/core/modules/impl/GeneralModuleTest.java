@@ -81,7 +81,7 @@ class GeneralModuleTest {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void map(String partitionType) throws ClassNotFoundException {
-        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/FunctionExample.jar").get("org.ignis.executor.api.function.IFunctionExample2");
+        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.IFunctionExample");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
         
         List<Object> elems = IElements.createInteger().collect(Collectors.toList());
@@ -94,6 +94,7 @@ class GeneralModuleTest {
 
             for(int i=0; i < elems.size(); i++){
                 assertEquals(function.call(elems.get(i), this.generalModule.executorData.getContext()), result.get(i));
+                System.out.println(result.get(i));
             }
 
         } catch (TException e) {
