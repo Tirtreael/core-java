@@ -10,6 +10,8 @@ import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IGeneralModule;
 import org.ignis.executor.core.storage.IPartitionGroup;
 
+import java.util.stream.Stream;
+
 public class GeneralModule extends Module implements IGeneralModule {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -32,7 +34,7 @@ public class GeneralModule extends Module implements IGeneralModule {
                     it.write(src.call(obj, context));
                 }
             }
-//            inputGroup.clear();
+            inputGroup.clear();
             
             src.after(context);
             this.executorData.setPartitions(outputGroup);
@@ -44,12 +46,56 @@ public class GeneralModule extends Module implements IGeneralModule {
 
     @Override
     public void filter(IFunction src) {
+        try {
+            IContext context = this.executorData.getContext();
+            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+            src.before(context);
+            IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+            LOGGER.info("General: filter " + inputGroup.size() + " partitions");
 
+
+            for (int i = 0; i < inputGroup.size(); i++) {
+                IWriteIterator it = outputGroup.get(i).writeIterator();
+                for (Object obj : inputGroup.get(i)) {
+                    if(src.call(obj, context) == Boolean.TRUE) {
+                        it.write(obj);
+                    }
+                }
+            }
+            inputGroup.clear();
+
+            src.after(context);
+            this.executorData.setPartitions(outputGroup);
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void flatmap(IFunction src) {
+        try {
+            IContext context = this.executorData.getContext();
+            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+            src.before(context);
+            IPartitionGroup outputGroup= this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+            LOGGER.info("General: flatmap " + inputGroup.size() + " partitions");
+            for(int i=0; i< inputGroup.size(); i++) {
+                IWriteIterator it = outputGroup.get(i).writeIterator();
+                for(Object obj : inputGroup.get(i)){
+                    for(Object obj2 : (Iterable<?>) src.call(obj, context)){
+                        it.write(obj2);
+                    }
+                }
+            }
+            inputGroup.clear();
 
+            src.after(context);
+            this.executorData.setPartitions(outputGroup);
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

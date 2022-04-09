@@ -24,7 +24,7 @@ public class IPartitionTools {
 
 
     public IPartition newPartition() {
-        return this.newPartition("");
+        return this.newPartition("Memory");
     }
 
     public IPartition newPartition(int size) {

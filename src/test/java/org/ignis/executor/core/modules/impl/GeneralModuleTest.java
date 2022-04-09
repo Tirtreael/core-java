@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GeneralModuleTest {
 
-    private GeneralModule generalModule = new GeneralModule(new IExecutorData());;
+    private GeneralModule generalModule = new GeneralModule(new IExecutorData());
     private static final Logger LOGGER = LogManager.getLogger();
 
     public GeneralModuleTest() {
@@ -52,11 +52,11 @@ class GeneralModuleTest {
     void tearDown() {
     }
 
-    void loadToPartitions(List<Object> elems, IPartitionGroup partitionGroup) throws TException {
-        IPartitionGroup group = this.generalModule.getExecutorData().getPartitionTools().newPartitionGroup(partitionGroup);
+    void loadToPartitions(List<Object> elems, int partitions) throws TException {
+        IPartitionGroup group = this.generalModule.getExecutorData().getPartitionTools().newPartitionGroup(partitions);
         this.generalModule.getExecutorData().setPartitions(group);
-        int partitionSize = elems.size() / partitionGroup.size();
-        for(int p=0; p < partitionGroup.size(); p++){
+        int partitionSize = elems.size() / group.size();
+        for(int p=0; p < group.size(); p++){
             IWriteIterator writeIterator = group.get(p).writeIterator();
             int i = partitionSize * p;
             while( i < partitionSize * (p+1) && i < elems.size()){
@@ -81,26 +81,73 @@ class GeneralModuleTest {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void map(String partitionType) throws ClassNotFoundException {
-        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.IFunctionExample");
+        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.MapFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
         
-        List<Object> elems = IElements.createInteger().collect(Collectors.toList());
+        List<Object> elems = IElements.createInteger(100 * 2, 0);
         try {
             IPartitionGroup group = new IPartitionGroup();
             group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, group);
+            this.loadToPartitions(elems, 2);
             this.generalModule.map(function);
             List<Object> result = this.getFromPartitions();
 
             for(int i=0; i < elems.size(); i++){
-                assertEquals(function.call(elems.get(i), this.generalModule.executorData.getContext()), result.get(i));
-                System.out.println(result.get(i));
+                assertEquals(((Integer) elems.get(i)) * 2, result.get(i));
             }
 
         } catch (TException e) {
             e.printStackTrace();
         }
+    }
 
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    void filter(String partitionType) throws ClassNotFoundException {
+        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.FilterFunction");
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
+        List<Object> elems = IElements.createInteger(100 * 2, 0);
+        try {
+            IPartitionGroup group = new IPartitionGroup();
+            group.add(new IMemoryPartition());
+            this.loadToPartitions(elems, 2);
+            this.generalModule.filter(function);
+            List<Object> result = this.getFromPartitions();
+
+            for(int i=0, j=0; i < elems.size(); i++){
+                if(((Integer) elems.get(i))>50) {
+                    assertEquals(elems.get(i), result.get(j));
+                    j++;
+                }
+            }
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    void flatMap(String partitionType) throws ClassNotFoundException {
+        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.FlatMapFunction");
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
+
+        List<Object> elems = IElements.createInteger(100 * 2, 0);
+        try {
+            IPartitionGroup group = new IPartitionGroup();
+            group.add(new IMemoryPartition());
+            this.loadToPartitions(elems, 2);
+            this.generalModule.flatmap(function);
+            List<Object> result = this.getFromPartitions();
+
+            for(int i=0; i < elems.size(); i++){
+                assertEquals(elems.get(i), result.get(2*i));
+                assertEquals(elems.get(i), result.get(2*i+1));
+            }
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
     }
 }
