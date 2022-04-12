@@ -2,6 +2,8 @@ package org.ignis.executor.core;
 
 // @ToDo loadLibrary, loadParameters, reloadLibraries
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ignis.executor.api.IContext;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.core.storage.IPartition;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 
 public class IExecutorData {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private IContext context;
     private IPropertyParser propertyParser;

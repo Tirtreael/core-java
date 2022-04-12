@@ -35,6 +35,11 @@ public class IDiskPartition extends IRawPartition {
     }
 
     @Override
+    public void setElements(List<Object> elements) {
+
+    }
+
+    @Override
     public IPartition clone() {
         String newPath = this.path;
         int i = 0;

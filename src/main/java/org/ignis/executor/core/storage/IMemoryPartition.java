@@ -21,7 +21,7 @@ public class IMemoryPartition implements IPartition {
 
     public static final String TYPE = "Memory";
 
-    public List<Object> elements;
+    private List<Object> elements;
 
     public IMemoryPartition() {
         elements = new ArrayList<>();
@@ -79,6 +79,10 @@ public class IMemoryPartition implements IPartition {
 
     public List<Object> getElements() {
         return this.elements;
+    }
+
+    public void setElements(List<Object> elements) {
+        this.elements = elements;
     }
 
     @Override
@@ -146,12 +150,12 @@ public class IMemoryPartition implements IPartition {
     }
 
 
-    private static class IMemoryReadIterator implements IReadIterator {
+    public static class IMemoryReadIterator implements IReadIterator {
 
         List<Object> elements;
         int pos = 0;
 
-        IMemoryReadIterator(List<Object> elements) {
+        public IMemoryReadIterator(List<Object> elements) {
             this.elements = elements;
         }
 
@@ -169,7 +173,7 @@ public class IMemoryPartition implements IPartition {
     }
 
 
-    private static class IMemoryWriteIterator implements IWriteIterator {
+    public static class IMemoryWriteIterator implements IWriteIterator {
 
         List<Object> elements;
 

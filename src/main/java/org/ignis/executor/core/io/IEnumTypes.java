@@ -70,7 +70,7 @@ public class IEnumTypes implements IIEnumTypes<IType> {
                 return IEnumTypes.I_LIST;
             }
         } else for (IType t1 : types.values()) {
-            if (t1.type == obj.getClass() || t1.type.isAssignableFrom(obj.getClass())) {
+            if (t1.type.isAssignableFrom(obj.getClass())) {
                 return t1;
             }
         }
@@ -84,7 +84,7 @@ public class IEnumTypes implements IIEnumTypes<IType> {
 
     public byte getIdClazz(Class<?> clazz) {
         for (IType t1 : types.values()) {
-            if (t1.type == clazz || t1.type.isAssignableFrom(clazz)) {
+            if (t1.type.isAssignableFrom(clazz)) {
                 return t1.id;
             }
         }

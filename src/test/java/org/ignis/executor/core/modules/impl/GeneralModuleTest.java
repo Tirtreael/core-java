@@ -3,6 +3,7 @@ package org.ignis.executor.core.modules.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
+import org.ignis.executor.api.IContext;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.api.function.IFunction;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -93,7 +95,7 @@ class GeneralModuleTest {
             List<Object> result = this.getFromPartitions();
 
             for(int i=0; i < elems.size(); i++){
-                assertEquals(((Integer) elems.get(i)) * 2, result.get(i));
+                assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), result.get(i));
             }
 
         } catch (TException e) {
@@ -144,6 +146,83 @@ class GeneralModuleTest {
             for(int i=0; i < elems.size(); i++){
                 assertEquals(elems.get(i), result.get(2*i));
                 assertEquals(elems.get(i), result.get(2*i+1));
+            }
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    void keyBy(String partitionType) throws ClassNotFoundException {
+        IFunction function = this.generalModule.getExecutorData().loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.KeyByFunction");
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
+
+        List<Object> elems = IElements.createInteger(100 * 2, 0);
+        try {
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
+            this.loadToPartitions(elems, 2);
+            this.generalModule.keyBy(function);
+            List<Object> result = this.getFromPartitions();
+
+            for(int i=0; i < elems.size(); i++){
+                assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), ((AbstractMap.SimpleEntry<Object, Object>) result.get(i)).getKey());
+            }
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    void mapPartitions(String partitionType) throws ClassNotFoundException {
+        IFunction function = this.generalModule.getExecutorData()
+                .loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.MapPartitionsFunction");
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
+
+        List<Object> elems = IElements.createInteger(100 * 2, 0);
+        try {
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
+            this.loadToPartitions(elems, 2);
+            this.generalModule.mapPartitions(function);
+            List<Object> result =  this.getFromPartitions();
+
+            IReadIterator readIterator = new IMemoryPartition.IMemoryReadIterator(elems);
+            for(IPartition part : this.generalModule.getExecutorData().getPartitions()) {
+                for (int i = 0; i < part.size(); i++) {
+                    assertEquals(readIterator.next(), ((IReadIterator) result.get(i)).next());
+                }
+            }
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    void mapPartitionsWithIndex(String partitionType) throws ClassNotFoundException {
+        IFunction function = this.generalModule.getExecutorData()
+                .loadLibraryFunctions("artifacts/IFunctionExample.jar").get("org.ignis.executor.api.functions.MapPartitionsWithIndexFunction");
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
+
+        List<Object> elems = IElements.createInteger(100 * 2, 0);
+        try {
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
+            this.loadToPartitions(elems, 2);
+            this.generalModule.mapPartitionsWithIndex(function, true);
+            List<Object> result =  this.getFromPartitions();
+
+            IReadIterator readIterator = new IMemoryPartition.IMemoryReadIterator(elems);
+            for(IPartition part : this.generalModule.getExecutorData().getPartitions()) {
+                for (int i = 0; i < part.size(); i++) {
+                    assertEquals(readIterator.next(), ((IReadIterator) result.get(i)).next());
+                }
             }
 
         } catch (TException e) {

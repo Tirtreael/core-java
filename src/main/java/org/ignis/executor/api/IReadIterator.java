@@ -1,6 +1,8 @@
 package org.ignis.executor.api;
 
-public interface IReadIterator {
+import java.util.Iterator;
+
+public interface IReadIterator extends Iterator<Object> {
 
     Object next();
 

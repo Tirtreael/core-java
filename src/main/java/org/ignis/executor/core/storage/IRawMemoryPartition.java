@@ -29,6 +29,9 @@ public class IRawMemoryPartition extends IRawPartition{
         return null;
     }
 
+    @Override
+    public void setElements(List<Object> elements) {  }
+
 //    @Override
 //    public List<Object> getElements() {
 //        return null;
@@ -75,7 +78,7 @@ public class IRawMemoryPartition extends IRawPartition{
     @Override
     public void clear() throws TException {
         super.clear();
-        ;//this.sync(); //
+        //this.sync(); //
     }
 
     @Override

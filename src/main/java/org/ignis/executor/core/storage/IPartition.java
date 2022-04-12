@@ -26,6 +26,8 @@ public interface IPartition extends Iterable<Object>, Serializable {
 
     List<Object> getElements();
 
+    void setElements(List<Object> elements);
+
     IReadIterator readIterator() throws TException;
 
     IWriteIterator writeIterator() throws TException;
