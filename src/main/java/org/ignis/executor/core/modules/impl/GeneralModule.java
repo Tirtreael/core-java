@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.ignis.executor.api.IContext;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
+import org.ignis.executor.api.Pair;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.core.IExecutorData;
@@ -113,7 +114,7 @@ public class GeneralModule extends Module implements IGeneralModule {
             for(int i=0; i< inputGroup.size(); i++) {
                 IWriteIterator it = outputGroup.get(i).writeIterator();
                 for(Object obj : inputGroup.get(i)){
-                    it.write(new AbstractMap.SimpleEntry<>(src.call(obj, context), obj));
+                    it.write(new Pair<>(src.call(obj, context), obj));
                 }
             }
             inputGroup.clear();

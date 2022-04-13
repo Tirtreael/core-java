@@ -1,5 +1,6 @@
 package org.ignis.executor.core.io;
 
+import org.ignis.executor.api.Pair;
 import org.ignis.executor.core.IIEnumTypes;
 import org.json.JSONObject;
 
@@ -21,7 +22,7 @@ public class IEnumTypes implements IIEnumTypes<IType> {
     public static final IType I_LIST = new IType(0x8, List.class);
     public static final IType I_SET = new IType(0x9, Set.class);
     public static final IType I_MAP = new IType(0xa, Map.class);
-    public static final IType I_PAIR = new IType(0xb, Map.Entry.class);
+    public static final IType I_PAIR = new IType(0xb, Pair.class);
     public static final IType I_BINARY = new IType(0xc, byte[].class);
     public static final IType I_PAIR_LIST = new IType(0xd, List.class);
     public static final IType I_JSON = new IType(0xe, JSONObject.class);
@@ -64,7 +65,7 @@ public class IEnumTypes implements IIEnumTypes<IType> {
 
     public IType getType(Object obj) {
         if (obj instanceof List) {
-            if (((List<?>) obj).size() > 0 && ((List<?>) obj).get(0) instanceof Map.Entry) {
+            if (((List<?>) obj).size() > 0 && ((List<?>) obj).get(0) instanceof Pair) {
                 return IEnumTypes.I_PAIR_LIST;
             } else {
                 return IEnumTypes.I_LIST;

@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
+import org.ignis.executor.api.Pair;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.core.IElements;
@@ -164,7 +165,7 @@ class GeneralModuleTest {
             List<Object> result = this.getFromPartitions();
 
             for(int i=0; i < elems.size(); i++){
-                assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), ((Map.Entry<Object, Object>) result.get(i)).getKey());
+                assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), ((Pair<Object, Object>) result.get(i)).getKey());
             }
 
         } catch (TException e) {

@@ -1,5 +1,6 @@
 package org.ignis.executor.core.io;
 
+import org.ignis.executor.api.Pair;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -122,7 +123,7 @@ class ITypeTest {
         @Test
         void getIdPair() {
             Random random = new Random(12345678);
-            Object obj = new AbstractMap.SimpleEntry<>(random.nextDouble(), random.nextDouble());
+            Object obj = new Pair<>(random.nextDouble(), random.nextDouble());
             byte id = IEnumTypes.I_PAIR.id;
 
             byte id2 = IEnumTypes.getInstance().getId(obj);
@@ -143,7 +144,7 @@ class ITypeTest {
         @Test
         void getIdPairList() {
             Random random = new Random(12345678);
-            Object obj = List.of(new AbstractMap.SimpleEntry<>(random.nextDouble(), random.nextDouble()),
+            Object obj = List.of(new Pair<>(random.nextDouble(), random.nextDouble()),
                     new AbstractMap.SimpleEntry<>(random.nextDouble(), random.nextDouble())
             );
             byte id = IEnumTypes.I_PAIR_LIST.id;
@@ -266,7 +267,7 @@ class ITypeTest {
 
     @Test
     void getIdClazzPair() {
-        Class<?> obj = Map.Entry.class;
+        Class<?> obj = Pair.class;
         byte id = IEnumTypes.I_PAIR.id;
 
         byte id2 = IEnumTypes.getInstance().getIdClazz(obj);

@@ -2,6 +2,7 @@ package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
+import org.ignis.executor.api.Pair;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
@@ -25,7 +26,7 @@ public interface IWriter {
             Map.entry(IEnumTypes.I_LIST.id, new WriterType((protocol, obj) -> writeList(protocol, (List<?>) obj))),
             Map.entry(IEnumTypes.I_SET.id, new WriterType((protocol, obj) -> writeSet(protocol, (Set<?>) obj))),
             Map.entry(IEnumTypes.I_MAP.id, new WriterType((protocol, obj) -> writeMap(protocol, (Map<?, ?>) obj))),
-            Map.entry(IEnumTypes.I_PAIR.id, new WriterType((protocol, obj) -> writePair(protocol, (Map.Entry<?, ?>) obj))),
+            Map.entry(IEnumTypes.I_PAIR.id, new WriterType((protocol, obj) -> writePair(protocol, (Pair<?, ?>) obj))),
             Map.entry(IEnumTypes.I_BINARY.id, new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
             Map.entry(IEnumTypes.I_PAIR_LIST.id, new WriterType((protocol, obj) -> writePairList(protocol, (List<?>) obj))),
             Map.entry(IEnumTypes.I_JSON.id, new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
@@ -106,7 +107,7 @@ public interface IWriter {
         }
     }
 
-    static <K, V> void writePair(TProtocol protocol, Map.Entry<K, V> pair) throws TException {
+    static <K, V> void writePair(TProtocol protocol, Pair<K, V> pair) throws TException {
         IType elemTypeKey = IEnumTypes.getInstance().getType(pair.getKey());
         IType elemTypeValue = IEnumTypes.getInstance().getType(pair.getValue());
         WriterType writerTypeKey = getWriterType(elemTypeKey.id);
@@ -131,16 +132,16 @@ public interface IWriter {
 
         writeSize(protocol, size);
         if (size > 0) {
-            elemTypeKey = IEnumTypes.getInstance().getType(((Map.Entry<?, ?>) pairList.get(0)).getKey());
-            elemTypeValue = IEnumTypes.getInstance().getType(((Map.Entry<?, ?>) pairList.get(0)).getValue());
+            elemTypeKey = IEnumTypes.getInstance().getType(((Pair<?, ?>) pairList.get(0)).getKey());
+            elemTypeValue = IEnumTypes.getInstance().getType(((Pair<?, ?>) pairList.get(0)).getValue());
             wtKey = getWriterType(elemTypeKey.id);
             wtValue = getWriterType(elemTypeValue.id);
         }
         writeType(protocol, elemTypeKey.id);
         writeType(protocol, elemTypeValue.id);
         for (Object pair : pairList) {
-            wtKey.getWrite().write(protocol, ((Map.Entry<?, ?>) pair).getKey());
-            wtValue.getWrite().write(protocol, ((Map.Entry<?, ?>) pair).getValue());
+            wtKey.getWrite().write(protocol, ((Pair<?, ?>) pair).getKey());
+            wtValue.getWrite().write(protocol, ((Pair<?, ?>) pair).getValue());
         }
     }
 

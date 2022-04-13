@@ -2,6 +2,7 @@ package org.ignis.executor.core.io;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
+import org.ignis.executor.api.Pair;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -79,12 +80,12 @@ public interface IReader {
         return obj;
     }
 
-    static Map.Entry<Object, Object> readPair(TProtocol protocol) throws TException {
+    static Pair<Object, Object> readPair(TProtocol protocol) throws TException {
         byte keyType = readType(protocol);
         byte valueType = readType(protocol);
         ReaderType readerTypeKey = getReaderType(keyType);
         ReaderType readerTypeValue = getReaderType(valueType);
-        return new AbstractMap.SimpleEntry<>(
+        return new Pair<>(
                 readerTypeKey.getRead().read(protocol), readerTypeValue.getRead().read(protocol)
         );
     }
@@ -93,15 +94,15 @@ public interface IReader {
         return protocol.readBinary().array();
     }
 
-    static List<Map.Entry<Object, Object>> readPairList(TProtocol protocol) throws TException {
+    static List<Pair<Object, Object>> readPairList(TProtocol protocol) throws TException {
         long size = readSize(protocol);
         byte keyType = readType(protocol);
         byte valueType = readType(protocol);
         ReaderType readerTypeKey = getReaderType(keyType);
         ReaderType readerTypeValue = getReaderType(valueType);
-        List<Map.Entry<Object, Object>> obj = new ArrayList<>();
+        List<Pair<Object, Object>> obj = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            obj.add(new AbstractMap.SimpleEntry<>(
+            obj.add(new Pair<>(
                     readerTypeKey.getRead().read(protocol), readerTypeValue.getRead().read(protocol)
             ));
         }
