@@ -6,6 +6,7 @@ import org.ignis.executor.api.IContext;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.api.function.IFunction;
+import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IGeneralModule;
 import org.ignis.executor.core.storage.IPartition;
@@ -151,7 +152,7 @@ public class GeneralModule extends Module implements IGeneralModule {
     }
 
     @Override
-    public void mapPartitionsWithIndex(IFunction src, boolean preservesPartitions) {
+    public void mapPartitionsWithIndex(IFunction2 src, boolean preservesPartitions) {
         try {
             IContext context = this.executorData.getContext();
             IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();

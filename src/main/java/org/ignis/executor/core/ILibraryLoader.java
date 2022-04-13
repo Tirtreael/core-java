@@ -3,9 +3,11 @@ package org.ignis.executor.core;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.api.function.IFunction;
+import org.ignis.executor.api.function.IFunction2;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
@@ -27,8 +29,22 @@ public class ILibraryLoader {
         this.functionsMap = new HashMap<>();
     }
 
-    public void loadFunction() {
+    public IFunction loadFunction(String src) {
+        try {
+            return Class.forName(src).asSubclass(IFunction.class).getConstructor().newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
+    public <T> T loadFunction(String src, Class<T> superClazz) {
+        try {
+            return Class.forName(src).asSubclass(superClazz).getConstructor().newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     /*
     * Loads functions inside a jar

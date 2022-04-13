@@ -1,6 +1,7 @@
 package org.ignis.executor.core.modules;
 
 import org.ignis.executor.api.function.IFunction;
+import org.ignis.executor.api.function.IFunction2;
 
 public interface IGeneralModule {
 
@@ -14,7 +15,7 @@ public interface IGeneralModule {
 
     void mapPartitions(IFunction src);
 
-    void mapPartitionsWithIndex(IFunction src, boolean preservesPartitions);
+    void mapPartitionsWithIndex(IFunction2 src, boolean preservesPartitions);
 
     void mapExecutor(IFunction src);
 
