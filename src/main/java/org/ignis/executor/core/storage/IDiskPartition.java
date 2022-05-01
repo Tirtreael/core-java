@@ -12,6 +12,7 @@ import java.util.List;
 
 public class IDiskPartition extends IRawPartition {
 
+    public static final String TYPE = "Disk";
     private String path;
     private boolean destroy;
 

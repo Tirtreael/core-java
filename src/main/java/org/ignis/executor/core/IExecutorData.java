@@ -23,13 +23,13 @@ public class IExecutorData {
     private IPartitionTools partitionTools;
     private IMPI mpi;
     private IPartitionGroup partitions;
-    private Map<Object, Object> variables;
+    private Map<String, Object> variables;
 
     public ILibraryLoader getLibraryLoader() {
         return libraryLoader;
     }
 
-    public Map<Object, Object> getVariables() {
+    public Map<String, Object> getVariables() {
         return variables;
     }
 
@@ -38,6 +38,7 @@ public class IExecutorData {
         this.context = new IContext(this.propertyParser);
         this.libraryLoader = new ILibraryLoader(this.propertyParser);
         this.partitionTools = new IPartitionTools(this.propertyParser, this.context);
+//        this.mpi = new IMPI(this.propertyParser, this.partitionTools, this.context);
     }
 
     public Object getVariable(String key) {
@@ -127,4 +128,8 @@ public class IExecutorData {
         }
         return null;
     }
+
+//    public void getThreadContext(int threadId) {
+//        return new IThreadContext(this.context, threadId);
+//    }
 }

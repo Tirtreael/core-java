@@ -1,5 +1,7 @@
 package org.ignis.executor.api;
 
+import mpi.Intracomm;
+import mpi.MPI;
 import org.ignis.executor.core.IPropertyParser;
 
 import java.util.Map;
@@ -9,6 +11,7 @@ public class IContext {
 
     private IPropertyParser properties;
     private Map<String, Object> variables;
+    private mpi.Intracomm mpiGroup = MPI.COMM_WORLD;
 
     public IContext(IPropertyParser properties) {
         this.properties = properties;
@@ -42,8 +45,8 @@ public class IContext {
         return this.variables;
     }
 
-//    public MPIGroup mpiGroup(){
-//        return this.mpiGroup;
-//    }
+    public Intracomm getMPIGroup(){
+        return this.mpiGroup;
+    }
 
 }

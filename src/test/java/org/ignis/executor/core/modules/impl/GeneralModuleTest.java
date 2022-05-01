@@ -87,10 +87,12 @@ class GeneralModuleTest {
         try {
             IPartitionGroup group = new IPartitionGroup();
             group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 2);
+            this.loadToPartitions(elems, 20);
             this.generalModule.map(function);
             List<Object> result = this.getFromPartitions();
 
+            assertEquals(elems.size(), result.size());
+            System.out.println(elems.size());
             for(int i=0; i < elems.size(); i++){
                 assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), result.get(i));
             }
@@ -110,7 +112,7 @@ class GeneralModuleTest {
         try {
             IPartitionGroup group = new IPartitionGroup();
             group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 2);
+            this.loadToPartitions(elems, 20);
             this.generalModule.filter(function);
             List<Object> result = this.getFromPartitions();
 
@@ -136,7 +138,7 @@ class GeneralModuleTest {
         try {
             IPartitionGroup group = new IPartitionGroup();
             group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 2);
+            this.loadToPartitions(elems, 20);
             this.generalModule.flatmap(function);
             List<Object> result = this.getFromPartitions();
 
@@ -160,7 +162,7 @@ class GeneralModuleTest {
         try {
 //            IPartitionGroup group = new IPartitionGroup();
 //            group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 2);
+            this.loadToPartitions(elems, 20);
             this.generalModule.keyBy(function);
             List<Object> result = this.getFromPartitions();
 
