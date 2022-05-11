@@ -82,7 +82,7 @@ public class IPartitionTools {
         return new IMemoryPartition();
     }
 
-    public IPartition newMemoryPartition(int elems) {
+    public IMemoryPartition newMemoryPartition(int elems) {
         return new IMemoryPartition(elems);
     }
 

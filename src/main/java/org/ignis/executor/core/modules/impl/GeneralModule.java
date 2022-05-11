@@ -6,7 +6,6 @@ import org.apache.thrift.TException;
 import org.ignis.executor.api.IContext;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
-import org.ignis.executor.api.Pair;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.core.IExecutorData;
@@ -21,10 +20,14 @@ import java.util.List;
 public class GeneralModule extends Module implements IGeneralModule {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    IPipeImpl IPipe = new IPipeImpl(executorData);
+    //    ISortImpl ISort
+    IReduceImpl IReduce = new IReduceImpl(executorData);
 
     public GeneralModule(IExecutorData executorData) {
         super(executorData, LOGGER);
     }
+//    IRepartitionImpl IRepartition
 
     @Override
     public void map(IFunction src) {
@@ -125,29 +128,7 @@ public class GeneralModule extends Module implements IGeneralModule {
     @Override
     public void keyBy(IFunction src) {
         try {
-            IContext context = this.executorData.getContext();
-            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
-            src.before(context);
-            IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
-            LOGGER.info("General: keyBy " + inputGroup.size() + " partitions");
-            IThreadPool.parallel((i) -> {
-//                for (int i = 0; i < inputGroup.size(); i++) {
-                IWriteIterator it;
-                try {
-                    it = outputGroup.get(i).writeIterator();
-                    for (Object obj : inputGroup.get(i)) {
-                        it.write(new Pair<>(src.call(obj, context), obj));
-                    }
-                } catch (TException e) {
-                    this.packException(e);
-                }
-//                }
-            }, inputGroup.size());
-            inputGroup.clear();
-
-            src.after(context);
-            this.executorData.setPartitions(outputGroup);
-
+            this.IPipe.keyBy(src);
         } catch (Exception e) {
             this.packException(e);
         }
@@ -161,8 +142,7 @@ public class GeneralModule extends Module implements IGeneralModule {
             src.before(context);
             IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
             LOGGER.info("General: mapPartitions " + inputGroup.size() + " partitions");
-//            IThreadPool.parallel(() -> {
-            for (int i = 0; i < inputGroup.size(); i++) {
+            IThreadPool.parallel((i) -> {
                 IWriteIterator it;
                 try {
                     it = outputGroup.get(i).writeIterator();
@@ -173,8 +153,7 @@ public class GeneralModule extends Module implements IGeneralModule {
                 } catch (TException e) {
                     this.packException(e);
                 }
-            }
-//            });
+            }, inputGroup.size());
             inputGroup.clear();
 
             src.after(context);
@@ -193,8 +172,7 @@ public class GeneralModule extends Module implements IGeneralModule {
             src.before(context);
             IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
             LOGGER.info("General: mapPartitionsWithIndex " + inputGroup.size() + " partitions");
-//            IThreadPool.parallel(() -> {
-            for (int i = 0; i < inputGroup.size(); i++) {
+            IThreadPool.parallel((i) -> {
                 IWriteIterator it;
                 try {
                     it = outputGroup.get(i).writeIterator();
@@ -205,8 +183,7 @@ public class GeneralModule extends Module implements IGeneralModule {
                 } catch (TException e) {
                     this.packException(e);
                 }
-            }
-//            });
+            }, inputGroup.size());
             inputGroup.clear();
 
             src.after(context);
@@ -236,9 +213,10 @@ public class GeneralModule extends Module implements IGeneralModule {
                 }
                 inputGroup = aux;
             }
-            ArrayList<Object> arg = new ArrayList<>();
-            for (IPartition part : inputGroup)
-                arg.addAll(part.getElements());
+            List<List<Object>> arg = new ArrayList<>();
+            for (IPartition part : inputGroup) {
+                arg.add(part.getElements());
+            }
 
             src.call(arg, context);
 
@@ -280,9 +258,10 @@ public class GeneralModule extends Module implements IGeneralModule {
                 }
                 inputGroup = aux;
             }
-            ArrayList<Object> arg = new ArrayList<>();
-            for (IPartition part : inputGroup)
-                arg.addAll(part.getElements());
+            List<List<Object>> arg = new ArrayList<>();
+            for (IPartition part : inputGroup) {
+                arg.add(part.getElements());
+            }
 
             List<List<Object>> newParts = (List<List<Object>>) src.call(arg, context);
             LOGGER.info("General: moving elements to partitions");
@@ -313,8 +292,8 @@ public class GeneralModule extends Module implements IGeneralModule {
     @Override
     public void groupBy(IFunction src, int numPartitions) {
         try {
-            this.keyBy(src);
-//             groupByKey
+            this.IPipe.keyBy(src);
+            this.IReduce.groupByKey(numPartitions);
 
         } catch (Exception e) {
             this.packException(e);

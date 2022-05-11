@@ -2,6 +2,7 @@ package org.ignis.executor.core;
 
 // @ToDo loadLibrary, loadParameters, reloadLibraries
 
+import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.api.IContext;
@@ -17,10 +18,10 @@ public class IExecutorData {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private IContext context;
-    private IPropertyParser propertyParser;
-    private ILibraryLoader libraryLoader;
-    private IPartitionTools partitionTools;
+    private final IContext context;
+    private final IPropertyParser propertyParser;
+    private final ILibraryLoader libraryLoader;
+    private final IPartitionTools partitionTools;
     private IMPI mpi;
     private IPartitionGroup partitions;
     private Map<String, Object> variables;
@@ -127,6 +128,17 @@ public class IExecutorData {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void enableMPICores() throws MPIException {
+        double ratio = this.propertyParser.transportCores();
+        int mpiCores;
+        if (ratio > 1) {
+            mpiCores = Math.min(getContext().cores(), (int) Math.ceil(ratio));
+        } else mpiCores = (int) Math.ceil(getContext().cores() * ratio);
+        if (mpiCores > 1 && context.getMPIGroup().getSize() == 1 && context.executors() > 1) {
+//            context.getMPIGroup() = context.getMPIGroup()
+        }
     }
 
 //    public void getThreadContext(int threadId) {

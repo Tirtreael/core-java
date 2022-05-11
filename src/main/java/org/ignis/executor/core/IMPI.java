@@ -4,26 +4,34 @@ import mpi.Comm;
 import mpi.Intracomm;
 import mpi.MPI;
 import mpi.MPIException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TMemoryBuffer;
 import org.ignis.executor.api.IContext;
+import org.ignis.executor.api.Pair;
 import org.ignis.executor.core.protocol.IObjectProtocol;
+import org.ignis.executor.core.storage.IDiskPartition;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 
 import java.io.NotSerializableException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
 public class IMPI {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private MPI mpi;
-    private IPropertyParser propertyParser;
-    private IPartitionTools partitionTools;
-    private IContext context;
+    private final IPropertyParser propertyParser;
+    private final IPartitionTools partitionTools;
+    private final IContext context;
 
     public IMPI(IPropertyParser propertyParser, IPartitionTools partitionTools, IContext context) {
         this.propertyParser = propertyParser;
@@ -120,7 +128,7 @@ public class IMPI {
 
     }
 
-    public void send(IPartition partition, Object dest, String tag) {
+    public void send(IPartition partition, int dest, int tag) {
 
     }
 
@@ -128,11 +136,11 @@ public class IMPI {
 
     }
 
-    public void recv(Intracomm group, IPartition partition, Object source, String tag) {
-
+    public void recv(IPartition partition, int source, int tag) {
+        sendRecv(partition, source, rank(), tag);
     }
 
-    public void sendRecv(Object sendP, Object recvP, Object other, String tag) {
+    public void sendRecv(Object sendP, Object recvP, int other, int tag) {
 
     }
 
@@ -198,13 +206,158 @@ public class IMPI {
 
     }
 
-    public void exchangeASync(Object input, Object outPut) {
+    public void exchangeSync(IPartitionGroup input, IPartitionGroup output) {
+        int executors = this.executors();
+        if (executors == 1 || input.size() < 2) {
+            for (IPartition part : input) {
+                part.fit();
+                output.add(part);
+            }
+            return;
+        }
+
+        int numPartitions = input.size();
+        int block = numPartitions / executors;
+        int remainder = numPartitions % executors;
+        List<Pair<Integer, Integer>> partsTargets = new ArrayList<>(Collections.nCopies((block + 1) * executors, null));
+
+        int p = 0;
+        for (int i = 0; i < executors; i++) {
+            for (int j = 0; i < block; i++) {
+                partsTargets.set(j * executors + i, new Pair<>(p + j, i));
+            }
+            p += block;
+            if (i < remainder) {
+                partsTargets.set(block * executors + i, new Pair<>(p, i));
+                p++;
+            }
+        }
+        partsTargets.removeIf(Objects::isNull);
+        int cores = this.propertyParser.cores();
+        String pType = input.get(0).getType();
+        String optType = pType;
+        Class<?> cls = null;
+        Intracomm comm = this.nativ();
+        List<?> wins = new ArrayList<>();
+        boolean onlyShared = false;
+
+        if (this.propertyParser.transportCores() > 0 && cores > 1 && pType != IDiskPartition.TYPE) {
+            LOGGER.info("Local exchange init");
+            class IMPIBuffer extends TMemoryBuffer {
+                public IMPIBuffer(int size) {
+                    super(size);
+                }
+
+                public void realloc(int size) {
+//                    super();
+//                    aux = TMemoryBuffer
+                }
+            }
+
+            if (pType == IMemoryPartition.TYPE) {
+//                cls = input.get(0).IMemoryPartitionCls
+//                if()
+            }
+
+        }
+
+
+    }
+
+    public void exchangeASync(IPartitionGroup input, IPartitionGroup output) throws MPIException {
+        int executors = executors();
+        int rank = rank();
+        int numPartitions = input.size();
+        int block = numPartitions / executors;
+        int remainder = numPartitions % executors;
+        List<Pair<Integer, Integer>> ranges = new ArrayList<>();
+        List<Integer> queue = new ArrayList<>();
+
+        int init, end;
+        for (int i = 0; i < executors; i++) {
+            if (i < remainder) {
+                init = (block + 1) * i;
+                end = init + block + 1;
+            } else {
+                init = (block + 1) * remainder + block * (i - remainder);
+                end = init + block + 1;
+            }
+            ranges.add(new Pair<>(init, end));
+        }
+        int m = (executors % 2 == 0) ? executors : executors + 1;
+        int id = 0;
+        int id2 = m * m - 2;
+        for (int i = 0; i < m - 1; i++) {
+            if (rank == id % (m - 1))
+                queue.add(m - 1);
+            if (rank == m - 1)
+                queue.add(id % (m - 1));
+            id++;
+            for (int j = 1; j < m / 2; j++) {
+                if (rank == id % (m - 1))
+                    queue.add(id2 % (m - 1));
+                if (rank == id2 % (m - 1))
+                    queue.add(id % (m - 1));
+                id++;
+                id2++;
+            }
+        }
+        List<Boolean> ignores = new ArrayList<>(Collections.nCopies(queue.size(), false));
+        for (int i = 0; i < queue.size(); i++) {
+            int other = queue.get(i);
+            boolean ignore = true;
+            if (other == executors)
+                continue;
+            for (int j = ranges.get(other).getKey(); j < ranges.get(other).getValue(); j++) {
+                ignore = ignore && input.get(j).isEmpty();
+            }
+            boolean ignoreOther = false;
+            nativ().sendRecv(ignore, 1, MPI.BOOLEAN, other, 0, ignoreOther, 1, MPI.BOOLEAN, other, 0);
+
+            if (ignore && ignoreOther) {
+                ignores.set(i, true);
+                input.subList(ranges.get(other).getKey(), ranges.get(other).getValue()).clear();
+            }
+        }
+
+        for (int i = 0; i < queue.size(); i++) {
+            int other = queue.get(i);
+            if (ignores.get(i) || other == executors) {
+                continue;
+            }
+            int otherPart = ranges.get(other).getKey();
+            int otherEnd = ranges.get(other).getValue();
+            int mePart = ranges.get(rank).getKey();
+            int meEnd = ranges.get(rank).getValue();
+            int its = Math.max(otherEnd - otherPart, meEnd - mePart);
+
+            for (int j = 0; j < its; i++) {
+                if (otherPart >= otherEnd || mePart >= meEnd) {
+                    if (otherPart >= otherEnd) {
+                        recv(input.get(mePart), other, 0);
+                    } else if (mePart >= meEnd) {
+                        send(input.get(otherPart), other, 0);
+                    } else continue;
+                } else {
+                    sendRecv(input.get(otherPart), input.get(mePart), other, 0);
+                }
+                input.remove(otherPart);
+                otherPart++;
+                mePart++;
+            }
+        }
+
+        for (IPartition partition : input) {
+            partition.fit();
+            output.add(partition);
+        }
+        input.clear();
 
     }
 
     private class MsgOpt {
-        private boolean sameProtocol;
-        private boolean sameStorage;
+        private final boolean sameProtocol;
+        private final boolean sameStorage;
 
         public MsgOpt(boolean sameProtocol, boolean sameStorage) {
             this.sameProtocol = sameProtocol;

@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 public class IThreadPool {
 
-    private static int defaultCores = 1;
+    public static int defaultCores = 1;
 
     public static int getDefaultCores() {
         return defaultCores;
