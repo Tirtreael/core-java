@@ -1,16 +1,24 @@
 package org.ignis.executor.core.modules.impl;
 
+import mpi.MPIException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Properties;
 
 class ModuleTest {
 
-    private IExecutorData iExecutorData = new IExecutorData();
-    private String library = "artifacts/FunctionExample.jar";
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final IExecutorData iExecutorData = new IExecutorData();
+    private final String library = "artifacts/FunctionExample.jar";
 
-    public ModuleTest(){
+    private final GeneralModule generalModule = new GeneralModule(iExecutorData);
+
+
+    public ModuleTest() {
         Properties props = this.iExecutorData.getContext().props().getProperties();
         props.put("ignis.transport.compression", "0");
         props.put("ignis.partition.compression", "0");
@@ -36,5 +44,11 @@ class ModuleTest {
 
     @Test
     void resizeMemoryPartition() {
+    }
+
+    public List<Object> rankVector(List<Object> elems) throws MPIException {
+        int n = elems.size() / this.generalModule.getExecutorData().getContext().executors();
+        int rank = this.generalModule.getExecutorData().getContext().executorId();
+        return elems.subList(n * rank, n * (rank + 1));
     }
 }

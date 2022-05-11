@@ -55,8 +55,8 @@ public class IRawMemoryPartition extends IRawPartition{
     }
 
     @Override
-    public void moveTo(IPartition source, IPartition target) {
-        super.moveTo(source, target);
+    public void moveTo(IPartition target) {
+        super.moveTo(target);
     }
 
     @Override

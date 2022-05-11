@@ -22,7 +22,7 @@ public class IExecutorData {
     private final IPropertyParser propertyParser;
     private final ILibraryLoader libraryLoader;
     private final IPartitionTools partitionTools;
-    private IMPI mpi;
+    private final IMPI mpi;
     private IPartitionGroup partitions;
     private Map<String, Object> variables;
 
@@ -39,7 +39,7 @@ public class IExecutorData {
         this.context = new IContext(this.propertyParser);
         this.libraryLoader = new ILibraryLoader(this.propertyParser);
         this.partitionTools = new IPartitionTools(this.propertyParser, this.context);
-//        this.mpi = new IMPI(this.propertyParser, this.partitionTools, this.context);
+        this.mpi = new IMPI(this.propertyParser, this.partitionTools, this.context);
     }
 
     public Object getVariable(String key) {

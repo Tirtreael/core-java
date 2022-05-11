@@ -1,5 +1,6 @@
 package org.ignis.executor.core.modules.impl;
 
+import mpi.MPIException;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
 import org.ignis.executor.api.IWriteIterator;
@@ -239,7 +240,7 @@ public class IOModule extends Module implements IIOModule {
             logger.info("IO: created " + partitionGroup.size() + " partitions, " + elements
                     + " lines and " + (exChunkEnd - exChunkInit) + "Bytes read ");
 
-        } catch (TException e) {
+        } catch (TException | MPIException e) {
             e.printStackTrace();
         }
     }

@@ -13,8 +13,8 @@ import java.util.List;
 public class IDiskPartition extends IRawPartition {
 
     public static final String TYPE = "Disk";
-    private String path;
-    private boolean destroy;
+    private final String path;
+    private final boolean destroy;
 
     public IDiskPartition(String path, int compression, boolean nativ, boolean persist, boolean read) throws IOException, TException {
         super(new TFileTransport(path, read), compression, nativ);
@@ -68,8 +68,8 @@ public class IDiskPartition extends IRawPartition {
     }
 
     @Override
-    public void moveTo(IPartition source, IPartition target) {
-        super.moveTo(source, target);
+    public void moveTo(IPartition target) {
+        super.moveTo(target);
     }
 
     @Override

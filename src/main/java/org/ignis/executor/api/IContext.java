@@ -2,6 +2,7 @@ package org.ignis.executor.api;
 
 import mpi.Intracomm;
 import mpi.MPI;
+import mpi.MPIException;
 import org.ignis.executor.core.IPropertyParser;
 
 import java.util.Map;
@@ -9,9 +10,9 @@ import java.util.Map;
 // @Todo
 public class IContext {
 
-    private IPropertyParser properties;
+    private final IPropertyParser properties;
     private Map<String, Object> variables;
-    private mpi.Intracomm mpiGroup = MPI.COMM_WORLD;
+    private final mpi.Intracomm mpiGroup = MPI.COMM_WORLD;
 
     public IContext(IPropertyParser properties) {
         this.properties = properties;
@@ -23,17 +24,16 @@ public class IContext {
         return 1;
     }
 
-    public int executors(){
-//        return this.mpiGroup.getSize();
-        return 0;
+    public int executors() throws MPIException {
+        return MPI.COMM_WORLD.getSize();
     }
 
-    public int executorId(){
+    public int executorId() {
 //        return this.mpiGroup.getRank();
         return 0;
     }
 
-    public int threadId(){
+    public int threadId() {
         return 0;
     }
 

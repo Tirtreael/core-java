@@ -42,8 +42,8 @@ public interface IPartition extends Iterable<Object>, Serializable {
 
     void moveFrom(IPartition source) throws TException;
 
-    default void moveTo(IPartition source, IPartition target) {
-        target.copyFrom(source);
+    default void moveTo(IPartition target) {
+        target.copyFrom(this);
     }
 
     int size();

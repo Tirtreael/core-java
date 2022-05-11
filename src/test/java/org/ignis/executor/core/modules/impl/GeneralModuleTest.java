@@ -1,5 +1,6 @@
 package org.ignis.executor.core.modules.impl;
 
+import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -18,16 +19,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.io.IOException;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class GeneralModuleTest {
+class GeneralModuleTest extends ModuleTest {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+
+    static {
+        try {
+            mpi.MPI.Init(new String[]{});
+        } catch (MPIException e) {
+            e.printStackTrace();
+        }
+    }
 
     private final GeneralModule generalModule = new GeneralModule(new IExecutorData());
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public GeneralModuleTest() {
         Properties props = this.generalModule.getExecutorData().getPropertyParser().getProperties();
@@ -39,7 +48,7 @@ class GeneralModuleTest {
         props.put("ignis.transport.cores", "0");
         props.put("ignis.modules.load.type", "false");
         props.put("ignis.modules.exchange.type", "sync");
-        
+
         props.put("ignis.modules.sort.samples", "0.1");
         props.put("ignis.modules.sort.resampling", "false");
     }
@@ -57,10 +66,10 @@ class GeneralModuleTest {
         IPartitionGroup group = this.generalModule.getExecutorData().getPartitionTools().newPartitionGroup(partitions);
         this.generalModule.getExecutorData().setPartitions(group);
         int partitionSize = elems.size() / group.size();
-        for(int p=0; p < group.size(); p++){
+        for (int p = 0; p < group.size(); p++) {
             IWriteIterator writeIterator = group.get(p).writeIterator();
             int i = partitionSize * p;
-            while( i < partitionSize * (p+1) && i < elems.size()){
+            while (i < partitionSize * (p + 1) && i < elems.size()) {
                 writeIterator.write(elems.get(i));
                 i += 1;
             }
@@ -84,7 +93,7 @@ class GeneralModuleTest {
     void map(String partitionType) {
         IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.MapFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
-        
+
         List<Object> elems = IElements.createInteger(100 * 2, 0);
         try {
             IPartitionGroup group = new IPartitionGroup();
@@ -94,7 +103,7 @@ class GeneralModuleTest {
             List<Object> result = this.getFromPartitions();
 
             assertEquals(elems.size(), result.size());
-            for(int i=0; i < elems.size(); i++){
+            for (int i = 0; i < elems.size(); i++) {
                 assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), result.get(i));
             }
 
@@ -117,8 +126,8 @@ class GeneralModuleTest {
             this.generalModule.filter(function);
             List<Object> result = this.getFromPartitions();
 
-            for(int i=0, j=0; i < elems.size(); i++){
-                if(((Integer) elems.get(i))>50) {
+            for (int i = 0, j = 0; i < elems.size(); i++) {
+                if (((Integer) elems.get(i)) > 50) {
                     assertEquals(elems.get(i), result.get(j));
                     j++;
                 }
@@ -143,9 +152,9 @@ class GeneralModuleTest {
             this.generalModule.flatmap(function);
             List<Object> result = this.getFromPartitions();
 
-            for(int i=0; i < elems.size(); i++){
-                assertEquals(elems.get(i), result.get(2*i));
-                assertEquals(elems.get(i), result.get(2*i+1));
+            for (int i = 0; i < elems.size(); i++) {
+                assertEquals(elems.get(i), result.get(2 * i));
+                assertEquals(elems.get(i), result.get(2 * i + 1));
             }
 
         } catch (TException e) {
@@ -188,10 +197,10 @@ class GeneralModuleTest {
 //            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
             this.generalModule.mapPartitions(function);
-            List<Object> result =  this.getFromPartitions();
+            List<Object> result = this.getFromPartitions();
 
             IReadIterator readIterator = new IMemoryPartition.IMemoryReadIterator(elems);
-            for(IPartition part : this.generalModule.getExecutorData().getPartitions()) {
+            for (IPartition part : this.generalModule.getExecutorData().getPartitions()) {
                 for (int i = 0; i < part.size(); i++) {
                     assertEquals(readIterator.next(), ((IReadIterator) result.get(i)).next());
                 }
@@ -214,7 +223,7 @@ class GeneralModuleTest {
 //            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
             this.generalModule.mapPartitionsWithIndex(function, true);
-            List<Object> result =  this.getFromPartitions();
+            List<Object> result = this.getFromPartitions();
 
             IReadIterator readIterator = new IMemoryPartition.IMemoryReadIterator(elems);
             for (IPartition part : this.generalModule.getExecutorData().getPartitions()) {
@@ -269,4 +278,46 @@ class GeneralModuleTest {
             e.printStackTrace();
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    void groupBy(String partitionType) {
+        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction(
+                "org.ignis.executor.api.functions.GroupByIntStringFunction", IFunction.class);
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
+
+        try {
+            int np = this.generalModule.getExecutorData().getContext().executors();
+            List<Object> elems = IElements.createString(100 * 2 * np, 0);
+            List<Object> localElems = super.rankVector(elems);
+            this.loadToPartitions(elems, 2);
+            this.generalModule.groupBy(function, 1);
+            List<Object> result = this.getFromPartitions();
+
+            Map<Integer, Integer> counts = new HashMap<>();
+            for (Object obj : elems) {
+                int len = ((String) obj).length();
+                if (counts.containsKey(len)) {
+                    counts.put(len, counts.get(len) + 1);
+                } else {
+                    counts.put(len, 1);
+                }
+            }
+            this.loadToPartitions(result, 1);
+            generalModule.getExecutorData().getMpi().gather(generalModule.getExecutorData().getPartitions().get(0), 0);
+            List<Object> result2 = this.getFromPartitions();
+
+            if (getExecutorData().getMpi().isRoot(0)) {
+                for (Object obj : result2) {
+                    Pair<Integer, ArrayList<String>> item = (Pair<Integer, ArrayList<String>>) obj;
+                    assertEquals(counts.get(item.getKey()), item.getValue().size());
+                }
+            }
+
+        } catch (TException | MPIException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

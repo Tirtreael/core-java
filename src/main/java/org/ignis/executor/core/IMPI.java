@@ -16,7 +16,11 @@ import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.NotSerializableException;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,11 +31,10 @@ import java.util.stream.Collectors;
 public class IMPI {
 
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private MPI mpi;
     private final IPropertyParser propertyParser;
     private final IPartitionTools partitionTools;
     private final IContext context;
+    private MPI mpi;
 
     public IMPI(IPropertyParser propertyParser, IPartitionTools partitionTools, IContext context) {
         this.propertyParser = propertyParser;
@@ -39,12 +42,12 @@ public class IMPI {
         this.context = context;
     }
 
-    public void gather(IPartition part, int root) {
+    public void gather(IPartition part, int root) throws MPIException, TException, IOException {
         if (this.executors() == 1) {
         } else this.gatherImpl(this.nativ(), part, root, true);
     }
 
-    public void bcast(IPartition partition, int root) throws TException, NotSerializableException {
+    public void bcast(IPartition partition, int root) throws TException, NotSerializableException, MPIException {
         if (this.executors() == 1) {
         } else if (partition.type().equals(IMemoryPartition.TYPE)) {
 //            if(partition ) {
@@ -156,7 +159,7 @@ public class IMPI {
         return this.context.executorId();
     }
 
-    public int executors() {
+    public int executors() throws MPIException {
         return this.context.executors();
     }
 
@@ -190,8 +193,59 @@ public class IMPI {
         return svz.stream().map(t -> t.get(c)).collect(Collectors.toList());
     }
 
-    public void gatherImpl(Comm group, IPartition partition, int root, boolean sameProtocol) {
+    public void gatherImpl(Comm group, IPartition partition, int root, boolean sameProtocol) throws MPIException, IOException, TException {
+        int rank = group.getRank();
+        int executors = group.getSize();
+        if (partition.type().equals(IMemoryPartition.TYPE)) {
+//            cls = null;
+            int sz = partition.size();
+            List<Integer> szv = new ArrayList<>();
+            List<Integer> displs = new ArrayList<>();
+            if (sameProtocol) {
+//                cls =
+//                if(rank == root){
+//
+//                }
+//                group.b
+                group.gather(sz, 1, MPI.INT, szv, 1, MPI.INT, root);
+                if (rank == root) {
+                    displs = this.displs(szv);
+                    if (root > 0) {
+//                        partition.getElements() =
+                    }
+                    partition.getElements().addAll(Collections.singletonList(BigInteger.valueOf(displs.get(displs.size() - 1) - partition.size()).toByteArray()));
+                    group.gatherv(MPI.REPLACE, 0, MPI.BYTE, partition, this.listToArrayInt(szv), this.listToArrayInt(displs), MPI.BYTE, root);
+                } else {
+                    group.gatherv(partition, sz, MPI.BYTE, null, null, null, MPI.BYTE, root);
+                }
+            } else {
+//                IMemoryPartition men = partitionTools.newMemoryPartition(partition);
+                TMemoryBuffer buffer = new TMemoryBuffer(4096);
+                sz = 0;
+                if (rank != root) {
+                    partition.write(buffer, propertyParser.msgCompression());
+                    buffer.flush();
+                }
+                group.gather(sz, 1, MPI.INT, szv, 1, MPI.INT, root);
+                if (rank == root) {
+                    displs = this.displs(szv);
+                    buffer = new TMemoryBuffer(displs.get(displs.size() - 1));
+                }
+                group.gatherv(buffer, sz, MPI.BYTE, buffer, this.listToArrayInt(szv), this.listToArrayInt(displs), MPI.BYTE, root);
 
+                if (rank == root) {
+                    IPartition rcv = new IMemoryPartition();
+                    for (int i = 0; i < executors; i++) {
+                        if (i != rank) {
+                            rcv.read(buffer);
+                        }
+                    }
+                    partition.moveTo(rcv);
+                }
+            }
+        }
+//        else if(partition.type() == IRawMemoryPartition.TYPE){
+//        } else {}
     }
 
     public void sendRecv(IPartition part, Object source, Object dest, String tag) {
@@ -206,7 +260,7 @@ public class IMPI {
 
     }
 
-    public void exchangeSync(IPartitionGroup input, IPartitionGroup output) {
+    public void exchangeSync(IPartitionGroup input, IPartitionGroup output) throws MPIException {
         int executors = this.executors();
         if (executors == 1 || input.size() < 2) {
             for (IPartition part : input) {
@@ -355,6 +409,21 @@ public class IMPI {
 
     }
 
+    public int[] listToArrayInt(List<Integer> list) {
+        int[] array = new int[list.size()];
+        for (int i = 0; i < list.size(); i++)
+            array[i] = list.get(i);
+        return array;
+    }
+
+    public byte[] objToBytes(Object obj) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(obj);
+        oos.flush();
+        return bos.toByteArray();
+    }
+
     private class MsgOpt {
         private final boolean sameProtocol;
         private final boolean sameStorage;
@@ -364,6 +433,5 @@ public class IMPI {
             this.sameStorage = sameStorage;
         }
     }
-
 
 }
