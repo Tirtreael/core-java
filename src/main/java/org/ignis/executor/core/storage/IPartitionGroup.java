@@ -27,11 +27,11 @@ public class IPartitionGroup extends ArrayList<IPartition> {
         super(c);
     }
 
-    public Object shallowCopy() {
-        return this.clone();
+    public IPartitionGroup shallowCopy() {
+        return (IPartitionGroup) this.clone();
     }
 
-    public Object deepCopy() {
+    public IPartitionGroup deepCopy() {
         IPartitionGroup copy = new IPartitionGroup();
         for (IPartition partition : this) {
             copy.add(partition.clone());
