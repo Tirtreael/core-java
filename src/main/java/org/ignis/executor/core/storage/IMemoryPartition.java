@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,6 +58,15 @@ public class IMemoryPartition implements IPartition {
         } else {
             elements.add(elems);
         }*/
+    }
+
+    public void readAll(TTransport transport) throws TException, NotSerializableException {
+        IZlibTransport trans = new IZlibTransport(transport);
+        IObjectProtocol proto = new IObjectProtocol(trans);
+        Object elems = proto.readObject();
+        if (elems instanceof Collection)
+            elements.addAll((Collection<?>) elems);
+        else elements.add(elems);
     }
 
     @Override
@@ -141,7 +151,7 @@ public class IMemoryPartition implements IPartition {
 
     @Override
     public void fit() {
-
+        ((ArrayList<Object>) this.elements).trimToSize();
     }
 
     @Override
