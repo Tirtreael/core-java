@@ -9,7 +9,6 @@ import org.ignis.executor.core.io.IReader;
 import org.ignis.executor.core.io.IWriter;
 
 import java.io.NotSerializableException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,11 +35,7 @@ public class IObjectProtocol extends TCompactProtocol {
             boolean header = readBool();
             if (header) {
                 long elements = IReader.readSize(this);
-                List<Object> list = new ArrayList<>((int) elements);
-                for (int i = 0; i < elements; i++) {
-                    list.add(INativeReader.read(this));
-                }
-                return list;
+                return INativeReader.read(this, elements);
             } else {
                 return INativeReader.read(this);
             }
@@ -55,11 +50,11 @@ public class IObjectProtocol extends TCompactProtocol {
             this.writeBool(obj instanceof Collection && listHeader);
             if (obj instanceof Collection && listHeader) {
                 IWriter.writeSize(this, ((Collection<?>) obj).size());
-                for (Object element : (Collection<?>) obj) {
-                    INativeWriter.write(this, element);
-                }
-            } else {
+//                for (Object element : (Collection<?>) obj) {
                 INativeWriter.write(this, obj);
+//                }
+            } else {
+                INativeWriter.write(this, List.of(obj));
             }
         } else {
             IWriter.write(this, obj);
@@ -68,7 +63,7 @@ public class IObjectProtocol extends TCompactProtocol {
 
 
     public boolean readSerialization() throws TException, NotSerializableException {
-        this.readByte();
+//        this.readByte();
         byte id = this.readByte();
         if (id == IGNIS_PROTOCOL)
             return false;

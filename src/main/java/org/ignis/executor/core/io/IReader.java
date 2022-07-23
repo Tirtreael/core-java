@@ -3,7 +3,7 @@ package org.ignis.executor.core.io;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 import org.ignis.executor.api.Pair;
-import org.json.JSONObject;
+import org.ignis.executor.api.myJson;
 
 import java.util.*;
 
@@ -109,10 +109,10 @@ public interface IReader {
         return obj;
     }
 
-    static JSONObject readJson(TProtocol protocol) throws TException {
+    static myJson readJson(TProtocol protocol) throws TException {
         Object obj = read(protocol);
         if (obj instanceof Map)
-            return new JSONObject((Map<?, ?>) obj);
+            return new myJson((Map<?, ?>) obj);
         else return null;
 //        if(obj instanceof List) {
 //            JSONArray jsonArray = new JSONArray((List<?>) obj);

@@ -29,7 +29,7 @@ public class IMemoryPartitionTest extends IElements {
 
     public static boolean compare(Object obj, Object obj2) {
         if (obj instanceof JSONObject && obj2 instanceof JSONObject)
-            return obj.toString() == (obj2.toString());
+            return obj.toString().equals(obj2.toString());
         else if (obj instanceof byte[] && obj2 instanceof byte[] && ((byte[]) obj).length == ((byte[]) obj2).length) {
             for (int i = 0; i < ((byte[]) obj).length; i++)
                 if (((byte[]) obj)[i] != ((byte[]) obj2)[i])
@@ -199,7 +199,7 @@ public class IMemoryPartitionTest extends IElements {
         partition.write(memoryBuffer, 0, nativ);
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
-//        zlib.flush();
+        zlib.flush();
         return proto.readObject();
     }
 

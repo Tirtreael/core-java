@@ -1,7 +1,7 @@
 package org.ignis.executor.core;
 
 import org.ignis.executor.api.Pair;
-import org.json.JSONObject;
+import org.ignis.executor.api.myJson;
 
 import java.util.*;
 
@@ -193,7 +193,7 @@ public class IElements {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
-            list.add(new JSONObject("{ raiz: { hijo1: 4, hijo2: 37 }, raiz2: { hijo1: 4, hijo2: 37 } }"));
+            list.add(new myJson("{ raiz: { hijo1: 4, hijo2: 37 }, raiz2: { hijo1: 4, hijo2: 37 } }"));
         }
         return List.of(list);
     }

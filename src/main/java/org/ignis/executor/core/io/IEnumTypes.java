@@ -1,8 +1,8 @@
 package org.ignis.executor.core.io;
 
 import org.ignis.executor.api.Pair;
+import org.ignis.executor.api.myJson;
 import org.ignis.executor.core.IIEnumTypes;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +25,7 @@ public class IEnumTypes implements IIEnumTypes<IType> {
     public static final IType I_PAIR = new IType(0xb, Pair.class);
     public static final IType I_BINARY = new IType(0xc, byte[].class);
     public static final IType I_PAIR_LIST = new IType(0xd, List.class);
-    public static final IType I_JSON = new IType(0xe, JSONObject.class);
+    public static final IType I_JSON = new IType(0xe, myJson.class);
 
     public static final Map<Byte, IType> types = new HashMap<>();
 

@@ -6,19 +6,24 @@ import org.apache.thrift.transport.TTransportException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
 public interface INativeWriter {
 
     WriterType write = new WriterType(INativeWriter::write);
 
-    static void write(TProtocol protocol, Object obj) {
+    static void write(TProtocol protocol, Object list) {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream oos = null;
         byte[] data = new byte[4096];
         try {
             bos = new ByteArrayOutputStream();
             oos = new ObjectOutputStream(bos);
-            oos.writeObject(obj);
+            if (list instanceof List) {
+                for (Object o : (List<?>) list) {
+                    oos.writeObject(o);
+                }
+            }
             oos.flush();
             data = bos.toByteArray();
         } catch (IOException e) {
@@ -39,7 +44,6 @@ public interface INativeWriter {
                 }
             }
         }
-
 
         try {
             protocol.getTransport().write(data);

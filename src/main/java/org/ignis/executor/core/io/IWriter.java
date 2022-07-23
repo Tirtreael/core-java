@@ -3,7 +3,7 @@ package org.ignis.executor.core.io;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 import org.ignis.executor.api.Pair;
-import org.json.JSONObject;
+import org.ignis.executor.api.myJson;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -29,7 +29,7 @@ public interface IWriter {
             Map.entry(IEnumTypes.I_PAIR.id, new WriterType((protocol, obj) -> writePair(protocol, (Pair<?, ?>) obj))),
             Map.entry(IEnumTypes.I_BINARY.id, new WriterType((protocol, obj) -> writeBinary(protocol, (byte[]) obj))),
             Map.entry(IEnumTypes.I_PAIR_LIST.id, new WriterType((protocol, obj) -> writePairList(protocol, (List<?>) obj))),
-            Map.entry(IEnumTypes.I_JSON.id, new WriterType((protocol, obj) -> writeJSON(protocol, (JSONObject) obj)))
+            Map.entry(IEnumTypes.I_JSON.id, new WriterType((protocol, obj) -> writeJSON(protocol, (myJson) obj)))
     );
 
     static WriterType getWriterType(byte id) {
@@ -145,7 +145,7 @@ public interface IWriter {
         }
     }
 
-    static void writeJSON(TProtocol protocol, JSONObject obj) throws TException {
+    static void writeJSON(TProtocol protocol, myJson obj) throws TException {
         write(protocol, obj.toMap());
     }
 

@@ -9,9 +9,9 @@ public class IZlibTransport extends TZlibTransport {
     private static final int defaultCompressionLevel = 0;
 
     private final TTransport transport;
-    private boolean compBuffer = false;
+    private final boolean compBuffer;
     private byte compressionLevel = 0;
-    private byte inCompressionLevel;
+    private final byte inCompressionLevel;
     private boolean rInit = false;
     private boolean wInit = false;
 
@@ -42,8 +42,8 @@ public class IZlibTransport extends TZlibTransport {
     public int read(byte[] buf, int off, int len) throws TTransportException {
         if (!this.rInit) {
 //            byte[] byteArr = new byte[1];
-//            this.transport.readAll(buf, off, 1);
-//            this.compressionLevel = buf[0];
+            this.transport.read(buf, off, 1);
+            this.compressionLevel = buf[0];
             this.rInit = transport.peek();
         }
         if (this.compressionLevel > 0) {
@@ -62,11 +62,13 @@ public class IZlibTransport extends TZlibTransport {
         }
         if (this.compressionLevel > 0) {
             super.write(buf, off, len);
-            if (this.getBufferPosition() > getBuffer().length) {
-                this.flush();
-            }
+            super.flush();
+//            if (this.getBufferPosition() > getBuffer().length) {
+//                this.flush();
+//            }
         } else {
             this.transport.write(buf, off, len);
+            this.transport.flush();
         }
     }
 
