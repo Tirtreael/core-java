@@ -85,8 +85,9 @@ public class IMemoryPartitionTest extends IElements {
         List<?> resultList;
         if (result instanceof List) {
             resultList = (List<?>) result;
-            compare(elems.get(0), resultList.get(0));
-//            compare(elems.get(1), resultList.get(1));
+            for (int i = 0; i < elems.size(); i++) {
+                compare(elems.get(i), resultList.get(i));
+            }
         } else assertEquals(elems, result);
     }
 
@@ -110,9 +111,10 @@ public class IMemoryPartitionTest extends IElements {
         IMemoryPartition partition = new IMemoryPartition();
         this.read(elems, partition, rNative);
         assertEquals(elems.size(), partition.size());
-        List<Object> result = this.readIterator(partition);
-        compare(elems.get(0), result.get(0));
-//        compare(elems.get(1), result.get(1));
+        List<Object> resultList = this.readIterator(partition);
+        for (int i = 0; i < elems.size(); i++) {
+            compare(elems.get(i), resultList.get(i));
+        }
     }
 
     @ParameterizedTest
@@ -140,8 +142,9 @@ public class IMemoryPartitionTest extends IElements {
         List<?> resultList;
         if (result instanceof List) {
             resultList = (List<?>) result;
-            compare(elems.get(0), resultList.get(0));
-//            compare(elems.get(1), resultList.get(1));
+            for (int i = 0; i < elems.size(); i++) {
+                compare(elems.get(i), resultList.get(i));
+            }
         } else assertEquals(elems, result);
     }
 
@@ -196,7 +199,7 @@ public class IMemoryPartitionTest extends IElements {
 
     Object write(IMemoryPartition partition, boolean nativ) throws TException, NotSerializableException {
         TTransport memoryBuffer = new TMemoryBuffer(4096);
-        partition.write(memoryBuffer, 0, nativ);
+        partition.write(memoryBuffer, 3, nativ);
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
         zlib.flush();
@@ -220,40 +223,80 @@ public class IMemoryPartitionTest extends IElements {
     }
 
 
-    @Test
-    void testClone() {
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
+    void testClone(List<Object> elems) {
+        IMemoryPartition partition = new IMemoryPartition();
+        partition.setElements(elems);
+
+        IMemoryPartition partitionClone = partition.clone();
+
+        assertEquals(partition.size(), partitionClone.size());
+        for (int i = 0; i < partition.size(); i++) {
+            compare(partition.getElements().get(i), partitionClone.getElements().get(i));
+        }
     }
 
-    @Test
-    void testWrite() {
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
+    void copyFrom(List<Object> elems) {
+        IMemoryPartition partition = new IMemoryPartition();
+        partition.setElements(elems);
+
+        IMemoryPartition partitionClone = new IMemoryPartition();
+        partitionClone.copyFrom(partition);
+
+        assertEquals(partition.size(), partitionClone.size());
+        for (int i = 0; i < partition.size(); i++) {
+            compare(partition.getElements().get(i), partitionClone.getElements().get(i));
+        }
     }
 
-    @Test
-    void testWrite1() {
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
+    void moveFrom(List<Object> elems) {
+        IMemoryPartition partition = new IMemoryPartition();
+        partition.setElements(elems);
+        int elemsInitial = partition.size();
+        IMemoryPartition partition2 = new IMemoryPartition();
+
+        try {
+            partition2.moveFrom(partition);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+
+        assertEquals(elemsInitial, partition2.size());
+        assertEquals(0, partition.size());
+        for (int i = 0; i < partition.size(); i++) {
+            compare(elems.get(i), partition2.getElements().get(i));
+        }
     }
 
-    @Test
-    void readIterator() {
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
+    void size(List<Object> elems) {
+        IMemoryPartition partition = new IMemoryPartition();
+        partition.setElements(elems);
+        assertEquals(partition.size(), partition.getElements().size());
+        assertEquals(partition.size(), elems.size());
     }
 
-    @Test
-    void writeIterator() {
-    }
-
-    @Test
-    void copyFrom() {
-    }
-
-    @Test
-    void moveFrom() {
-    }
-
-    @Test
-    void size() {
-    }
-
-    @Test
-    void toBytes() {
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
+    void toBytes(List<Object> elems) {
+        IMemoryPartition partition = new IMemoryPartition();
+        partition.setElements(elems);
     }
 
     @ParameterizedTest
@@ -264,22 +307,36 @@ public class IMemoryPartitionTest extends IElements {
         IMemoryPartition partition = new IMemoryPartition();
         this.writeIterator(elems, partition);
         assertEquals(elems.size(), partition.size());
+
         partition.clear();
+
         assertEquals(0, partition.size());
         List<Object> result = this.readIterator(partition);
         assertEquals(0, result.size());
     }
 
-    @Test
-    void fit() {
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
+    void fit(List<Object> elems) throws TException {
+        IMemoryPartition partition = new IMemoryPartition();
+        this.writeIterator(elems, partition);
+        assertEquals(elems.size(), partition.size());
+
+        ArrayList<Object> arrayList = (ArrayList<Object>) partition.getElements();
+        arrayList.trimToSize();
+
+//        assertEquals(0, partition.size());
+//        List<Object> result = this.readIterator(partition);
+//        assertEquals(0, result.size());
     }
 
     @Test
     void type() {
-    }
-
-    @Test
-    void iterator() {
+        IMemoryPartition partition = new IMemoryPartition();
+        assertEquals(partition.type(), IMemoryPartition.TYPE);
+        assertEquals(partition.type(), "Memory");
     }
 
 

@@ -47,6 +47,11 @@ public class IMemoryPartition implements IPartition {
         return IMemoryPartition.TYPE;
     }
 
+    @Override
+    public long bytes() {
+        return this.toBytes().length;
+    }
+
     //@Todo check
     public void read(TTransport transport) throws TException, NotSerializableException {
         IZlibTransport trans = new IZlibTransport(transport);
@@ -134,12 +139,16 @@ public class IMemoryPartition implements IPartition {
     }
 
     @Override
-    public byte[] toBytes() throws IOException {
+    public byte[] toBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream out = new ObjectOutputStream(baos);
-
-        for (Object element : this.elements) {
-            out.writeObject(element);
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(baos);
+            for (Object element : this.elements) {
+                out.writeObject(element);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return baos.toByteArray();
     }

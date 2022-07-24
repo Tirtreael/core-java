@@ -7,7 +7,7 @@ import java.util.*;
 
 public class IElements {
 
-    public static final int N = 2;
+    public static final int N = 50;
     public static final int SEED = 0;
 
     public static List<Object> createBoolean() {
