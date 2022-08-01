@@ -32,27 +32,7 @@ public class GeneralModule extends Module implements IGeneralModule {
     @Override
     public void map(IFunction src) {
         try {
-            IContext context = this.executorData.getContext();
-            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
-            src.before(context);
-            IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
-            LOGGER.info("General: map " + inputGroup.size() + " partitions");
-            IThreadPool.parallel((i) -> {
-                IWriteIterator it;
-                try {
-                    it = outputGroup.get(i).writeIterator();
-                    for (Object obj : inputGroup.get(i)) {
-                        it.write(src.call(obj, context));
-                    }
-                } catch (TException e) {
-                    this.packException(e);
-                }
-            }, inputGroup.size());
-            inputGroup.clear();
-
-            src.after(context);
-            this.executorData.setPartitions(outputGroup);
-
+            IPipe.map(src);
         } catch (Exception e) {
             this.packException(e);
         }
@@ -61,32 +41,7 @@ public class GeneralModule extends Module implements IGeneralModule {
     @Override
     public void filter(IFunction src) {
         try {
-            IContext context = this.executorData.getContext();
-            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
-            src.before(context);
-            IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
-            LOGGER.info("General: filter " + inputGroup.size() + " partitions");
-
-            IThreadPool.parallel((i) -> {
-//                for (int i = 0; i < inputGroup.size(); i++) {
-                IWriteIterator it;
-                try {
-                    it = outputGroup.get(i).writeIterator();
-                    for (Object obj : inputGroup.get(i)) {
-                        if (src.call(obj, context) == Boolean.TRUE) {
-                            it.write(obj);
-                        }
-                    }
-                } catch (TException e) {
-                    this.packException(e);
-                }
-//                }
-            }, inputGroup.size());
-            inputGroup.clear();
-
-            src.after(context);
-            this.executorData.setPartitions(outputGroup);
-
+            IPipe.filter(src);
         } catch (Exception e) {
             this.packException(e);
         }
@@ -95,31 +50,7 @@ public class GeneralModule extends Module implements IGeneralModule {
     @Override
     public void flatmap(IFunction src) {
         try {
-            IContext context = this.executorData.getContext();
-            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
-            src.before(context);
-            IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
-            LOGGER.info("General: flatmap " + inputGroup.size() + " partitions");
-            IThreadPool.parallel((i) -> {
-//                for (int i = 0; i < inputGroup.size(); i++) {
-                IWriteIterator it;
-                try {
-                    it = outputGroup.get(i).writeIterator();
-                    for (Object obj : inputGroup.get(i)) {
-                        for (Object obj2 : (Iterable<?>) src.call(obj, context)) {
-                            it.write(obj2);
-                        }
-                    }
-                } catch (TException e) {
-                    this.packException(e);
-                }
-//                }
-            }, inputGroup.size());
-            inputGroup.clear();
-
-            src.after(context);
-            this.executorData.setPartitions(outputGroup);
-
+            IPipe.flatmap(src);
         } catch (Exception e) {
             this.packException(e);
         }

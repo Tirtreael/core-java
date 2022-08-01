@@ -12,7 +12,6 @@ import java.io.NotSerializableException;
 import java.util.Collection;
 import java.util.List;
 
-//@Todo: add all methods
 public class IObjectProtocol extends TCompactProtocol {
 
     public static final byte IGNIS_PROTOCOL = 0;

@@ -25,12 +25,11 @@ public class IContext {
     }
 
     public int executors() throws MPIException {
-        return MPI.COMM_WORLD.getSize();
+        return MPI.COMM_WORLD.Size();
     }
 
     public int executorId() {
-//        return this.mpiGroup.getRank();
-        return 0;
+        return this.mpiGroup.Rank();
     }
 
     public int threadId() {

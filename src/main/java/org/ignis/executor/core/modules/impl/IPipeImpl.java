@@ -19,6 +19,85 @@ public class IPipeImpl extends Module {
         super(executorData, LOGGER);
     }
 
+
+    public void map(IFunction src) {
+        IContext context = this.executorData.getContext();
+        IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+        src.before(context);
+        IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+        LOGGER.info("General: map " + inputGroup.size() + " partitions");
+        IThreadPool.parallel((i) -> {
+            IWriteIterator it;
+            try {
+                it = outputGroup.get(i).writeIterator();
+                for (Object obj : inputGroup.get(i)) {
+                    it.write(src.call(obj, context));
+                }
+            } catch (TException e) {
+                this.packException(e);
+            }
+        }, inputGroup.size());
+        inputGroup.clear();
+
+        src.after(context);
+        this.executorData.setPartitions(outputGroup);
+    }
+
+    public void filter(IFunction src) {
+        IContext context = this.executorData.getContext();
+        IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+        src.before(context);
+        IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+        LOGGER.info("General: filter " + inputGroup.size() + " partitions");
+
+        IThreadPool.parallel((i) -> {
+//                for (int i = 0; i < inputGroup.size(); i++) {
+            IWriteIterator it;
+            try {
+                it = outputGroup.get(i).writeIterator();
+                for (Object obj : inputGroup.get(i)) {
+                    if (src.call(obj, context) == Boolean.TRUE) {
+                        it.write(obj);
+                    }
+                }
+            } catch (TException e) {
+                this.packException(e);
+            }
+//                }
+        }, inputGroup.size());
+        inputGroup.clear();
+
+        src.after(context);
+        this.executorData.setPartitions(outputGroup);
+    }
+
+    public void flatmap(IFunction src) {
+        IContext context = this.executorData.getContext();
+        IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+        src.before(context);
+        IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+        LOGGER.info("General: flatmap " + inputGroup.size() + " partitions");
+        IThreadPool.parallel((i) -> {
+//                for (int i = 0; i < inputGroup.size(); i++) {
+            IWriteIterator it;
+            try {
+                it = outputGroup.get(i).writeIterator();
+                for (Object obj : inputGroup.get(i)) {
+                    for (Object obj2 : (Iterable<?>) src.call(obj, context)) {
+                        it.write(obj2);
+                    }
+                }
+            } catch (TException e) {
+                this.packException(e);
+            }
+//                }
+        }, inputGroup.size());
+        inputGroup.clear();
+
+        src.after(context);
+        this.executorData.setPartitions(outputGroup);
+    }
+
     public void keyBy(IFunction src) {
         IContext context = this.executorData.getContext();
         IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();

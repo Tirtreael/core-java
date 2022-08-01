@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-// @Todo
+
 public class IMemoryPartition implements IPartition {
 
     public static final String TYPE = "Memory";
@@ -84,12 +84,11 @@ public class IMemoryPartition implements IPartition {
     @Override
     public void write(TTransport transport, int compression) throws TException {
         write(transport, compression, false);
-
     }
 
     @Override
     public void write(TTransport transport) throws TException {
-        write(transport, 0, false);
+        write(transport, IZlibTransport.defaultCompressionLevel, false);
     }
 
     public List<Object> getElements() {
@@ -141,7 +140,7 @@ public class IMemoryPartition implements IPartition {
     @Override
     public byte[] toBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream out = null;
+        ObjectOutputStream out;
         try {
             out = new ObjectOutputStream(baos);
             for (Object element : this.elements) {

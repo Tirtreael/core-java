@@ -136,7 +136,7 @@ public class IExecutorData {
         if (ratio > 1) {
             mpiCores = Math.min(getContext().cores(), (int) Math.ceil(ratio));
         } else mpiCores = (int) Math.ceil(getContext().cores() * ratio);
-        if (mpiCores > 1 && context.getMPIGroup().getSize() == 1 && context.executors() > 1) {
+        if (mpiCores > 1 && context.getMPIGroup().Size() == 1 && context.executors() > 1) {
 //            context.getMPIGroup() = context.getMPIGroup()
         }
     }

@@ -6,24 +6,27 @@ import org.apache.thrift.transport.TZlibTransport;
 
 public class IZlibTransport extends TZlibTransport {
 
-    private static final int defaultCompressionLevel = 0;
+    public static final int defaultCompressionLevel = 6;
 
     private final TTransport transport;
     private final boolean compBuffer;
-    private byte compressionLevel = 0;
-    private final byte inCompressionLevel;
-    private boolean rInit = false;
-    private boolean wInit = false;
+    private int compressionLevel;
+    private boolean rInit;
+    private boolean wInit;
 
     public IZlibTransport(TTransport transport) {
         this(transport, defaultCompressionLevel);
+        rInit = false;
+        wInit = false;
     }
 
     public IZlibTransport(TTransport transport, int compressionLevel) {
         super(transport, compressionLevel);
         this.transport = transport;
-        this.inCompressionLevel = this.compressionLevel;
+        this.compressionLevel = compressionLevel;
         this.compBuffer = true;
+        rInit = false;
+        wInit = false;
     }
 
     public void reset() {
@@ -41,7 +44,6 @@ public class IZlibTransport extends TZlibTransport {
     @Override
     public int read(byte[] buf, int off, int len) throws TTransportException {
         if (!this.rInit) {
-//            byte[] byteArr = new byte[1];
             this.transport.read(buf, off, 1);
             this.compressionLevel = buf[0];
             this.rInit = transport.peek();
@@ -57,18 +59,16 @@ public class IZlibTransport extends TZlibTransport {
     public void write(byte[] buf, int off, int len) throws TTransportException {
         if (!this.wInit) {
             this.wInit = true;
-            byte[] compBuffer = new byte[]{this.compressionLevel};
-            this.transport.write(compBuffer, off, compBuffer.length);
+            byte[] compBuffer = new byte[]{(byte) compressionLevel};
+            this.transport.write(compBuffer, off, 1);
+            this.flush();
         }
         if (this.compressionLevel > 0) {
             super.write(buf, off, len);
-            super.flush();
-//            if (this.getBufferPosition() > getBuffer().length) {
-//                this.flush();
-//            }
+            this.flush();
         } else {
             this.transport.write(buf, off, len);
-            this.transport.flush();
+            this.flush();
         }
     }
 

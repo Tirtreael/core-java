@@ -1,6 +1,5 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPI;
 import mpi.MPIException;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
@@ -82,13 +81,13 @@ public abstract class Module implements IModule {
                     i++;
             }
             data.add(i);
-            this.executorData.getMpi().nativ().reduce(data, 2, MPI.INT, MPI.SUM, 0);
+//            this.executorData.getMpi().nativ().reduce(data, 2, MPI.INT, MPI.SUM, 0);
             if (this.executorData.getMpi().isRoot(0)) {
                 int n = data.get(0);
                 int nZero = data.get(1);
                 sync = nZero < n / executors;
             }
-            this.executorData.getMpi().nativ().bcast(sync, 1, MPI.BOOLEAN, 0);
+//            this.executorData.getMpi().nativ().bcast(sync, 1, MPI.BOOLEAN, 0);
         }
         if (sync) {
             this.logger.info("Base: using synchronous exchange");

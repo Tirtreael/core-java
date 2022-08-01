@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IMemoryPartitionTest extends IElements {
+public class IMemoryPartitionTest implements IElements {
 
 //    @BeforeAll
 //    void exampleData(){
@@ -193,16 +193,14 @@ public class IMemoryPartitionTest extends IElements {
         IObjectProtocol proto = new IObjectProtocol(zlib);
 
         proto.writeObject(elems, nativ, true);
-        zlib.flush();
         partition.readAll(memoryBuffer);
     }
 
     Object write(IMemoryPartition partition, boolean nativ) throws TException, NotSerializableException {
         TTransport memoryBuffer = new TMemoryBuffer(4096);
-        partition.write(memoryBuffer, 3, nativ);
+        partition.write(memoryBuffer, IZlibTransport.defaultCompressionLevel, nativ);
         TTransport zlib = new IZlibTransport(memoryBuffer);
         IObjectProtocol proto = new IObjectProtocol(zlib);
-        zlib.flush();
         return proto.readObject();
     }
 

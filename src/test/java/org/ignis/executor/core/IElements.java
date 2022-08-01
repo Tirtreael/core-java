@@ -5,69 +5,69 @@ import org.ignis.executor.api.myJson;
 
 import java.util.*;
 
-public class IElements {
+public interface IElements {
 
-    public static final int N = 50;
-    public static final int SEED = 0;
+    int N = 180;
+    int SEED = 17;
 
-    public static List<Object> createBoolean() {
+    static List<Object> createBoolean() {
         return createBoolean(N, SEED);
     }
 
-    public static List<Object> createByte() {
+    static List<Object> createByte() {
         return createByte(N, SEED);
     }
 
-    public static List<Object> createShort() {
+    static List<Object> createShort() {
         return createShort(N, SEED);
     }
 
-    public static List<Object> createInteger() {
+    static List<Object> createInteger() {
         return createInteger(N, SEED);
     }
 
-    public static List<Object> createLong() {
+    static List<Object> createLong() {
         return createLong(N, SEED);
     }
 
-    public static List<Object> createDouble() {
+    static List<Object> createDouble() {
         return createDouble(N, SEED);
     }
 
-    public static List<Object> createString() {
+    static List<Object> createString() {
         return createString(N, SEED);
     }
 
-    public static List<Object> createList() {
+    static List<Object> createList() {
         return createList(N, SEED);
     }
 
-    public static List<Object> createSet() {
+    static List<Object> createSet() {
         return createSet(N, SEED);
     }
 
-    public static List<Object> createMap() {
+    static List<Object> createMap() {
         return createMap(N, SEED);
     }
 
-    public static List<Object> createPair() {
+    static List<Object> createPair() {
         return createPair(N, SEED);
     }
 
-    public static List<Object> createBinary() {
+    static List<Object> createBinary() {
         return createBinary(N, SEED);
     }
 
-    public static List<Object> createPairList() {
+    static List<Object> createPairList() {
         return createPairList(N, SEED);
     }
 
-    public static List<Object> createJson() {
+    static List<Object> createJson() {
         return createJson(N, SEED);
     }
 
 
-    public static List<Object> createBoolean(int n, int seed) {
+    static List<Object> createBoolean(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -76,7 +76,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createByte(int n, int seed) {
+    static List<Object> createByte(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -85,7 +85,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createShort(int n, int seed) {
+    static List<Object> createShort(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -94,7 +94,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createInteger(int n, int seed) {
+    static List<Object> createInteger(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -103,7 +103,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createLong(int n, int seed) {
+    static List<Object> createLong(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -112,7 +112,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createDouble(int n, int seed) {
+    static List<Object> createDouble(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -121,7 +121,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createString(int n, int seed) {
+    static List<Object> createString(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -130,7 +130,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createList(int n, int seed) {
+    static List<Object> createList(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -139,7 +139,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createSet(int n, int seed) {
+    static List<Object> createSet(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -148,7 +148,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createMap(int n, int seed) {
+    static List<Object> createMap(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -158,7 +158,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createPair(int n, int seed) {
+    static List<Object> createPair(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -167,7 +167,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createBinary(int n, int seed) {
+    static List<Object> createBinary(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -179,7 +179,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createPairList(int n, int seed) {
+    static List<Object> createPairList(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
@@ -189,7 +189,7 @@ public class IElements {
         return List.of(list);
     }
 
-    public static List<Object> createJson(int n, int seed) {
+    static List<Object> createJson(int n, int seed) {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {

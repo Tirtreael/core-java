@@ -1,6 +1,5 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPI;
 import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,7 +47,7 @@ public class ISortImpl extends Module {
         }
         int localPartitions = input.size();
         int totalPartitions = 0;
-        this.executorData.getMpi().nativ().allReduce(localPartitions, totalPartitions, 1, MPI.INT, MPI.SUM);
+//        this.executorData.getMpi().nativ().allReduce(localPartitions, totalPartitions, 1, MPI.INT, MPI.SUM);
         if (totalPartitions < 2) {
             executorData.setPartitions(input);
             return;
@@ -69,7 +68,7 @@ public class ISortImpl extends Module {
             for (IPartition part : input) {
                 send[1] += part.size();
             }
-            executorData.getMpi().nativ().allReduce(send, rcv, 2, MPI.LONG, MPI.SUM);
+//            executorData.getMpi().nativ().allReduce(send, rcv, 2, MPI.LONG, MPI.SUM);
             samples = (int) Math.ceil(rcv[1] / rcv[0] * sr);
         }
         samples = Math.max(numPartitions, samples);
@@ -136,7 +135,7 @@ public class ISortImpl extends Module {
         int sz = tmp.parallelStream().mapToInt(IPartition::size).sum();
         int disp = 0, pos, sample;
 
-        this.executorData.getMpi().nativ().allGather(sz, 1, MPI.INT, aux, 1, MPI.INT);
+//        this.executorData.getMpi().nativ().allGather(sz, 1, MPI.INT, aux, 1, MPI.INT);
 
         sz = 0;
         for (int i = 0; i < executors; i++) {

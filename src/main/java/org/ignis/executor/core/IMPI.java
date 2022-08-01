@@ -44,6 +44,7 @@ public class IMPI {
 
     public void gather(IPartition part, int root) throws MPIException, TException, IOException {
         if (this.executors() == 1) {
+
         } else this.gatherImpl(this.nativ(), part, root, true);
     }
 
@@ -81,8 +82,8 @@ public class IMPI {
     }
 
     public void driverGather(Intracomm group, IPartitionGroup partitionGroup) throws MPIException {
-        boolean driver = group.getRank() == 0;
-        boolean exec0 = group.getRank() == 1;
+        boolean driver = group.Rank() == 0;
+        boolean exec0 = group.Rank() == 1;
         int maxPartition = 0;
         byte protocol = IObjectProtocol.JAVA_PROTOCOL;
         boolean same_protocol;
@@ -99,17 +100,17 @@ public class IMPI {
             }
         }
 //        @Todo MPI.REPLACE -> MPI.IN_PLACE
-        group.allReduce(MPI.REPLACE, maxPartition, MPI.INT, MPI.MAX);
-        group.bcast(protocol, 1, MPI.BYTE, 0);
+//        group.allReduce(MPI.REPLACE, maxPartition, MPI.INT, MPI.MAX);
+//        group.bcast(protocol, 1, MPI.BYTE, 0);
         if (maxPartition == 0) {
             return;
         }
-        group.allReduce(MPI.REPLACE, storageLength, MPI.INT, MPI.MAX);
+//        group.allReduce(MPI.REPLACE, storageLength, MPI.INT, MPI.MAX);
 
         storage.add((byte) (storageLength - storage.size()));
         List<Byte> storageV;
         if (driver)
-            storageV = new ArrayList<>(storageLength * group.getSize());
+            storageV = new ArrayList<>(storageLength * group.Size());
         else storageV = new ArrayList<>();
 
 
@@ -194,8 +195,8 @@ public class IMPI {
     }
 
     public void gatherImpl(Comm group, IPartition partition, int root, boolean sameProtocol) throws MPIException, IOException, TException {
-        int rank = group.getRank();
-        int executors = group.getSize();
+        int rank = group.Rank();
+        int executors = group.Size();
         if (partition.type().equals(IMemoryPartition.TYPE)) {
 //            cls = null;
             int sz = partition.size();
@@ -207,31 +208,31 @@ public class IMPI {
 //
 //                }
 //                group.b
-                group.gather(sz, 1, MPI.INT, szv, 1, MPI.INT, root);
+//                group.gather(sz, 1, MPI.INT, szv, 1, MPI.INT, root);
                 if (rank == root) {
                     displs = this.displs(szv);
                     if (root > 0) {
 //                        partition.getElements() =
                     }
                     partition.getElements().addAll(Collections.singletonList(BigInteger.valueOf(displs.get(displs.size() - 1) - partition.size()).toByteArray()));
-                    group.gatherv(MPI.REPLACE, 0, MPI.BYTE, partition, this.listToArrayInt(szv), this.listToArrayInt(displs), MPI.BYTE, root);
+//                    group.gatherv(MPI.REPLACE, 0, MPI.BYTE, partition, this.listToArrayInt(szv), this.listToArrayInt(displs), MPI.BYTE, root);
                 } else {
-                    group.gatherv(partition, sz, MPI.BYTE, null, null, null, MPI.BYTE, root);
+//                    group.gatherv(partition, sz, MPI.BYTE, null, null, null, MPI.BYTE, root);
                 }
             } else {
 //                IMemoryPartition men = partitionTools.newMemoryPartition(partition);
                 TMemoryBuffer buffer = new TMemoryBuffer(4096);
                 sz = 0;
                 if (rank != root) {
-                    partition.write(buffer, propertyParser.msgCompression());
+//                    partition.write(buffer, propertyParser.msgCompression());
                     buffer.flush();
                 }
-                group.gather(sz, 1, MPI.INT, szv, 1, MPI.INT, root);
+//                group.gather(sz, 1, MPI.INT, szv, 1, MPI.INT, root);
                 if (rank == root) {
                     displs = this.displs(szv);
                     buffer = new TMemoryBuffer(displs.get(displs.size() - 1));
                 }
-                group.gatherv(buffer, sz, MPI.BYTE, buffer, this.listToArrayInt(szv), this.listToArrayInt(displs), MPI.BYTE, root);
+//                group.gatherv(buffer, sz, MPI.BYTE, buffer, this.listToArrayInt(szv), this.listToArrayInt(displs), MPI.BYTE, root);
 
                 if (rank == root) {
                     IPartition rcv = new IMemoryPartition();
@@ -366,7 +367,7 @@ public class IMPI {
                 ignore = ignore && input.get(j).isEmpty();
             }
             boolean ignoreOther = false;
-            nativ().sendRecv(ignore, 1, MPI.BOOLEAN, other, 0, ignoreOther, 1, MPI.BOOLEAN, other, 0);
+//            nativ().sendRecv(ignore, 1, MPI.BOOLEAN, other, 0, ignoreOther, 1, MPI.BOOLEAN, other, 0);
 
             if (ignore && ignoreOther) {
                 ignores.set(i, true);
