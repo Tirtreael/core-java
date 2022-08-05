@@ -13,7 +13,7 @@ class ModuleTest {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final IExecutorData iExecutorData = new IExecutorData();
-    private final String library = "artifacts/FunctionExample.jar";
+    private final String library = "build/libs/core-jara-testFunctions.jar";
 
     private final GeneralModule generalModule = new GeneralModule(iExecutorData);
 

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GeneralModuleTest extends ModuleTest implements IElements {
 
@@ -30,7 +31,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
     static {
         try {
-            mpi.MPI.Init(new String[]{});
+//            mpi.MPI.Init(new String[]{});
         } catch (MPIException e) {
             e.printStackTrace();
         }
@@ -96,8 +97,8 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
-            IPartitionGroup group = new IPartitionGroup();
-            group.add(new IMemoryPartition());
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
             this.generalModule.map(function);
             List<Object> result = this.getFromPartitions();
@@ -120,8 +121,8 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
-            IPartitionGroup group = new IPartitionGroup();
-            group.add(new IMemoryPartition());
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
             this.generalModule.filter(function);
             List<Object> result = this.getFromPartitions();
@@ -146,8 +147,8 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
-            IPartitionGroup group = new IPartitionGroup();
-            group.add(new IMemoryPartition());
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
             this.generalModule.flatmap(function);
             List<Object> result = this.getFromPartitions();
@@ -170,8 +171,8 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
-            IPartitionGroup group = new IPartitionGroup();
-            group.add(new IMemoryPartition());
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
             this.generalModule.keyBy(function);
             List<Object> result = this.getFromPartitions();
@@ -193,18 +194,24 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
-//            IPartitionGroup group = new IPartitionGroup();
-//            group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 20);
-            this.generalModule.mapPartitions(function);
-            List<Object> result = this.getFromPartitions();
+            /* ARRANGE */
+            int partitions = 20;
+            this.loadToPartitions(elems, partitions);
 
-            IReadIterator readIterator = new IMemoryPartition.IMemoryReadIterator(elems);
-            for (IPartition part : this.generalModule.getExecutorData().getPartitions()) {
-                for (Object o : result) {
-                    assertEquals(readIterator.hasNext(), o);
+            /* ACT */
+            this.generalModule.mapPartitions(function);
+
+            /* CHECK */
+            List<Object> result = this.getFromPartitions();
+            assertEquals(partitions, result.size());
+            for (Object oIterator : result) {
+                int elements = 0;
+                for (IMemoryPartition.IMemoryReadIterator it = (IMemoryPartition.IMemoryReadIterator) oIterator; it.hasNext(); ) {
+                    Object o = it.next();
+                    elements++;
                 }
-                System.out.println(result.size());
+                // Check there are at least the integer division in each partition
+                assertTrue(elems.size()/partitions - 1 <= elements);
             }
 
         } catch (TException e) {

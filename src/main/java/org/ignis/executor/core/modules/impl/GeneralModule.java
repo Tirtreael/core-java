@@ -68,6 +68,11 @@ public class GeneralModule extends Module implements IGeneralModule {
     @Override
     public void mapPartitions(IFunction src) {
         try {
+            this.IPipe.mapPartitions(src);
+        } catch (Exception e) {
+            this.packException(e);
+        }
+        /*try {
             IContext context = this.executorData.getContext();
             IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
             src.before(context);
@@ -92,7 +97,7 @@ public class GeneralModule extends Module implements IGeneralModule {
 
         } catch (Exception e) {
             this.packException(e);
-        }
+        }*/
     }
 
     @Override

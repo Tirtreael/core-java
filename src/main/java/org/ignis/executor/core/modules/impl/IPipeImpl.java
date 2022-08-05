@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
 import org.ignis.executor.api.IContext;
+import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.api.Pair;
 import org.ignis.executor.api.function.IFunction;
@@ -122,4 +123,30 @@ public class IPipeImpl extends Module {
         src.after(context);
         this.executorData.setPartitions(outputGroup);
     }
+
+    public void mapPartitions(IFunction src) {
+        IContext context = this.executorData.getContext();
+        IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+        src.before(context);
+        IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+        LOGGER.info("General: mapPartitions " + inputGroup.size() + " partitions");
+        IThreadPool.parallel((i) -> {
+            IWriteIterator it;
+            try {
+                it = outputGroup.get(i).writeIterator();
+                IReadIterator iter = (IReadIterator) src.call(inputGroup.get(i).readIterator(), context);
+                while (iter.hasNext()) {
+                    it.write(iter.next());
+                }
+            } catch (TException e) {
+                this.packException(e);
+            }
+        }, inputGroup.size());
+        inputGroup.clear();
+
+        src.after(context);
+        this.executorData.setPartitions(outputGroup);
+    }
+
+
 }

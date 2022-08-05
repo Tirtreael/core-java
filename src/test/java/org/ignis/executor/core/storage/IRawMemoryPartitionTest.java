@@ -6,6 +6,7 @@ import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.core.protocol.IObjectProtocol;
 import org.ignis.executor.core.transport.IZlibTransport;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -88,6 +89,7 @@ class IRawMemoryPartitionTest {
         return Stream.of(new JSONObject("{ raiz: { hijo1: 4, hijo2: 37 }, raiz2: { hijo1: 4, hijo2: 37 } }"));
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair", "createBinary",

@@ -22,10 +22,18 @@ task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from 
     archiveClassifier.set('sources')
 }
 
+task FunctionsJar(dependsOn: classes, type: Jar,
+        description: 'Creates a jar from the org.ignis.executor.api.functions classes.') {
+    archiveClassifier.set('testFunctions')
+    from sourceSets.main.output
+    include 'org/ignis/executor/api/functions/**'
+}
+
 artifacts {
     archives jar
     archives sourcesJar
     archives javadocsJar
+    archives FunctionsJar
 }
 
 publishing {
@@ -42,6 +50,9 @@ publishing {
 
 repositories {
     mavenCentral()
+    flatDir {
+        dirs 'lib/mpj-v0_44/lib'
+    }
 }
 
 dependencies {
@@ -50,14 +61,11 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.14.0'
     implementation group: 'org.json', name: 'json', version: '20210307'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    implementation name: 'mpj'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
 
