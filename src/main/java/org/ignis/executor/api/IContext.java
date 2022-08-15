@@ -44,8 +44,12 @@ public class IContext {
         return this.variables;
     }
 
-    public Intracomm getMPIGroup(){
+    public Intracomm getMPIGroup() {
         return this.mpiGroup;
+    }
+
+    public IThreadContext newIThreadContext(int threadID) {
+        return new IThreadContext(this, threadID);
     }
 
 }

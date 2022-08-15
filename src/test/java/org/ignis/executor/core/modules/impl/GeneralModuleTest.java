@@ -66,7 +66,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     void loadToPartitions(List<Object> elems, int partitions) throws TException {
         IPartitionGroup group = this.generalModule.getExecutorData().getPartitionTools().newPartitionGroup(partitions);
         this.generalModule.getExecutorData().setPartitions(group);
-        int partitionSize = elems.size() / group.size();
+        int partitionSize = (int) Math.ceil((double) elems.size() / group.size());
         for (int p = 0; p < group.size(); p++) {
             IWriteIterator writeIterator = group.get(p).writeIterator();
             int i = partitionSize * p;
@@ -211,7 +211,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
                     elements++;
                 }
                 // Check there are at least the integer division in each partition
-                assertTrue(elems.size()/partitions - 1 <= elements);
+                assertTrue(elems.size() / partitions - 1 <= elements);
             }
 
         } catch (TException e) {

@@ -6,6 +6,7 @@ import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.api.IContext;
+import org.ignis.executor.api.IThreadContext;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
@@ -141,7 +142,7 @@ public class IExecutorData {
         }
     }
 
-//    public void getThreadContext(int threadId) {
-//        return new IThreadContext(this.context, threadId);
-//    }
+    public IThreadContext getThreadContext(int threadId) {
+        return new IThreadContext(this.context, threadId);
+    }
 }

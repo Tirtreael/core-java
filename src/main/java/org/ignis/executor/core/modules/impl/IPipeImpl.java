@@ -3,14 +3,18 @@ package org.ignis.executor.core.modules.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
-import org.ignis.executor.api.IContext;
-import org.ignis.executor.api.IReadIterator;
-import org.ignis.executor.api.IWriteIterator;
-import org.ignis.executor.api.Pair;
+import org.ignis.executor.api.*;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.ithreads.IThreadPool;
 import org.ignis.executor.core.storage.IPartitionGroup;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class IPipeImpl extends Module {
 
@@ -27,17 +31,34 @@ public class IPipeImpl extends Module {
         src.before(context);
         IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
         LOGGER.info("General: map " + inputGroup.size() + " partitions");
-        IThreadPool.parallel((i) -> {
-            IWriteIterator it;
-            try {
-                it = outputGroup.get(i).writeIterator();
-                for (Object obj : inputGroup.get(i)) {
-                    it.write(src.call(obj, context));
-                }
-            } catch (TException e) {
-                this.packException(e);
+        try {
+            ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Callable<Void>> taskQueue = new ArrayList<>();
+            // Create tasks
+            for (int i = 0; i < inputGroup.size(); i++) {
+                ConcurrentLinkedQueue<Object> dataQueue = new ConcurrentLinkedQueue<>(inputGroup.get(i).getElements());
+                int finalI = i;
+                taskQueue.add(() -> {
+                    IWriteIterator it;
+                    try {
+                        it = outputGroup.get(finalI).writeIterator();
+                        Object obj;
+                        while ((obj = dataQueue.poll()) != null) {
+                            it.write(src.call(obj, context));
+                        }
+                    } catch (TException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return null;
+                });
             }
-        }, inputGroup.size());
+            // Execute tasks
+            executorService.invokeAll(taskQueue);
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         inputGroup.clear();
 
         src.after(context);
