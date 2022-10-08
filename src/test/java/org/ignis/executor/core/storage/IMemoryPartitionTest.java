@@ -301,6 +301,16 @@ public class IMemoryPartitionTest implements IElements {
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
             "createPairList", "createJson"})
+    void bytes(List<Object> elems) {
+        IMemoryPartition partition = new IMemoryPartition();
+        partition.setElements(elems);
+        System.out.println("bytes: " + partition.bytes());
+    }
+
+    @ParameterizedTest
+    @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
+            "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
+            "createPairList", "createJson"})
     void clear(List<Object> elems) throws TException {
         IMemoryPartition partition = new IMemoryPartition();
         this.writeIterator(elems, partition);

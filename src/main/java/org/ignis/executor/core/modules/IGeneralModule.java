@@ -3,7 +3,7 @@ package org.ignis.executor.core.modules;
 import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.api.function.IFunction2;
 
-public interface IGeneralModule {
+public interface IGeneralModule extends IModule, org.ignis.rpc.executor.IGeneralModule.Iface {
 
     void map(IFunction src);
 

@@ -11,7 +11,6 @@ import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.api.function.IFunction0;
 import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.core.IExecutorData;
-import org.ignis.executor.core.ithreads.IThreadPool;
 import org.ignis.executor.core.ithreads.IThreadPool2;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
@@ -213,32 +212,31 @@ public class IPipeImpl extends Module {
     }
 
     public void mapPartitionsWithIndex(IFunction2 src, boolean preservesPartitions) {
+        IContext context = this.executorData.getContext();
+        IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
+        src.before(context);
+        IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
+        LOGGER.info("General: mapPartitions " + inputGroup.size() + " partitions");
         try {
-            IContext context = this.executorData.getContext();
-            IPartitionGroup inputGroup = this.executorData.getAndDeletePartitions();
-            src.before(context);
-            IPartitionGroup outputGroup = this.executorData.getPartitionTools().newPartitionGroup(inputGroup);
-            LOGGER.info("General: mapPartitionsWithIndex " + inputGroup.size() + " partitions");
-            IThreadPool.parallel((i) -> {
+            IThreadPool2.parallel((Integer i) -> {
                 IWriteIterator it;
                 try {
                     it = outputGroup.get(i).writeIterator();
-                    for (IReadIterator iter = (IReadIterator) src.call(i, inputGroup.get(i).readIterator(), context); iter.hasNext(); ) {
-                        Object obj = iter.next();
-                        it.write(obj);
+                    IReadIterator iter = (IReadIterator) src.call(i, inputGroup.get(i).readIterator(), context);
+                    while (iter.hasNext()) {
+                        it.write(iter.next());
                     }
                 } catch (TException e) {
                     this.packException(e);
                 }
             }, inputGroup.size());
-            inputGroup.clear();
-
-            src.after(context);
-            this.executorData.setPartitions(outputGroup);
-
         } catch (Exception e) {
-            this.packException(e);
+            throw new RuntimeException(e);
         }
+        inputGroup.clear();
+
+        src.after(context);
+        this.executorData.setPartitions(outputGroup);
     }
 
     public void mapExecutor(IFunction src) {

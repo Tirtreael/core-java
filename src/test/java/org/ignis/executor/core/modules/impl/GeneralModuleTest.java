@@ -11,11 +11,15 @@ import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.core.IElements;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.ILibraryLoader;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.rpc.ISource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -91,15 +95,16 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
     @ParameterizedTest
     @ValueSource(strings = "Memory")
+    @Timeout(60000)
     void map(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.MapFunction");
+        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.MapFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
 //            IPartitionGroup group = new IPartitionGroup();
 //            group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 20);
+            this.loadToPartitions(elems, 1000);
             this.generalModule.map(function);
             List<Object> result = this.getFromPartitions();
 
@@ -116,7 +121,9 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void filter(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.FilterFunction");
+
+        ISource iSource = this.generalModule.getExecutorData().getLibraryLoader().createSource("org.ignis.executor.api.functions.FilterFunction");
+//        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.FilterFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -124,15 +131,17 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 //            IPartitionGroup group = new IPartitionGroup();
 //            group.add(new IMemoryPartition());
             this.loadToPartitions(elems, 20);
-            this.generalModule.filter(function);
+            this.generalModule.filter(iSource);
             List<Object> result = this.getFromPartitions();
 
-            for (int i = 0, j = 0; i < elems.size(); i++) {
-                if (((Integer) elems.get(i)) > 50) {
-                    assertEquals(elems.get(i), result.get(j));
+            int j = 0;
+            for (Object elem : elems) {
+                if (((Integer) elem) > 50) {
+                    assertEquals(elem, result.get(j));
                     j++;
                 }
             }
+            assertEquals(result.size(), j);
 
         } catch (TException e) {
             e.printStackTrace();
@@ -142,7 +151,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void flatMap(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.FlatMapFunction");
+        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.FlatMapFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -166,7 +175,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void keyBy(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.KeyByFunction");
+        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.KeyByFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -189,7 +198,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void mapPartitions(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.MapPartitionsFunction");
+        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.MapPartitionsFunction");
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -222,23 +231,33 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void mapPartitionsWithIndex(String partitionType) {
-        IFunction2 function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.MapPartitionsWithIndexFunction", IFunction2.class);
+        IFunction2 function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.MapPartitionsWithIndexFunction", IFunction2.class);
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
         try {
-//            IPartitionGroup group = new IPartitionGroup();
-//            group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 20);
-            this.generalModule.mapPartitionsWithIndex(function, true);
-            List<Object> result = this.getFromPartitions();
+            /* ARRANGE */
+            int partitions = 20;
+            this.loadToPartitions(elems, partitions);
 
-            IReadIterator readIterator = new IMemoryPartition.IMemoryReadIterator(elems);
-            for (IPartition part : this.generalModule.getExecutorData().getPartitions()) {
-                for (int i = 0; i < part.size(); i++) {
-                    assertEquals(readIterator.next(), ((IReadIterator) result.get(i)).next());
+            /* ACT */
+            this.generalModule.mapPartitionsWithIndex(function, true);
+
+            /* CHECK */
+            List<Object> result = this.getFromPartitions();
+            assertEquals(partitions, result.size());
+            int total = 0;
+            for (Object oIterator : result) {
+                int elements = 0;
+                for (IMemoryPartition.IMemoryReadIterator it = (IMemoryPartition.IMemoryReadIterator) oIterator; it.hasNext(); ) {
+                    Object o = it.next();
+                    elements++;
                 }
+                total += elements;
+                // Check there are at least the integer division in each partition
+                assertTrue(elems.size() / partitions - 1 == elements || elems.size() / partitions == elements);
             }
+            assertEquals(elems.size(), total);
 
         } catch (TException e) {
             e.printStackTrace();
@@ -248,7 +267,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void mapExecutor(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.MapExecutorFunction", IFunction.class);
+        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.MapExecutorFunction", IFunction.class);
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -269,7 +288,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void mapExecutorTo(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction("org.ignis.executor.api.functions.MapExecutorToStringFunction", IFunction.class);
+        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.MapExecutorToStringFunction", IFunction.class);
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -287,10 +306,11 @@ class GeneralModuleTest extends ModuleTest implements IElements {
         }
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void groupBy(String partitionType) {
-        IFunction function = this.generalModule.getExecutorData().getLibraryLoader().loadFunction(
+        IFunction function = ILibraryLoader.loadFunction(
                 "org.ignis.executor.api.functions.GroupByIntStringFunction", IFunction.class);
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 

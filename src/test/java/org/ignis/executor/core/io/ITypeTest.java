@@ -1,7 +1,7 @@
 package org.ignis.executor.core.io;
 
 import org.ignis.executor.api.Pair;
-import org.json.JSONObject;
+import org.ignis.executor.api.myJson;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -156,7 +156,7 @@ class ITypeTest {
 
         @Test
         void getIdJSON() {
-            Object obj = new JSONObject();
+            Object obj = new myJson();
             byte id = IEnumTypes.I_JSON.id;
 
             byte id2 = IEnumTypes.getInstance().getId(obj);

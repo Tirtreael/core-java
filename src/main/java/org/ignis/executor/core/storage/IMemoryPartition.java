@@ -47,10 +47,10 @@ public class IMemoryPartition implements IPartition {
         return IMemoryPartition.TYPE;
     }
 
-    @Override
-    public long bytes() {
-        return this.toBytes().length;
-    }
+//    @Override
+//    public long bytes() {
+//        return this.toBytes().length;
+//    }
 
     //@Todo check
     public void read(TTransport transport) throws TException, NotSerializableException {

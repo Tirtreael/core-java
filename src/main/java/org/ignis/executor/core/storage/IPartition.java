@@ -4,6 +4,7 @@ import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransport;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
+import org.openjdk.jol.info.GraphLayout;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
@@ -55,8 +56,7 @@ public interface IPartition extends Iterable<Object>, Serializable {
     default long bytes() {
         if (this.size() == 0)
             return 0;
-        else return 0;
-//        else return IMemoryPartition.ObjectSizeFetcher.getObjectSize(this.getElements().get(0)) * this.size();
+        else return GraphLayout.parseInstance(getElements().get(0)).totalSize() * this.size();
     }
 
     Iterator<Object> iterator();
