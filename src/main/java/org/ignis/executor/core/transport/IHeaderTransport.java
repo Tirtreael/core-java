@@ -1,5 +1,6 @@
 package org.ignis.executor.core.transport;
 
+import org.apache.thrift.TConfiguration;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
@@ -46,5 +47,20 @@ public class IHeaderTransport extends TTransport {
     @Override
     public void write(byte[] buf, int off, int len) throws TTransportException {
         transport.write(buf, off, len);
+    }
+
+    @Override
+    public TConfiguration getConfiguration() {
+        return null;
+    }
+
+    @Override
+    public void updateKnownMessageSize(long size) throws TTransportException {
+
+    }
+
+    @Override
+    public void checkReadBytesAvailable(long numBytes) throws TTransportException {
+
     }
 }

@@ -39,7 +39,13 @@ public class IThreadedServer extends TServer {
                     if (client == null) {
                         continue;
                     }
-                    Thread t = new Thread(() -> this.handle(client));
+                    Thread t = new Thread(() -> {
+                        try {
+                            this.handle(client);
+                        } catch (TTransportException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                     t.setDaemon(true);
                     t.start();
                 } catch (TTransportException e) {
@@ -53,7 +59,7 @@ public class IThreadedServer extends TServer {
         }
     }
 
-    private void handle(TTransport client) {
+    private void handle(TTransport client) throws TTransportException {
         TTransport trans = this.inputTransportFactory_.getTransport(client);
         TProtocol prot = this.inputProtocolFactory_.getProtocol(trans);
 

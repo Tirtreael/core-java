@@ -14,13 +14,13 @@ public class IZlibTransport extends TZlibTransport {
     private boolean rInit;
     private boolean wInit;
 
-    public IZlibTransport(TTransport transport) {
+    public IZlibTransport(TTransport transport) throws TTransportException {
         this(transport, defaultCompressionLevel);
         rInit = false;
         wInit = false;
     }
 
-    public IZlibTransport(TTransport transport, int compressionLevel) {
+    public IZlibTransport(TTransport transport, int compressionLevel) throws TTransportException {
         super(transport, compressionLevel);
         this.transport = transport;
         this.compressionLevel = compressionLevel;

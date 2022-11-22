@@ -1,6 +1,5 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -15,10 +14,10 @@ import org.ignis.executor.core.ILibraryLoader;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.mpi.Mpi;
 import org.ignis.rpc.ISource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,7 +35,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     static {
         try {
 //            mpi.MPI.Init(new String[]{});
-        } catch (MPIException e) {
+        } catch (Mpi.MpiException e) {
             e.printStackTrace();
         }
     }
@@ -306,7 +305,6 @@ class GeneralModuleTest extends ModuleTest implements IElements {
         }
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(strings = "Memory")
     void groupBy(String partitionType) {
@@ -316,7 +314,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
 
         try {
             int np = this.generalModule.getExecutorData().getContext().executors();
-            List<Object> elems = IElements.createString(100 * 2 * np, 0);
+            List<Object> elems = (List<Object>) IElements.createString(100 * 2 * np, 0).get(0);
             List<Object> localElems = super.rankVector(elems);
             this.loadToPartitions(elems, 2);
             this.generalModule.groupBy(function, 1);
@@ -341,8 +339,9 @@ class GeneralModuleTest extends ModuleTest implements IElements {
                     assertEquals(counts.get(item.getKey()), item.getValue().size());
                 }
             }
+            System.out.println("a");
 
-        } catch (TException | MPIException | IOException e) {
+        } catch (TException | Mpi.MpiException | IOException e) {
             e.printStackTrace();
         }
     }

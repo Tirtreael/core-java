@@ -1,6 +1,5 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -11,6 +10,7 @@ import org.ignis.executor.core.ithreads.IThreadPool;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.mpi.Mpi;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class ISortImpl extends Module {
 
     }
 
-    public void sortImpl(Comparator<Object> cmp, boolean ascending, int numPartitions, boolean localSort) throws MPIException, TException, IOException {
+    public void sortImpl(Comparator<Object> cmp, boolean ascending, int numPartitions, boolean localSort) throws Mpi.MpiException, TException, IOException {
         IPartitionGroup input = this.executorData.getPartitionGroup();
         int executors = this.executorData.getMpi().executors();
         if (input.isCache()) {
@@ -126,7 +126,7 @@ public class ISortImpl extends Module {
         }
     }
 
-    private IPartition parallelSelectPivots(int samples) throws MPIException {
+    private IPartition parallelSelectPivots(int samples) throws Mpi.MpiException {
         int rank = this.executorData.getMpi().rank();
         int executors = this.executorData.getMpi().executors();
         IMemoryPartition result = this.executorData.getPartitionTools().newMemoryPartition(samples);

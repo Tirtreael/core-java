@@ -1,6 +1,5 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -10,6 +9,8 @@ import org.ignis.executor.core.modules.IIOModule;
 import org.ignis.executor.core.storage.IDiskPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.mpi.Mpi;
+import org.ignis.rpc.IExecutorException;
 import org.ignis.rpc.ISource;
 import org.json.JSONArray;
 import org.json.JSONTokener;
@@ -63,6 +64,16 @@ public class IOModule extends Module implements IIOModule {
         LOGGER.info("IO: calculating partition size");
         return this.getExecutorData().getPartitionGroup().stream()
                 .mapToLong(IPartition::bytes).sum();
+    }
+
+    @Override
+    public void plainFile(String path, byte delim) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void plainFile3(String path, long minPartitions, byte delim) throws IExecutorException, TException {
+
     }
 
     @Override
@@ -149,7 +160,9 @@ public class IOModule extends Module implements IIOModule {
                 IWriteIterator writeIterator = partition.writeIterator();
                 JSONTokener tokener = new JSONTokener(br);
                 JSONArray object = new JSONArray(tokener);
-                writeIterator.write(object);
+                for (var v : object) {
+                    writeIterator.write(v);
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -231,7 +244,7 @@ public class IOModule extends Module implements IIOModule {
             LOGGER.info("IO: created " + partitionGroup.size() + " partitions, " + elements
                     + " lines and " + (exChunkEnd - exChunkInit) + "Bytes read ");
 
-        } catch (TException | MPIException e) {
+        } catch (TException | Mpi.MpiException e) {
             e.printStackTrace();
         }
     }
@@ -331,8 +344,4 @@ public class IOModule extends Module implements IIOModule {
         group.clear();
     }
 
-    @Override
-    public void packException(Exception ex) {
-
-    }
 }

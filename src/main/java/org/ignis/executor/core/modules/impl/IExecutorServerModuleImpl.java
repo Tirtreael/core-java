@@ -6,14 +6,15 @@ import org.apache.thrift.TException;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.server.TServer;
+import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IExecutorServerModule;
+import org.ignis.rpc.IExecutorException;
 
 import java.util.Map;
-import java.util.Properties;
 
 
 public class IExecutorServerModuleImpl extends Module implements IExecutorServerModule {
@@ -31,10 +32,10 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
 
 
     public void serve(String name, int port, int compression) throws TTransportException {
-        if (this.server != null) {
+        if (this.server == null) {
             this.processor = new TMultiplexedProcessor();
             TServerTransport serverTransport = new TServerSocket(port);
-            this.server = new IThreadedServer(new TServer.Args(serverTransport));
+            this.server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport));
 
             this.processor.registerProcessor(name, new org.ignis.rpc.executor.IExecutorServerModule.Processor<>(this));
             LOGGER.info("ServerModule: java executor started");
@@ -44,17 +45,10 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
         }
     }
 
-    public void start(Properties properties) {
-        //this.getExecutorData().
-    }
-
     @Override
-    public void start(Map<String, String> properties) throws TException {
+    public void start(Map<String, String> properties, Map<String, String> env) throws IExecutorException, TException {
         try {
-//            this.executorData.getContext().props()
-//            for (Map.Entry<String, String> entry : properties.entrySet()) {
-//
-//            }
+            this.executorData.getContext().props().getProperties().putAll(properties);
 
 //            MPI.Init()
 //            LOGGER.info("ServerModule: Mpi started");
@@ -86,10 +80,5 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
     }
 
     public void createServices(TProcessor processor) {
-    }
-
-    @Override
-    public void packException(Exception ex) {
-
     }
 }

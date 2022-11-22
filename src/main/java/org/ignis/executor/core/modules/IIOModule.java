@@ -9,8 +9,4 @@ public interface IIOModule extends IModule, org.ignis.rpc.executor.IIOModule.Ifa
 
     void saveAsObjectFile(String path, String compression, int first);
 
-    void saveAsTextFile(String path, int first);
-
-
-    void saveAsJsonFile(String path, int first, boolean pretty);
 }

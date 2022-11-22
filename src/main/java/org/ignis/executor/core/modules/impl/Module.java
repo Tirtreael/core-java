@@ -1,12 +1,12 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPIException;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IModule;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.mpi.Mpi;
 import org.ignis.rpc.IExecutorException;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public abstract class Module implements IModule {
         }
     }
 
-    public void exchange(IPartitionGroup input, IPartitionGroup output) throws MPIException {
+    public void exchange(IPartitionGroup input, IPartitionGroup output) throws Mpi.MpiException {
         int executors = this.executorData.getMpi().executors();
         if (executors == 1) {
             for (IPartition part : input) {

@@ -1,9 +1,8 @@
 package org.ignis.executor.core;
 
-import mpi.Comm;
-import mpi.Intracomm;
-import mpi.MPI;
-import mpi.MPIException;
+import org.apache.thrift.transport.TTransportException;
+import org.ignis.mpi.Mpi;
+import org.ignis.mpi.Mpi.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -20,7 +19,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.MemorySession;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +37,7 @@ public class IMPI {
     private final IPropertyParser propertyParser;
     private final IPartitionTools partitionTools;
     private final IContext context;
-    private MPI mpi;
+    private Mpi mpi;
 
     public IMPI(IPropertyParser propertyParser, IPartitionTools partitionTools, IContext context) {
         this.propertyParser = propertyParser;
@@ -42,13 +45,28 @@ public class IMPI {
         this.context = context;
     }
 
-    public void gather(IPartition part, int root) throws MPIException, TException, IOException {
+    //
+    public static List<Integer> getRankAndSize(){
+        IntBuffer buffer0 = ByteBuffer.allocateDirect(4).asIntBuffer();
+        int rank;
+        int size;
+        Mpi.MPI_Comm_rank(Mpi.MPI_COMM_WORLD, new Mpi.C_pointer<>(MemorySegment.ofBuffer(buffer0)));
+        rank = buffer0.get(0);
+        try (MemorySession s = MemorySession.openConfined()) {
+            Mpi.C_int c_size = Mpi.C_int.alloc(s);
+            Mpi.MPI_Comm_size(Mpi.MPI_COMM_WORLD, c_size.pointer(s));
+            size = c_size.get();
+        }
+        return List.of(rank, size);
+    }
+
+    public void gather(IPartition part, int root) throws MpiException, TException, IOException {
         if (this.executors() == 1) {
 
         } else this.gatherImpl(this.nativ(), part, root, true);
     }
 
-    public void bcast(IPartition partition, int root) throws TException, NotSerializableException, MPIException {
+    public void bcast(IPartition partition, int root) throws TException, NotSerializableException, MpiException {
         if (this.executors() == 1) {
         } else if (partition.type().equals(IMemoryPartition.TYPE)) {
 //            if(partition ) {
@@ -81,9 +99,20 @@ public class IMPI {
 //        }
     }
 
-    public void driverGather(Intracomm group, IPartitionGroup partitionGroup) throws MPIException {
-        boolean driver = group.Rank() == 0;
-        boolean exec0 = group.Rank() == 1;
+    public void driverGather(MPI_Comm group, IPartitionGroup partitionGroup) throws MpiException {
+        IntBuffer buffer0 = ByteBuffer.allocateDirect(4).asIntBuffer();
+        int rank;
+        int size;
+        Mpi.MPI_Comm_rank(Mpi.MPI_COMM_WORLD, new Mpi.C_pointer<>(MemorySegment.ofBuffer(buffer0)));
+        rank = buffer0.get(0);
+        try (MemorySession s = MemorySession.openConfined()) {
+            Mpi.C_int c_size = Mpi.C_int.alloc(s);
+            Mpi.MPI_Comm_size(Mpi.MPI_COMM_WORLD, c_size.pointer(s));
+            size = c_size.get();
+        }
+
+        boolean driver = rank == 0;
+        boolean exec0 = rank == 1;
         int maxPartition = 0;
         byte protocol = IObjectProtocol.JAVA_PROTOCOL;
         boolean same_protocol;
@@ -110,25 +139,25 @@ public class IMPI {
         storage.add((byte) (storageLength - storage.size()));
         List<Byte> storageV;
         if (driver)
-            storageV = new ArrayList<>(storageLength * group.Size());
+            storageV = new ArrayList<>(storageLength * size);
         else storageV = new ArrayList<>();
 
 
     }
 
-    public void driverGather0(Intracomm group, IPartitionGroup partitionGroup) {
+    public void driverGather0(MPI_Comm group, IPartitionGroup partitionGroup) {
 
     }
 
-    public void driverScatter(Intracomm group, IPartitionGroup partitionGroup, List<IPartition> partitions) {
+    public void driverScatter(MPI_Comm group, IPartitionGroup partitionGroup, List<IPartition> partitions) {
 
     }
 
-    public void getMsgOpt(Intracomm group, String partitionType, boolean send, Object other, String tag) {
+    public void getMsgOpt(MPI_Comm group, String partitionType, boolean send, Object other, String tag) {
 
     }
 
-    public void sendGroup(Intracomm group, IPartition partition, Object dest, String tag, MsgOpt opt) {
+    public void sendGroup(MPI_Comm group, IPartition partition, Object dest, String tag, MsgOpt opt) {
 
     }
 
@@ -136,7 +165,7 @@ public class IMPI {
 
     }
 
-    public void recvGroup(Intracomm group, IPartition partition, Object source, String tag, MsgOpt opt) {
+    public void recvGroup(MPI_Comm group, IPartition partition, Object source, String tag, MsgOpt opt) {
 
     }
 
@@ -160,12 +189,12 @@ public class IMPI {
         return this.context.executorId();
     }
 
-    public int executors() throws MPIException {
+    public int executors() throws MpiException {
         return this.context.executors();
     }
 
-    public Intracomm nativ() {
-        return this.context.getMPIGroup();
+    public MPI_Comm nativ() {
+        return Mpi.MPI_COMM_WORLD;
     }
 
     public List<Integer> displs(List<Integer> szv) {
@@ -194,9 +223,19 @@ public class IMPI {
         return svz.stream().map(t -> t.get(c)).collect(Collectors.toList());
     }
 
-    public void gatherImpl(Comm group, IPartition partition, int root, boolean sameProtocol) throws MPIException, IOException, TException {
-        int rank = group.Rank();
-        int executors = group.Size();
+    public void gatherImpl(MPI_Comm group, IPartition partition, int root, boolean sameProtocol) throws MpiException, IOException, TException {
+        IntBuffer buffer0 = ByteBuffer.allocateDirect(4).asIntBuffer();
+        int rank;
+        int size;
+        Mpi.MPI_Comm_rank(Mpi.MPI_COMM_WORLD, new Mpi.C_pointer<>(MemorySegment.ofBuffer(buffer0)));
+        rank = buffer0.get(0);
+        try (MemorySession s = MemorySession.openConfined()) {
+            Mpi.C_int c_size = Mpi.C_int.alloc(s);
+            Mpi.MPI_Comm_size(Mpi.MPI_COMM_WORLD, c_size.pointer(s));
+            size = c_size.get();
+        }
+
+        int executors = size;
         if (partition.type().equals(IMemoryPartition.TYPE)) {
 //            cls = null;
             int sz = partition.size();
@@ -261,7 +300,7 @@ public class IMPI {
 
     }
 
-    public void exchangeSync(IPartitionGroup input, IPartitionGroup output) throws MPIException {
+    public void exchangeSync(IPartitionGroup input, IPartitionGroup output) throws MpiException {
         int executors = this.executors();
         if (executors == 1 || input.size() < 2) {
             for (IPartition part : input) {
@@ -292,14 +331,14 @@ public class IMPI {
         String pType = input.get(0).getType();
         String optType = pType;
         Class<?> cls = null;
-        Intracomm comm = this.nativ();
+        Mpi.MPI_Comm comm = this.nativ();
         List<?> wins = new ArrayList<>();
         boolean onlyShared = false;
 
         if (this.propertyParser.transportCores() > 0 && cores > 1 && pType != IDiskPartition.TYPE) {
             LOGGER.info("Local exchange init");
             class IMPIBuffer extends TMemoryBuffer {
-                public IMPIBuffer(int size) {
+                public IMPIBuffer(int size) throws TTransportException {
                     super(size);
                 }
 
@@ -319,7 +358,7 @@ public class IMPI {
 
     }
 
-    public void exchangeASync(IPartitionGroup input, IPartitionGroup output) throws MPIException {
+    public void exchangeASync(IPartitionGroup input, IPartitionGroup output) throws MpiException {
         int executors = executors();
         int rank = rank();
         int numPartitions = input.size();

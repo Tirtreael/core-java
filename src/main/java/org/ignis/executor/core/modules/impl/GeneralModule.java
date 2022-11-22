@@ -109,6 +109,11 @@ public class GeneralModule extends Module implements IGeneralModule {
     }
 
     @Override
+    public void executeTo(ISource src) throws IExecutorException, TException {
+
+    }
+
+    @Override
     public void map_(ISource src) throws IExecutorException {
         this.map(loadISource(src));
     }
@@ -129,11 +134,20 @@ public class GeneralModule extends Module implements IGeneralModule {
     }
 
     @Override
+    public void mapWithIndex(ISource src) throws IExecutorException, TException {
+
+    }
+
+    @Override
     public void mapPartitions(ISource src) throws TException {
         this.mapPartitions(loadISource(src));
     }
 
     @Override
+    public void mapPartitionsWithIndex(ISource src) throws IExecutorException, TException {
+
+    }
+
     public void mapPartitionsWithIndex(ISource src, boolean preservesPartitioning) throws TException {
         this.mapPartitionsWithIndex(loadISource2(src), preservesPartitioning);
     }
@@ -170,6 +184,56 @@ public class GeneralModule extends Module implements IGeneralModule {
 
     @Override
     public void sortBy3(ISource src, boolean ascending, long numPartitions) throws TException {
+
+    }
+
+    @Override
+    public void union_(String other, boolean preserveOrder) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void union2(String other, boolean preserveOrder, ISource src) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void join(String other, long numPartitions) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void join3(String other, long numPartitions, ISource src) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void distinct(long numPartitions) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void distinct2(long numPartitions, ISource src) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void repartition(long numPartitions, boolean preserveOrdering, boolean global_) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void partitionByRandom(long numPartitions, int seed) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void partitionByHash(long numPartitions) throws IExecutorException, TException {
+
+    }
+
+    @Override
+    public void partitionBy(ISource src, long numPartitions) throws IExecutorException, TException {
 
     }
 

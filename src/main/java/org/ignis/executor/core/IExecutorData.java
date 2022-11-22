@@ -2,7 +2,8 @@ package org.ignis.executor.core;
 
 // @ToDo loadLibrary, loadParameters, reloadLibraries
 
-import mpi.MPIException;
+import org.ignis.mpi.Mpi;
+import org.ignis.mpi.Mpi.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.api.IContext;
@@ -131,13 +132,13 @@ public class IExecutorData {
         return null;
     }
 
-    public void enableMPICores() throws MPIException {
+    public void enableMPICores() throws MpiException {
         double ratio = this.propertyParser.transportCores();
         int mpiCores;
         if (ratio > 1) {
             mpiCores = Math.min(getContext().cores(), (int) Math.ceil(ratio));
         } else mpiCores = (int) Math.ceil(getContext().cores() * ratio);
-        if (mpiCores > 1 && context.getMPIGroup().Size() == 1 && context.executors() > 1) {
+        if (mpiCores > 1 && IMPI.getRankAndSize().get(1) == 1 && context.executors() > 1) {
 //            context.getMPIGroup() = context.getMPIGroup()
         }
     }

@@ -11,6 +11,7 @@ import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -91,7 +92,7 @@ class IOModuleTest implements IElements {
     @Test
     void textFile() {
         String path = "./testfile.txt";
-        
+
 
     }
 
@@ -140,16 +141,16 @@ class IOModuleTest implements IElements {
         try {
 //            IPartitionGroup group = new IPartitionGroup();
 //            group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 20);
-            this.ioModule.saveAsTextFile(path, 1234);
-            this.ioModule.partitionTextFile(path, 1234, 20);
+            this.loadToPartitions(elems, 2);
+            this.ioModule.saveAsTextFile(path, 0);
+            this.ioModule.partitionTextFile(path, 0, 2);
             List<Object> result = this.getFromPartitions();
 
-            assertEquals(elems, result);
-//            assertEquals(elems.size(), result.size());
-//            for (int i = 0; i < elems.size(); i++) {
-//                assertEquals(elems.get(0), result.get(0));
-//            }
+//            assertEquals(elems.get(0), result.get(0));
+            assertEquals(elems.size(), result.size());
+            for (int i = 0; i < elems.size(); i++) {
+                assertEquals(elems.get(i), result.get(i));
+            }
 
         } catch (TException e) {
             e.printStackTrace();
@@ -157,6 +158,7 @@ class IOModuleTest implements IElements {
     }
 
 
+    @Disabled
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
@@ -170,16 +172,16 @@ class IOModuleTest implements IElements {
         try {
 //            IPartitionGroup group = new IPartitionGroup();
 //            group.add(new IMemoryPartition());
-            this.loadToPartitions(elems, 20);
-            this.ioModule.saveAsJsonFile(path, 1234, true);
-            this.ioModule.partitionJsonFile4a(path, 1234, 20, true);
+            this.loadToPartitions(elems, 3);
+            this.ioModule.saveAsJsonFile(path, 0, true);
+            this.ioModule.partitionJsonFile4a(path, 0, 3, true);
             List<Object> result = this.getFromPartitions();
 
-            assertEquals(elems, result);
-//            assertEquals(elems.size(), result.size());
-//            for (int i = 0; i < elems.size(); i++) {
-//                assertEquals(elems.get(0), result.get(0));
-//            }
+//            assertEquals(elems, result);
+            assertEquals(elems.size(), result.size());
+            for (int i = 0; i < elems.size(); i++) {
+                assertEquals(elems.get(i), result.get(i));
+            }
 
         } catch (TException e) {
             e.printStackTrace();

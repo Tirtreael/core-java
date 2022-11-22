@@ -1,6 +1,6 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPIException;
+import org.ignis.mpi.Mpi;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -34,7 +34,7 @@ public class IReduceImpl extends Module {
 
     }
 
-    public void reduce(IFunction2 f) throws TException, MPIException, IOException {
+    public void reduce(IFunction2 f) throws TException, Mpi.MpiException, IOException {
         IContext context = this.executorData.getContext();
         f.before(context);
         IPartition elemPart = this.executorData.getPartitionTools().newMemoryPartition(1);
@@ -43,7 +43,7 @@ public class IReduceImpl extends Module {
         f.after(context);
     }
 
-    private void finalReduce(IFunction2 f, IPartition elemPart) throws TException, MPIException, IOException {
+    private void finalReduce(IFunction2 f, IPartition elemPart) throws TException, Mpi.MpiException, IOException {
         IPartitionGroup output = this.executorData.getPartitionTools().newPartitionGroup();
         LOGGER.info("Reduce: gathering elements for an executor");
         this.executorData.getMpi().gather(elemPart, 0);
@@ -66,7 +66,7 @@ public class IReduceImpl extends Module {
         return acum;
     }
 
-    public void treeReduce(IFunction2 f) throws TException, MPIException {
+    public void treeReduce(IFunction2 f) throws TException, Mpi.MpiException {
         IContext context = this.executorData.getContext();
         f.before(context);
         IMemoryPartition elemPart = this.executorData.getPartitionTools().newMemoryPartition(1);
@@ -75,7 +75,7 @@ public class IReduceImpl extends Module {
         f.after(context);
     }
 
-    private void finalTreeReduce(IFunction2 f, IMemoryPartition elemPart) throws TException, MPIException {
+    private void finalTreeReduce(IFunction2 f, IMemoryPartition elemPart) throws TException, Mpi.MpiException {
         int executors = this.executorData.getMpi().executors();
         int rank = this.executorData.getMpi().rank();
         IContext context = this.executorData.getContext();
@@ -164,7 +164,7 @@ public class IReduceImpl extends Module {
         return acum;
     }
 
-    public void fold(IFunction2 f) throws TException, MPIException, IOException {
+    public void fold(IFunction2 f) throws TException, Mpi.MpiException, IOException {
         IContext context = this.executorData.getContext();
         f.before(context);
         IPartitionGroup input = this.executorData.getAndDeletePartitions();
@@ -182,7 +182,7 @@ public class IReduceImpl extends Module {
         this.finalReduce(f, partialReduce);
     }
 
-    public void groupByKey(int numPartitions) throws TException, MPIException {
+    public void groupByKey(int numPartitions) throws TException, Mpi.MpiException {
         this.keyHashing(numPartitions);
         this.exchanging();
 
@@ -232,7 +232,7 @@ public class IReduceImpl extends Module {
         this.executorData.setPartitions(output);
     }
 
-    public void exchanging() throws MPIException {
+    public void exchanging() throws Mpi.MpiException {
         IPartitionGroup input = this.executorData.getAndDeletePartitions();
         IPartitionGroup output = this.executorData.getPartitionTools().newPartitionGroup();
         int numPartitions = input.size();

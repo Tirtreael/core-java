@@ -1,9 +1,9 @@
 package org.ignis.executor.core.modules.impl;
 
-import mpi.MPIException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.mpi.Mpi;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -46,7 +46,7 @@ class ModuleTest {
     void resizeMemoryPartition() {
     }
 
-    public List<Object> rankVector(List<Object> elems) throws MPIException {
+    public List<Object> rankVector(List<Object> elems) throws Mpi.MpiException {
         int n = elems.size() / this.generalModule.getExecutorData().getContext().executors();
         int rank = this.generalModule.getExecutorData().getContext().executorId();
         return elems.subList(n * rank, n * (rank + 1));
