@@ -2,12 +2,14 @@ package org.ignis.executor.core.modules.impl;
 
 import org.apache.logging.log4j.Logger;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.ILibraryLoader;
 import org.ignis.executor.core.modules.IModule;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 import org.ignis.mpi.Mpi;
 import org.ignis.rpc.IExecutorException;
+import org.ignis.rpc.ISource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,12 +40,12 @@ public abstract class Module implements IModule {
 //        throw new IExecutorException(message, cause);
     }
 
-    public void useSource(String src) throws IExecutorException {
-//        try {
-//            this.executorData.loadLibrary(src).before(this.executorData.getContext());
-//        } catch (Exception ex) {
-//            this.packException(ex);
-//        }
+    public void useSource(ISource src) throws IExecutorException {
+        try {
+            ILibraryLoader.loadISourceIndividual(src).before(this.executorData.getContext());
+        } catch (Exception ex) {
+            this.packException(ex);
+        }
     }
 
 

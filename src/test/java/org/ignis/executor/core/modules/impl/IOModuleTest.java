@@ -91,8 +91,15 @@ class IOModuleTest implements IElements {
 
     @Test
     void textFile() {
-        String path = "./testfile.txt";
-
+        String partitionType = "Memory";
+        String pathIn = "/home/miguelr/Downloads/ignis-downloads/ignis-deploy/text.txt";
+        String pathOut = "/home/miguelr/Downloads/ignis-downloads/ignis-deploy/outText.txt";
+        try {
+            this.ioModule.textFile(pathIn);
+            this.ioModule.saveAsTextFile(pathOut,0);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -134,7 +141,7 @@ class IOModuleTest implements IElements {
             "createPairList", "createJson"})
     void saveAsTextFile(List<Object> elems) {
         String partitionType = "Memory";
-        String path = "/home/miguelr/Downloads/ignisIOTestText" + elems.get(0).getClass().getName();
+        String path = "test-data/ignisIOTestText" + elems.get(0).getClass().getName();
         this.ioModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
 //        List<Object> elems = (List<Object>) IElements.createMap().get(0);
@@ -158,14 +165,14 @@ class IOModuleTest implements IElements {
     }
 
 
-    @Disabled
+//    @Disabled
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
-            "createPairList", "createJson"})
+            "createPairList"/*, "createJson"*/})
     void saveAsJsonFile(List<Object> elems) {
         String partitionType = "Memory";
-        String path = "/home/miguelr/Downloads/ignisIOTestJson" + elems.get(0).getClass().getName();
+        String path = "test-data/Downloads/ignisIOTestJson" + elems.get(0).getClass().getName();
         this.ioModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
 //        List<Object> elems = (List<Object>) IElements.createMap().get(0);

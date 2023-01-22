@@ -9,6 +9,7 @@ import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
+import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IExecutorServerModule;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class IExecutorServerModuleImpl extends Module implements IExecutorServerModule {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private TServer server;
+    private IThreadedServer server;
     private TMultiplexedProcessor processor;
 
 
@@ -34,8 +35,10 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
     public void serve(String name, int port, int compression) throws TTransportException {
         if (this.server == null) {
             this.processor = new TMultiplexedProcessor();
-            TServerTransport serverTransport = new TServerSocket(port);
-            this.server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport));
+            TServerSocket serverTransport = new TServerSocket(port);
+
+//            this.server = new IThreadedServer(new IThreadedServer.Args(serverTransport).processor(new org.ignis.rpc.executor.IExecutorServerModule.Processor<>(this)));
+            this.server = new IThreadedServer(new IThreadedServer.Args(serverTransport).processor(this.processor));
 
             this.processor.registerProcessor(name, new org.ignis.rpc.executor.IExecutorServerModule.Processor<>(this));
             LOGGER.info("ServerModule: java executor started");

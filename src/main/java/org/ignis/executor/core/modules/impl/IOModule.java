@@ -32,12 +32,16 @@ public class IOModule extends Module implements IIOModule {
         super(executorData, LOGGER);
     }
 
-    //@ToDo
     @Override
-    public void loadClass(ISource src) throws TException {
-//        this.useSource(src);
+    public void loadClass(ISource src) {
+        try {
+            this.useSource(src);
+        } catch (IExecutorException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
     public void loadLibrary(String path) {
         try {
             this.executorData.loadLibraryFunctions(path);
@@ -60,6 +64,7 @@ public class IOModule extends Module implements IIOModule {
         return sizes;
     }
 
+    @Override
     public long partitionApproxSize() {
         LOGGER.info("IO: calculating partition size");
         return this.getExecutorData().getPartitionGroup().stream()
@@ -233,6 +238,8 @@ public class IOModule extends Module implements IIOModule {
                 }
 
                 String bb = br.readLine();
+                if(bb == null)
+                    break;
                 if (bb.charAt(bb.length() - 1) == delim.charAt(0))
                     writeIterator.write(new String(bb.substring(0, bb.length() - 1).getBytes(StandardCharsets.UTF_8)));
                 else writeIterator.write(new String(bb.getBytes(StandardCharsets.UTF_8)));

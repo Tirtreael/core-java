@@ -65,7 +65,7 @@ public class IThreadedServer extends TServer {
 
         try {
             while (!this.stop) {
-                super.processorFactory_.getProcessor(trans).process(prot, prot);
+                this.processorFactory_.getProcessor(trans).process(prot, prot);
             }
         } catch (Exception e) {
             if (!this.stop) {
