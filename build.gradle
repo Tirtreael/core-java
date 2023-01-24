@@ -40,10 +40,18 @@ task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from 
     archiveClassifier.set('sources')
 }
 
+task functionsJar(type: Jar, dependsOn: classes,
+        description: 'Creates a jar from the org.ignis.executor.api.functions classes.') {
+    archiveClassifier.set('testFunctions')
+    from sourceSets.main.output
+    include 'org/ignis/executor/api/functions/**'
+}
+
 artifacts {
     archives jar
     archives sourcesJar
     archives javadocsJar
+    archives functionsJar
 }
 
 archivesBaseName = 'ignis-core-java'

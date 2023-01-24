@@ -42,7 +42,7 @@ public abstract class Module implements IModule {
 
     public void useSource(ISource src) throws IExecutorException {
         try {
-            ILibraryLoader.loadISourceIndividual(src).before(this.executorData.getContext());
+            ILibraryLoader.loadISource(src).before(this.executorData.getContext());
         } catch (Exception ex) {
             this.packException(ex);
         }

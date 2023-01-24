@@ -5,14 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
+import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.server.TServer;
-import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
-import org.apache.thrift.transport.TServerTransport;
-import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IExecutorServerModule;
+import org.ignis.executor.core.transport.IZlibTransportFactory;
+import org.ignis.mpi.Mpi;
 import org.ignis.rpc.IExecutorException;
 
 import java.util.Map;
@@ -36,9 +36,13 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
         if (this.server == null) {
             this.processor = new TMultiplexedProcessor();
             TServerSocket serverTransport = new TServerSocket(port);
+            TServer.Args args = new IThreadedServer.Args(serverTransport)
+                    .processor(this.processor)
+                    .transportFactory(new IZlibTransportFactory(compression))
+                    .protocolFactory(new TCompactProtocol.Factory());
 
 //            this.server = new IThreadedServer(new IThreadedServer.Args(serverTransport).processor(new org.ignis.rpc.executor.IExecutorServerModule.Processor<>(this)));
-            this.server = new IThreadedServer(new IThreadedServer.Args(serverTransport).processor(this.processor));
+            this.server = new IThreadedServer(args);
 
             this.processor.registerProcessor(name, new org.ignis.rpc.executor.IExecutorServerModule.Processor<>(this));
             LOGGER.info("ServerModule: java executor started");
@@ -53,7 +57,8 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
         try {
             this.executorData.getContext().props().getProperties().putAll(properties);
 
-//            MPI.Init()
+//            Mpi.MPI_Init();
+//            MPI.Init();
 //            LOGGER.info("ServerModule: Mpi started");
 
             this.createServices(this.processor);

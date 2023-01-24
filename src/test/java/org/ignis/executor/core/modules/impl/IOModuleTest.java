@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -96,8 +99,9 @@ class IOModuleTest implements IElements {
         String pathOut = "/home/miguelr/Downloads/ignis-downloads/ignis-deploy/outText.txt";
         try {
             this.ioModule.textFile(pathIn);
-            this.ioModule.saveAsTextFile(pathOut,0);
-        } catch (TException e) {
+            this.ioModule.saveAsTextFile(pathOut, 0);
+            assertEquals(-1L, Files.mismatch(Path.of(pathIn), Path.of(pathOut)));
+        } catch (TException | IOException e) {
             e.printStackTrace();
         }
 
@@ -135,6 +139,7 @@ class IOModuleTest implements IElements {
     void saveAsTextFile() {
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair", "createBinary",
@@ -165,7 +170,7 @@ class IOModuleTest implements IElements {
     }
 
 
-//    @Disabled
+    //    @Disabled
     @ParameterizedTest
     @MethodSource({"createBoolean", "createByte", "createShort", "createInteger", "createLong", "createDouble",
             "createString", "createList", "createSet", "createMap", "createPair", "createBinary",

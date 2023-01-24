@@ -125,7 +125,8 @@ public interface IElements {
         List<Object> list = new ArrayList<>(n);
         Random random = new Random(seed);
         for (int i = 0; i < n; i++) {
-            list.add(random.ints().toString());
+            String str = String.valueOf(random.nextInt());
+            list.add(str);
         }
         return List.of(list);
     }

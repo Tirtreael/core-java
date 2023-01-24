@@ -17,14 +17,12 @@
 package org.ignis.driver.core;
 
 import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TMultiplexedProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.apache.thrift.transport.TZlibTransport;
-import org.ignis.rpc.driver.IBackendService;
-import org.ignis.rpc.driver.IClusterService;
-import org.ignis.rpc.driver.IPropertiesService;
-import org.ignis.rpc.driver.IWorkerService;
+import org.ignis.rpc.driver.*;
 
 import static java.lang.Thread.sleep;
 
@@ -34,28 +32,54 @@ import static java.lang.Thread.sleep;
 public class IClient {
 
     private TZlibTransport transport;
-    private IBackendService backendService;
-    private IPropertiesService propertiesService;
-    private IClusterService clusterService;
-    private IWorkerService workerService;
-    private org.ignis.rpc.driver.IDataFrameId dataFrameId;
+    private IBackendService.Client backendService;
+    private IPropertiesService.Client propertiesService;
+    private IClusterService.Client clusterService;
+    private IWorkerService.Client workerService;
+    private IDataFrameService.Client dataframeService;
 
     public IClient(int port, int compression) throws TTransportException, InterruptedException {
         transport = new TZlibTransport(new TSocket("localhost", port), compression);
         for (int i = 0; i < 10; i++) {
-            try{
+            try {
                 transport.open();
                 break;
             } catch (TTransportException e) {
-                if(i==9)
+                if (i == 9)
                     throw new RuntimeException(e);
                 sleep(i);
             }
         }
 
         TProtocol protocol = new TCompactProtocol(transport);
+        this.backendService = new IBackendService.Client(new TMultiplexedProtocol(protocol, "IBackend"));
+        this.propertiesService = new IPropertiesService.Client(new TMultiplexedProtocol(protocol, "IProperties"));
+        this.clusterService = new IClusterService.Client(new TMultiplexedProtocol(protocol, "ICluster"));
+        this.workerService = new IWorkerService.Client(new TMultiplexedProtocol(protocol, "IWorker"));
+        this.dataframeService = new IDataFrameService.Client(new TMultiplexedProtocol(protocol, "IDataFrame"));
+    }
 
+    public IBackendService.Client getBackendService() {
+        return backendService;
+    }
 
+    public IPropertiesService.Client getPropertiesService() {
+        return propertiesService;
+    }
 
+    public IClusterService.Client getClusterService() {
+        return clusterService;
+    }
+
+    public IWorkerService.Client getWorkerService() {
+        return workerService;
+    }
+
+    public IDataFrameService.Client getDataframeService() {
+        return dataframeService;
+    }
+
+    public void close() {
+        this.transport.close();
     }
 }

@@ -297,11 +297,6 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void saveAsObjectFile(String path, String compression, int first) {
-
-    }
-
-    @Override
-    public void saveAsTextFile(String path, long first) {
         LOGGER.info("IO: saving as text file");
         IPartitionGroup group = this.executorData.getAndDeletePartitions();
         for (int i = 0; i < group.size(); i++) {
@@ -317,6 +312,31 @@ public class IOModule extends Module implements IIOModule {
                 oos.flush();
                 oos.close();
                 fileOS.close();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        group.clear();
+    }
+
+    @Override
+    public void saveAsTextFile(String path, long first) {
+        LOGGER.info("IO: saving as text file");
+        IPartitionGroup group = this.executorData.getAndDeletePartitions();
+        for (int i = 0; i < group.size(); i++) {
+            try {
+                String fileName = this.partitionFileName(path, (int) (first + i));
+                FileWriter file = new FileWriter(fileName);
+//                FileOutputStream fileOS = new FileOutputStream(fileName);
+//                ObjectOutputStream oos = new ObjectOutputStream(fileOS);
+                LOGGER.info("IO: saving text file " + fileName);
+//                oos.writeObject(group.get(i).getElements());
+                for(Object elem : group.get(i)){
+                    file.write(elem + "\n");
+                }
+                file.flush();
+                file.close();
 
             } catch (IOException e) {
                 throw new RuntimeException(e);

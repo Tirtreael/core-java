@@ -3,6 +3,7 @@ package org.ignis;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TMultiplexedProcessor;
+import org.apache.thrift.TProcessor;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IGeneralModule;
@@ -43,11 +44,14 @@ public final class Main {
                 this.executorData = executorData;
             }
 
-            void createServices(TMultiplexedProcessor processor) {
+            @Override
+            public void createServices(TProcessor processor) {
+                super.createServices(processor);
+
                 IIOModule io = new IOModule(executorData);
-                processor.registerProcessor("IIO", new org.ignis.rpc.executor.IIOModule.Processor<>(io));
+                ((TMultiplexedProcessor) processor).registerProcessor("IIO", new org.ignis.rpc.executor.IIOModule.Processor<>(io));
                 IGeneralModule general = new GeneralModule(executorData);
-                processor.registerProcessor("IGeneral", new org.ignis.rpc.executor.IGeneralModule.Processor<>(general));
+                ((TMultiplexedProcessor) processor).registerProcessor("IGeneral", new org.ignis.rpc.executor.IGeneralModule.Processor<>(general));
             }
         }
         IExecutorData executorData = new IExecutorData();

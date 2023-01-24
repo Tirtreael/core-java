@@ -6,8 +6,10 @@ import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.modules.ICacheContextModule;
 import org.ignis.executor.core.modules.IGeneralModule;
 import org.ignis.executor.core.modules.IIOModule;
+import org.ignis.executor.core.modules.impl.CacheContextModule;
 import org.ignis.executor.core.modules.impl.GeneralModule;
 import org.ignis.executor.core.modules.impl.IOModule;
 
@@ -47,6 +49,8 @@ public final class Main {
             public void createServices(TProcessor processor) {
                 super.createServices(processor);
 
+                ICacheContextModule cacheContext = new CacheContextModule(executorData);
+                ((TMultiplexedProcessor) processor).registerProcessor("ICacheContext", new org.ignis.rpc.executor.ICacheContextModule.Processor<>(cacheContext));
                 IIOModule io = new IOModule(executorData);
                 ((TMultiplexedProcessor) processor).registerProcessor("IIO", new org.ignis.rpc.executor.IIOModule.Processor<>(io));
                 IGeneralModule general = new GeneralModule(executorData);

@@ -96,7 +96,8 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     @ValueSource(strings = "Memory")
     @Timeout(60000)
     void map(String partitionType) {
-        IFunction function = ILibraryLoader.loadFunction("org.ignis.executor.api.functions.MapFunction");
+        IFunction function = ILibraryLoader.loadISource(
+                ILibraryLoader.createSource("/home/miguelr/Downloads/ignis-downloads/ignis-core-java-1.0.jar:org.ignis.executor.api.functions.MapFunction"));
         this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
 
         List<Object> elems = (List<Object>) IElements.createInteger().get(0);
@@ -116,6 +117,35 @@ class GeneralModuleTest extends ModuleTest implements IElements {
             e.printStackTrace();
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = "Memory")
+    @Timeout(60000)
+    void map2(String partitionType) {
+        IFunction function = ILibraryLoader.loadISource(
+                ILibraryLoader.createSource("/home/miguelr/Downloads/ignis-downloads/ignis-core-java-1.0.jar:org.ignis.executor.api.functions.MapFunction"));
+        this.generalModule.getExecutorData().getPropertyParser().getProperties().put("ignis.partition.type", partitionType);
+
+        List<Object> elems = (List<Object>) IElements.createString().get(0);
+        try {
+//            IPartitionGroup group = new IPartitionGroup();
+//            group.add(new IMemoryPartition());
+            this.loadToPartitions(elems, 1000);
+            this.generalModule.map(function);
+            List<Object> result = this.getFromPartitions();
+
+            assertEquals(elems.size(), result.size());
+            for (int i = 0; i < elems.size(); i++) {
+                System.out.println(elems.get(i));
+                assertEquals(function.call(elems.get(i), generalModule.getExecutorData().getContext()), result.get(i));
+                System.out.println(result.get(i));
+            }
+
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @ParameterizedTest
     @ValueSource(strings = "Memory")
@@ -339,7 +369,6 @@ class GeneralModuleTest extends ModuleTest implements IElements {
                     assertEquals(counts.get(item.getKey()), item.getValue().size());
                 }
             }
-            System.out.println("a");
 
         } catch (TException | Mpi.MpiException | IOException e) {
             e.printStackTrace();

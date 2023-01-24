@@ -7,6 +7,7 @@ import org.apache.thrift.transport.TZlibTransport;
 public class IZlibTransportFactory extends TZlibTransport.Factory {
 
     private int compression;
+
     public IZlibTransportFactory(int compression) {
         this.compression = compression;
     }
