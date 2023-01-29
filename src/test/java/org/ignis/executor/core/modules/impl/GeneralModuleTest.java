@@ -41,7 +41,7 @@ class GeneralModuleTest extends ModuleTest implements IElements {
         }
     }
 
-    private final GeneralModule generalModule = new GeneralModule(new IExecutorData());
+    private final GeneralModule generalModule = new GeneralModule(super.getExecutorData());
 
     public GeneralModuleTest() {
         Properties props = this.generalModule.getExecutorData().getPropertyParser().getProperties();
@@ -67,31 +67,31 @@ class GeneralModuleTest extends ModuleTest implements IElements {
     void tearDown() {
     }
 
-    void loadToPartitions(List<Object> elems, int partitions) throws TException {
-        IPartitionGroup group = this.generalModule.getExecutorData().getPartitionTools().newPartitionGroup(partitions);
-        this.generalModule.getExecutorData().setPartitions(group);
-        int partitionSize = (int) Math.ceil((double) elems.size() / group.size());
-        for (int p = 0; p < group.size(); p++) {
-            IWriteIterator writeIterator = group.get(p).writeIterator();
-            int i = partitionSize * p;
-            while (i < partitionSize * (p + 1) && i < elems.size()) {
-                writeIterator.write(elems.get(i));
-                i += 1;
-            }
-        }
-    }
-
-    List<Object> getFromPartitions() throws TException {
-        List<Object> elems = new ArrayList<>();
-        IPartitionGroup group = this.generalModule.getExecutorData().getPartitionGroup();
-        for (IPartition objects : group) {
-            IReadIterator readIterator = objects.readIterator();
-            while (readIterator.hasNext()) {
-                elems.add(readIterator.next());
-            }
-        }
-        return elems;
-    }
+//    void loadToPartitions(List<Object> elems, int partitions) throws TException {
+//        IPartitionGroup group = this.generalModule.getExecutorData().getPartitionTools().newPartitionGroup(partitions);
+//        this.generalModule.getExecutorData().setPartitions(group);
+//        int partitionSize = (int) Math.ceil((double) elems.size() / group.size());
+//        for (int p = 0; p < group.size(); p++) {
+//            IWriteIterator writeIterator = group.get(p).writeIterator();
+//            int i = partitionSize * p;
+//            while (i < partitionSize * (p + 1) && i < elems.size()) {
+//                writeIterator.write(elems.get(i));
+//                i += 1;
+//            }
+//        }
+//    }
+//
+//    List<Object> getFromPartitions() throws TException {
+//        List<Object> elems = new ArrayList<>();
+//        IPartitionGroup group = this.generalModule.getExecutorData().getPartitionGroup();
+//        for (IPartition objects : group) {
+//            IReadIterator readIterator = objects.readIterator();
+//            while (readIterator.hasNext()) {
+//                elems.add(readIterator.next());
+//            }
+//        }
+//        return elems;
+//    }
 
     @ParameterizedTest
     @ValueSource(strings = "Memory")

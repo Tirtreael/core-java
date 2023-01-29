@@ -9,7 +9,7 @@ import org.ignis.executor.core.modules.IModule;
 import org.ignis.rpc.IExecutorException;
 
 
-public class CacheContextModule extends Module implements IModule, ICacheContextModule {
+public class CacheContextModule extends Module implements ICacheContextModule {
 
 
     private static final Logger LOGGER = LogManager.getLogger();
