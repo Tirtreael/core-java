@@ -292,7 +292,7 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void partitions() {
-
+// ToDo
     }
 
     @Override
@@ -324,19 +324,19 @@ public class IOModule extends Module implements IIOModule {
     public void saveAsTextFile(String path, long first) {
         LOGGER.info("IO: saving as text file");
         IPartitionGroup group = this.executorData.getAndDeletePartitions();
-        for (int i = 0; i < group.size(); i++) {
+        for (IPartition objects : group) {
             try {
-                String fileName = this.partitionFileName(path, (int) (first + i));
-                FileWriter file = new FileWriter(fileName);
+                FileWriter file = new FileWriter(path);
+                BufferedWriter bw = new BufferedWriter(file);
 //                FileOutputStream fileOS = new FileOutputStream(fileName);
 //                ObjectOutputStream oos = new ObjectOutputStream(fileOS);
-                LOGGER.info("IO: saving text file " + fileName);
+                LOGGER.info("IO: saving text file " + path);
 //                oos.writeObject(group.get(i).getElements());
-                for(Object elem : group.get(i)){
-                    file.write(elem + "\n");
+                for (Object elem : objects) {
+                    bw.write(elem + "\n");
                 }
-                file.flush();
-                file.close();
+                bw.flush();
+                bw.close();
 
             } catch (IOException e) {
                 throw new RuntimeException(e);

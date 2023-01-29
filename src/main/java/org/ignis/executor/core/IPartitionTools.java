@@ -1,9 +1,7 @@
 package org.ignis.executor.core;
 
 import org.ignis.executor.api.IContext;
-import org.ignis.executor.core.storage.IMemoryPartition;
-import org.ignis.executor.core.storage.IPartition;
-import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.executor.core.storage.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -86,12 +84,29 @@ public class IPartitionTools {
         return new IMemoryPartition(elems);
     }
 
-    public boolean isMemory(IPartitionGroup partitionGroup) {
-        return partitionGroup.size() > 0 && partitionGroup.get(0) instanceof IMemoryPartition;
-    }
 
     public boolean isMemory(IPartition partition) {
         return IMemoryPartition.TYPE.equals(partition.getType());
+    }
+
+    public boolean isRawMemory(IPartition partition) {
+        return IRawMemoryPartition.TYPE.equals(partition.getType());
+    }
+
+    public boolean isDisk(IPartition partition) {
+        return IDiskPartition.TYPE.equals(partition.getType());
+    }
+
+    public boolean isMemory(IPartitionGroup partitionGroup) {
+        return IMemoryPartition.TYPE.equals(partitionGroup.get(0).getType());
+    }
+
+    public boolean isRawMemory(IPartitionGroup partitionGroup) {
+        return IRawMemoryPartition.TYPE.equals(partitionGroup.get(0).getType());
+    }
+
+    public boolean isDisk(IPartitionGroup partitionGroup) {
+        return IDiskPartition.TYPE.equals(partitionGroup.get(0).getType());
     }
 
     public void createDirectoryIfNotExists(String path) {

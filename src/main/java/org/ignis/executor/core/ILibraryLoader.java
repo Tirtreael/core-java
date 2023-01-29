@@ -37,11 +37,7 @@ public class ILibraryLoader {
     }
 
     public static IFunction loadISource(ISource src) {
-        try {
-            return loadISourceIndividual(src, IFunction.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return loadISource(src, IFunction.class);
     }
 
     public static IFunction2 loadISource2(ISource src) {
@@ -50,14 +46,21 @@ public class ILibraryLoader {
 
     public static <T> T loadISource(ISource src, Class<T> superClazz) {
         String fName = src.getObj().getName();
-        LOGGER.info("Loaded function: " + fName);
-        return loadFunction(fName, superClazz);
+        LOGGER.info("Loading function: " + fName);
+        try {
+            return loadFunction(fName, superClazz);
+        } catch (ClassCastException e) {
+            LOGGER.error("Function " + fName + " cannot be cast to " + superClazz.getName());
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static <T> T loadISourceIndividual(ISource src, Class<T> superClazz) throws Exception {
         String fName = src.getObj().getName();
         LOGGER.info("Loaded function: " + fName);
-        return loadFunction2(fName, superClazz);
+        return loadFunction(fName, superClazz);
     }
 
     public static IFunction loadFunction(String src) {
@@ -70,7 +73,7 @@ public class ILibraryLoader {
         return null;
     }
 
-    public static <T> T loadFunction(String src, Class<T> superClazz) {
+   /* public static <T> T loadFunction(String src, Class<T> superClazz) {
         try {
             return Class.forName(src).asSubclass(superClazz).getConstructor().newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
@@ -78,12 +81,12 @@ public class ILibraryLoader {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 
     /*
      * Loads a single function inside jar
      */
-    public static <T> T  loadFunction2(String src, Class<T> superClazz) throws Exception {
+    public static <T> T  loadFunction(String src, Class<T> superClazz) throws Exception {
         String[] srcStringArr = src.split(":");
         String fileName = srcStringArr[0];
         String functionName = srcStringArr[1];
