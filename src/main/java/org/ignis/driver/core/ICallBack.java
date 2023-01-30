@@ -19,12 +19,17 @@ package org.ignis.driver.core;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TMultiplexedProcessor;
+import org.apache.thrift.TProcessor;
+import org.apache.thrift.server.TServer;
+import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
+import org.ignis.executor.core.modules.ICommModule;
+import org.ignis.executor.core.modules.IExecutorServerModule;
 import org.ignis.executor.core.modules.IIOModule;
+import org.ignis.executor.core.modules.impl.ICommImpl;
 import org.ignis.executor.core.modules.impl.IExecutorServerModuleImpl;
 import org.ignis.executor.core.modules.impl.IOModule;
 import org.ignis.executor.core.modules.ICacheContextModule;
-import org.ignis.rpc.executor.ICommModule;
 
 /**
  * @author César Pomar
@@ -34,28 +39,52 @@ public class ICallBack {
     private static final Logger LOGGER = LogManager.getLogger();
     private int port;
     private int compression;
+    private IDriverContext driverContext;
+    private IExecutorServerModuleImpl server;
 
     public ICallBack(int port, int compression) {
         this.port = port;
         this.compression = compression;
 
-        class IIExecutorServerModuleImpl extends IExecutorServerModuleImpl {
-            private ICacheContextModule driverContext;
+        class IExecutorServerModuleImpl extends org.ignis.executor.core.modules.impl.IExecutorServerModuleImpl {
+            private IDriverContext driverContext;
 
-            public IIExecutorServerModuleImpl(IExecutorData executorData, ICacheContextModule driverContext) {
+            public IExecutorServerModuleImpl(IExecutorData executorData, IDriverContext driverContext) {
                 super(executorData);
                 this.driverContext = driverContext;
             }
 
-            public void createServices(TMultiplexedProcessor processor) {
+            public void createServices(TProcessor processor) {
                 super.createServices(processor);
                 IIOModule io = new IOModule(this.getExecutorData());
-//                @ToDo
-                processor.registerProcessor("IIO", new org.ignis.rpc.executor.IIOModule.Processor<>(io));
-//                processor.registerProcessor("ICacheContext", new org.ignis.rpc.executor.ICacheContextModule.Processor<>(this.driverContext));
-//                var comm = new  ICommModule(this.getExecutorData());
+                ((TMultiplexedProcessor) processor).registerProcessor("IIO", new org.ignis.rpc.executor.IIOModule.Processor<>(io));
+                ((TMultiplexedProcessor) processor).registerProcessor("ICacheContext", new org.ignis.rpc.executor.ICacheContextModule.Processor<>(this.driverContext));
+                ICommModule comm = new ICommImpl(this.getExecutorData());
+                ((TMultiplexedProcessor) processor).registerProcessor("IComm", new org.ignis.rpc.executor.ICommModule.Processor<>(comm));
             }
         }
+
+        IExecutorData executorData = new IExecutorData();
+        this.driverContext = new IDriverContext(executorData);
+        this.server = new IExecutorServerModuleImpl(executorData, this.driverContext);
+
+        Thread t = new Thread(() -> {
+            try {
+                this.server.serve("IExecutorServer" , port, compression);
+            } catch (TTransportException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+
+    public void stop() {
+        this.server.stop();
+    }
+
+    public IDriverContext driverContext() {
+        return this.driverContext;
     }
 
 }

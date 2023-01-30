@@ -53,7 +53,8 @@ public class IPropertyParser {
 
     public boolean loadType() {
         try {
-            return getBoolean("ignis.modules.load.type");
+            String key = "ignis.modules.load.type";
+            return this.properties.containsKey(key) && getBoolean(key);
         } catch (InvalidKeyException e) {
             e.printStackTrace();
         }

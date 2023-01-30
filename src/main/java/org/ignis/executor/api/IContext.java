@@ -6,6 +6,7 @@ package org.ignis.executor.api;
 import org.ignis.executor.core.IPropertyParser;
 import org.ignis.mpi.Mpi;
 
+import java.util.HashMap;
 import java.util.Map;
 
 // @Todo
@@ -17,6 +18,7 @@ public class IContext {
 
     public IContext(IPropertyParser properties) {
         this.properties = properties;
+        this.variables = new HashMap<>();
     }
 
     //    private MPIGroup = mpi.MPI.COMM_WORLD;

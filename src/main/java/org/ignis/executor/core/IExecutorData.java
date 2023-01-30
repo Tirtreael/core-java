@@ -12,6 +12,7 @@ import org.ignis.executor.api.function.IFunction;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class IExecutorData {
         this.libraryLoader = new ILibraryLoader(this.propertyParser);
         this.partitionTools = new IPartitionTools(this.propertyParser, this.context);
         this.mpi = new IMPI(this.propertyParser, this.partitionTools, this.context);
+        this.variables = new HashMap<>();
     }
 
     public Object getVariable(String key) {

@@ -16,8 +16,98 @@
  */
 package org.ignis.driver.core;
 
+import org.apache.thrift.transport.TTransportException;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @author César Pomar
  */
 public class IClientPool {
+
+    private ReentrantLock lock = new ReentrantLock();
+    private int port;
+    private int compression;
+    private List<IClient> clients = new ArrayList<>();
+    private LinkedList<IClient> queue = new LinkedList<>();
+
+
+    public IClientPool(int port, int compression) {
+        this.port = port;
+        this.compression = compression;
+    }
+
+    public void destroy() {
+        lock.lock();
+        try {
+            for (IClient client : this.clients) {
+                client.close();
+            }
+            this.clients.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public ClientBound getClient() {
+        return new IClientPool.ClientBound(this.port, this.compression, this.clients, this.queue, this.lock);
+    }
+
+
+    private class ClientBound {
+        private int port;
+
+        private int compression;
+        private List<IClient> clients;
+        private LinkedList<IClient> queue;
+
+        private ReentrantLock lock;
+        private IClient client = null;
+
+        public ClientBound(int port, int compression, List<IClient> clients, LinkedList<IClient> queue, ReentrantLock lock) {
+            this.port = port;
+            this.compression = compression;
+            this.clients = clients;
+            this.queue = queue;
+            this.lock = lock;
+        }
+
+        public IClient enter() {
+            this.lock.lock();
+            try {
+                if (this.queue.size() > 0)
+                    this.queue.pop();
+                if (this.client == null) {
+                    this.client = new IClient(this.port, this.compression);
+                    this.lock.lock();
+                    try {
+                        this.clients.add(this.client);
+                    } finally {
+                        this.lock.unlock();
+                    }
+                }
+            } catch (TTransportException | InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                this.lock.unlock();
+            }
+            return this.client;
+        }
+
+        public void exit() {
+            this.lock.lock();
+            try {
+                this.queue.add(this.client);
+            } finally {
+                this.client = null;
+                this.lock.unlock();
+            }
+        }
+
+    }
+
+
 }
