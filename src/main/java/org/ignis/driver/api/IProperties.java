@@ -16,8 +16,79 @@
  */
 package org.ignis.driver.api;
 
+import org.apache.thrift.TException;
+import org.ignis.driver.core.IClient;
+
+import java.util.Properties;
+
 /**
  * @author César Pomar
  */
-public class IProperties {
+public class IProperties extends Properties {
+
+    private long id;
+
+    public long getId() {
+        return id;
+    }
+
+    IProperties(long properties) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            if (properties > 0) {
+                this.id = client.getPropertiesService().newInstance2(properties);
+            } else {
+                this.id = client.getPropertiesService().newInstance();
+            }
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+    public void set(String key, String value) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getPropertiesService().setProperty(this.id, key, value);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String get(String key) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            return client.getPropertiesService().getProperty(this.id, key);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String rm(String key) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            return client.getPropertiesService().rmProperty(this.id, key);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean contains(String key) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            return client.getPropertiesService().contains(this.id, key);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

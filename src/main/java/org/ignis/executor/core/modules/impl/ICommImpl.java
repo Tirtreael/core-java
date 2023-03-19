@@ -9,6 +9,7 @@ import org.ignis.rpc.IExecutorException;
 import org.ignis.rpc.ISource;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 // ToDo
@@ -21,7 +22,7 @@ public class ICommImpl extends Module implements ICommModule {
 
     @Override
     public String openGroup() throws IExecutorException, TException {
-        return null;
+        return "";
     }
 
     @Override
@@ -61,12 +62,12 @@ public class ICommImpl extends Module implements ICommModule {
 
     @Override
     public List<ByteBuffer> getPartitions(byte protocol) throws IExecutorException, TException {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<ByteBuffer> getPartitions2(byte protocol, long minPartitions) throws IExecutorException, TException {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

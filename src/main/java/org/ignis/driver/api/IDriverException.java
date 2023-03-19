@@ -19,5 +19,17 @@ package org.ignis.driver.api;
 /**
  * @author César Pomar
  */
-public class IDriverException extends RuntimeException{
+public class IDriverException extends RuntimeException {
+    public IDriverException(String message, Throwable cause) {
+        super(cause != null ? message + "\n" + "Caused by: " + cause : message, cause);
+    }
+
+    public IDriverException(String message) {
+        super(message);
+    }
+
+    public boolean hasCause() {
+        return this.getCause() != null;
+    }
+
 }

@@ -16,8 +16,35 @@
  */
 package org.ignis.driver.api;
 
+import org.apache.thrift.TException;
+import org.ignis.driver.core.IClient;
+
+
 /**
  * @author César Pomar
  */
 public class ICluster {
+
+    private long id;
+
+    public ICluster(IProperties properties, String name) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            if (properties == null) {
+                if (name == null) {
+                    this.id = client.getClusterService().newInstance0();
+                } else {
+                    this.id = client.getClusterService().newInstance1a(name);
+                }
+            } else {
+                if (name == null) {
+                    this.id = client.getClusterService().newInstance1b(properties.getId());
+                } else {
+                    this.id = client.getClusterService().newInstance2(name, properties.getId());
+                }
+            }
+        } catch (TException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
 }

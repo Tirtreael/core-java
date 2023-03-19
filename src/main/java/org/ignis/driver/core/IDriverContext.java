@@ -19,14 +19,21 @@ package org.ignis.driver.core;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
+import org.ignis.driver.api.IDriverException;
+import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.impl.Module;
+import org.ignis.executor.core.storage.IMemoryPartition;
+import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
 import org.ignis.rpc.IExecutorException;
 import org.ignis.rpc.executor.ICacheContextModule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author César Pomar
@@ -38,7 +45,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
 
     private long nextId = 0;
     private Map<Long, IPartitionGroup> context = new HashMap<>();
-    private Map<Long, IPartitionGroup> data = new HashMap<>();
+    private Map<Long, Supplier<IPartitionGroup>> data = new HashMap<>();
 
 
     public IDriverContext(IExecutorData executorData) {
@@ -103,7 +110,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
     @Override
     public synchronized void loadCache(long id) throws IExecutorException, TException {
         try {
-            IPartitionGroup partitionGroup = this.data.get(id);
+            IPartitionGroup partitionGroup = this.data.get(id).get();
             if (partitionGroup == null) {
                 throw new IllegalArgumentException("data " + id + " not found");
             }
@@ -112,4 +119,64 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
             this.packException(ex);
         }
     }
+
+    public Long parallelize(List<Object> data, boolean nativ) {
+        try {
+            Supplier<IPartitionGroup> get = () -> {
+                IPartitionGroup group = this.getExecutorData().getPartitionTools().newPartitionGroup();
+                IPartition partition = new IMemoryPartition();
+                partition.setElements(data);
+                group.add(partition);
+
+                return group;
+            };
+
+            synchronized (this) {
+                long id = this.nextId;
+                this.nextId += 1;
+                this.data.put(id, get);
+                return id;
+            }
+        } catch (Exception ex) {
+            this.packException(ex);
+        }
+        return 0L;
+    }
+
+    public synchronized List<Object> collect(long id) {
+        try {
+            IPartitionGroup group = this.getContext(id);
+            if (this.getExecutorData().getPartitionTools().isMemory(group)) {
+                IPartition result;
+                if (group.size() > 1) {
+                    result = new IMemoryPartition();
+                    for (IPartition part : group) {
+                        part.copyTo(result);
+                    }
+                } else result = group.get(0);
+                return result.getElements();
+            }
+
+            List<Object> result = new ArrayList<>();
+            for (IPartition part : group) {
+                IReadIterator it = part.readIterator();
+                while (it.hasNext()) {
+                    result.add(it.next());
+                }
+            }
+            return result;
+
+        } catch (Exception ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+    public Object collect1(long id) {
+        Object l = this.collect(id).get(0);
+        if (l instanceof List<?> && ((List<?>) l).size() == 0) {
+            throw new IDriverException("Empty collection");
+        }
+        return ((List<?>) l).get(0);
+    }
+
 }
