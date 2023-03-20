@@ -19,6 +19,8 @@ package org.ignis.driver.api;
 import org.apache.thrift.TException;
 import org.ignis.driver.core.IClient;
 
+import java.util.List;
+
 
 /**
  * @author César Pomar
@@ -47,4 +49,69 @@ public class ICluster {
             throw new IDriverException(ex.getMessage(), ex.getCause());
         }
     }
+
+    public void start() {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().start(this.id);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void destroy() {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().destroy(this.id);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setName(String name) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().setName(this.id, name);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void execute(List<String> cmd) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().execute(this.id, cmd);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void executeScript(String script) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().executeScript(this.id, script);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendFile(String source, String target) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().sendFile(this.id, source, target);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendCompressedFile(String source, String target) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getClusterService().sendCompressedFile(this.id, source, target);
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

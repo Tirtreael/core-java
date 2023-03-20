@@ -19,6 +19,7 @@ package org.ignis.driver.api;
 import org.apache.thrift.TException;
 import org.ignis.driver.core.IClient;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -84,6 +85,61 @@ public class IProperties extends Properties {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
             return client.getPropertiesService().contains(this.id, key);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Map<String, String> toMap(boolean defaults) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            return client.getPropertiesService().toMap(this.id, defaults);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void fromMap(Map<String, String> map) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getPropertiesService().fromMap(this.id, map);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void load(String path) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getPropertiesService().load(this.id, path);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void store(String path) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getPropertiesService().store(this.id, path);
+        } catch (org.ignis.rpc.driver.IDriverException ex) {
+            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void clear() {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getPropertiesService().clear(this.id);
         } catch (org.ignis.rpc.driver.IDriverException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
         } catch (TException e) {
