@@ -29,6 +29,10 @@ public class ICluster {
 
     private long id;
 
+    public long getId() {
+        return id;
+    }
+
     public ICluster(IProperties properties, String name) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();

@@ -33,7 +33,7 @@ public class IProperties extends Properties {
         return id;
     }
 
-    IProperties(long properties) {
+    public IProperties(long properties) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
             if (properties > 0) {

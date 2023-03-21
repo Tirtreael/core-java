@@ -16,8 +16,83 @@
  */
 package org.ignis.driver.api;
 
+import org.apache.thrift.TException;
+import org.ignis.driver.core.IClient;
+import org.ignis.rpc.driver.IWorkerId;
+
 /**
  * @author César Pomar
  */
 public class IWorker {
+
+    private ICluster cluster;
+    private IWorkerId id;
+
+    public IWorker(ICluster cluster, String type, String name, int cores, int instances) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            if (name == null) {
+                if (cores == 0)
+                    this.id = client.getWorkerService().newInstance(cluster.getId(), type);
+                else this.id = client.getWorkerService().newInstance4(cluster.getId(), type, cores, instances);
+            } else {
+                if (cores == 0)
+                    this.id = client.getWorkerService().newInstance3(cluster.getId(), name, type);
+                else this.id = client.getWorkerService().newInstance5(cluster.getId(), name, type, cores, instances);
+            }
+        } catch (TException ex) {
+            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+
+    public void start() {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getWorkerService().start(this.id);
+        } catch (TException ex) {
+            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+    public void destroy() {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getWorkerService().destroy(this.id);
+        } catch (TException ex) {
+            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+    public ICluster getCluster() {
+        return cluster;
+    }
+
+    public IWorkerId getId() {
+        return id;
+    }
+
+    public void setName(String name) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            client.getWorkerService().setName(this.id, name);
+        } catch (TException ex) {
+            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+    // @Todo
+
+
+    public IDataFrame textFile(String path, int minPartitions) {
+        try {
+            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+            if (minPartitions < 1)
+                return new IDataFrame(client.getWorkerService().textFile(this.id, path));
+            else return new IDataFrame(client.getWorkerService().textFile3(this.id, path, minPartitions));
+        } catch (TException ex) {
+            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        }
+    }
+
 }

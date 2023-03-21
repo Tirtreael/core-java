@@ -140,95 +140,97 @@ public class IDataFrame {
         }
     }
 
-    public void map(ISource src) {
+    public IDataFrame map(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().map_(this.id, src);
+            return new IDataFrame(client.getDataframeService().map_(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void filter(ISource src) {
+    public IDataFrame filter(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().filter(this.id, src);
+            return new IDataFrame(client.getDataframeService().filter(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void flatmap(ISource src) {
+    public IDataFrame flatmap(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().flatmap(this.id, src);
+            return new IDataFrame(client.getDataframeService().flatmap(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void keyBy(ISource src) {
+    public IDataFrame keyBy(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().keyBy(this.id, src);
+            return new IDataFrame(client.getDataframeService().keyBy(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void mapWithIndex(ISource src) {
+    public IDataFrame mapWithIndex(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().mapWithIndex(this.id, src);
+            return new IDataFrame(client.getDataframeService().mapWithIndex(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void mapPartitions(ISource src) {
+    public IDataFrame mapPartitions(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().mapPartitions(this.id, src);
+            return new IDataFrame(client.getDataframeService().mapPartitions(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void mapPartitionsWithIndex(ISource src) {
+    public IDataFrame mapPartitionsWithIndex(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().mapPartitionsWithIndex(this.id, src);
+            return new IDataFrame(client.getDataframeService().mapPartitionsWithIndex(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void mapExecutor(ISource src) {
+    public IDataFrame mapExecutor(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().mapExecutor(this.id, src);
+            return new IDataFrame(client.getDataframeService().mapExecutor(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void mapExecutorTo(ISource src) {
+    public IDataFrame mapExecutorTo(ISource src) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().mapExecutorTo(this.id, src);
+            return new IDataFrame(client.getDataframeService().mapExecutorTo(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void groupBy(ISource src, long numPartitions) {
+    public IDataFrame groupBy(ISource src, long numPartitions) {
         try {
             IClient client = Ignis.getInstance().clientPool().getClient().getClient();
-            client.getDataframeService().groupBy(this.id, src);
+            return new IDataFrame(client.getDataframeService().groupBy(this.id, src));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
     }
+
+    // @ToDo
 /*
 
     public void sort(ISource src) {
