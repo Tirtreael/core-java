@@ -18,6 +18,7 @@ package org.ignis.driver.core;
 
 import org.apache.thrift.transport.TTransportException;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class IClientPool {
     }
 
 
-    public class ClientBound {
+    public class ClientBound implements Closeable {
         private int port;
 
         private int compression;
@@ -66,7 +67,7 @@ public class IClientPool {
             this.queue = queue;
         }
 
-        public synchronized IClient enter() {
+        public synchronized IClient getClient() {
             try {
                 if (this.queue.size() > 0)
                     this.queue.pop();
@@ -80,13 +81,9 @@ public class IClientPool {
             return this.client;
         }
 
-        public synchronized void exit() {
+        public synchronized void close() {
             this.queue.add(this.client);
             this.client = null;
-        }
-
-        public IClient getClient() {
-            return client;
         }
     }
 

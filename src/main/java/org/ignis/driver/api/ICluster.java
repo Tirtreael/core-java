@@ -18,6 +18,7 @@ package org.ignis.driver.api;
 
 import org.apache.thrift.TException;
 import org.ignis.driver.core.IClient;
+import org.ignis.driver.core.IClientPool;
 
 import java.util.List;
 
@@ -29,13 +30,9 @@ public class ICluster {
 
     private long id;
 
-    public long getId() {
-        return id;
-    }
-
     public ICluster(IProperties properties, String name) {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             if (properties == null) {
                 if (name == null) {
                     this.id = client.getClusterService().newInstance0();
@@ -54,9 +51,13 @@ public class ICluster {
         }
     }
 
+    public long getId() {
+        return id;
+    }
+
     public void start() {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().start(this.id);
         } catch (TException e) {
             throw new RuntimeException(e);
@@ -64,8 +65,8 @@ public class ICluster {
     }
 
     public void destroy() {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().destroy(this.id);
         } catch (TException e) {
             throw new RuntimeException(e);
@@ -73,8 +74,8 @@ public class ICluster {
     }
 
     public void setName(String name) {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().setName(this.id, name);
         } catch (TException e) {
             throw new RuntimeException(e);
@@ -82,8 +83,8 @@ public class ICluster {
     }
 
     public void execute(List<String> cmd) {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().execute(this.id, cmd);
         } catch (TException e) {
             throw new RuntimeException(e);
@@ -91,8 +92,8 @@ public class ICluster {
     }
 
     public void executeScript(String script) {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().executeScript(this.id, script);
         } catch (TException e) {
             throw new RuntimeException(e);
@@ -100,8 +101,8 @@ public class ICluster {
     }
 
     public void sendFile(String source, String target) {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().sendFile(this.id, source, target);
         } catch (TException e) {
             throw new RuntimeException(e);
@@ -109,8 +110,8 @@ public class ICluster {
     }
 
     public void sendCompressedFile(String source, String target) {
-        try {
-            IClient client = Ignis.getInstance().clientPool().getClient().getClient();
+        try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
+            IClient client = clientBound.getClient();
             client.getClusterService().sendCompressedFile(this.id, source, target);
         } catch (TException e) {
             throw new RuntimeException(e);
