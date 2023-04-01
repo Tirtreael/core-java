@@ -38,7 +38,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().setName(this.id, name);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -47,7 +47,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().persist(this.id, cacheLevel);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -56,7 +56,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().cache(this.id);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -65,7 +65,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().unpersist(this.id);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -74,7 +74,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().uncache(this.id);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -83,7 +83,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().partitions(this.id);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -92,7 +92,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().saveAsObjectFile(this.id, path, compression);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -101,7 +101,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().saveAsTextFile(this.id, path);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -110,7 +110,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().saveAsJsonFile(this.id, path, pretty);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -119,7 +119,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().repartition(this.id, numPartitions, preserveOrdering, global);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -128,7 +128,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().partitionByRandom(this.id, numPartitions, seed);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -137,7 +137,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             client.getDataframeService().partitionBy(this.id, src, numPartitions);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -146,7 +146,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().map_(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -155,7 +155,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().filter(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -164,7 +164,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().flatmap(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -173,7 +173,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().keyBy(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -182,7 +182,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().mapWithIndex(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -191,7 +191,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().mapPartitions(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -200,7 +200,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().mapPartitionsWithIndex(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -209,7 +209,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().mapExecutor(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -218,7 +218,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().mapExecutorTo(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -227,7 +227,7 @@ public class IDataFrame {
             IClient client = clientBound.getClient();
             return new IDataFrame(client.getDataframeService().groupBy(this.id, src));
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -238,7 +238,7 @@ public class IDataFrame {
         try (IClient client = Ignis.getInstance().clientPool().getClient().getClient()) {
             client.getDataframeService().sort(this.id, src);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 

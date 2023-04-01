@@ -41,8 +41,8 @@ public class IWorker {
                     this.id = client.getWorkerService().newInstance3(cluster.getId(), name, type);
                 else this.id = client.getWorkerService().newInstance5(cluster.getId(), name, type, cores, instances);
             }
-        } catch (TException ex) {
-            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -51,8 +51,8 @@ public class IWorker {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getWorkerService().start(this.id);
-        } catch (TException ex) {
-            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -60,8 +60,8 @@ public class IWorker {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getWorkerService().destroy(this.id);
-        } catch (TException ex) {
-            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -77,8 +77,8 @@ public class IWorker {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getWorkerService().setName(this.id, name);
-        } catch (TException ex) {
-            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -91,8 +91,8 @@ public class IWorker {
             if (minPartitions < 1)
                 return new IDataFrame(client.getWorkerService().textFile(this.id, path));
             else return new IDataFrame(client.getWorkerService().textFile3(this.id, path, minPartitions));
-        } catch (TException ex) {
-            throw new org.ignis.driver.api.IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 

@@ -56,10 +56,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getPropertiesService().setProperty(this.id, key, value);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -67,10 +65,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             return client.getPropertiesService().getProperty(this.id, key);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -78,10 +74,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             return client.getPropertiesService().rmProperty(this.id, key);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -89,10 +83,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             return client.getPropertiesService().contains(this.id, key);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -100,10 +92,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             return client.getPropertiesService().toMap(this.id, defaults);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -111,10 +101,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getPropertiesService().fromMap(this.id, map);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -122,10 +110,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getPropertiesService().load(this.id, path);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -133,10 +119,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getPropertiesService().store(this.id, path);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -144,10 +128,8 @@ public class IProperties extends Properties {
         try (IClientPool.ClientBound clientBound = Ignis.getInstance().clientPool().getClient()) {
             IClient client = clientBound.getClient();
             client.getPropertiesService().clear(this.id);
-        } catch (org.ignis.rpc.driver.IDriverException ex) {
+        } catch (TException ex) {
             throw new IDriverException(ex.getMessage(), ex.getCause());
-        } catch (TException e) {
-            throw new RuntimeException(e);
         }
     }
 

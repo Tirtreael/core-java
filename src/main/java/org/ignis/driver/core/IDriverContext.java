@@ -95,11 +95,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
 
     @Override
     public void loadContextAsVariable(long id, String name) throws IExecutorException, TException {
-        try {
-            this.packException(new RuntimeException("Driver does not implement loadContextAsVariable"));
-        } catch (Exception ex) {
-            this.packException(ex);
-        }
+        this.packException(new RuntimeException("Driver does not implement loadContextAsVariable"));
     }
 
     @Override
@@ -120,7 +116,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
         }
     }
 
-    public Long parallelize(List<Object> data, boolean nativ) {
+    public long parallelize(List<Object> data, boolean nativ) {
         try {
             Supplier<IPartitionGroup> get = () -> {
                 IPartitionGroup group = this.getExecutorData().getPartitionTools().newPartitionGroup();
@@ -137,10 +133,9 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
                 this.data.put(id, get);
                 return id;
             }
-        } catch (Exception ex) {
-            this.packException(ex);
+        } catch (Exception e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
-        return 0L;
     }
 
     public synchronized List<Object> collect(long id) {

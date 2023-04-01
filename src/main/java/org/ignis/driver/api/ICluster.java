@@ -46,8 +46,8 @@ public class ICluster {
                     this.id = client.getClusterService().newInstance2(name, properties.getId());
                 }
             }
-        } catch (TException ex) {
-            throw new IDriverException(ex.getMessage(), ex.getCause());
+        } catch (TException e) {
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -60,7 +60,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().start(this.id);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -69,7 +69,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().destroy(this.id);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -78,7 +78,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().setName(this.id, name);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -87,7 +87,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().execute(this.id, cmd);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -96,7 +96,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().executeScript(this.id, script);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -105,7 +105,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().sendFile(this.id, source, target);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
@@ -114,7 +114,7 @@ public class ICluster {
             IClient client = clientBound.getClient();
             client.getClusterService().sendCompressedFile(this.id, source, target);
         } catch (TException e) {
-            throw new RuntimeException(e);
+            throw new IDriverException(e.getMessage(), e.getCause());
         }
     }
 
