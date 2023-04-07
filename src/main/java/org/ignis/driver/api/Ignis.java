@@ -26,9 +26,7 @@ import org.ignis.driver.core.IDriverContext;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-/**
- * @author César Pomar
- */
+
 public class Ignis {
 
     private static final Logger LOGGER = LogManager.getLogger();

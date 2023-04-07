@@ -1,19 +1,14 @@
 package org.ignis.executor.api;
 
-//import mpi.Intracomm;
-//import mpi.MPI;
-//import mpi.MPIException;
 import org.ignis.executor.core.IPropertyParser;
-import org.ignis.mpi.Mpi;
 
 import java.util.HashMap;
 import java.util.Map;
 
-// @Todo
 public class IContext {
 
     private final IPropertyParser properties;
-    private Map<String, Object> variables;
+    private final Map<String, Object> variables;
 //    private final mpi.Intracomm mpiGroup = MPI.COMM_WORLD;
 
     public IContext(IPropertyParser properties) {

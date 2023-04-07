@@ -28,9 +28,7 @@ import org.ignis.executor.core.modules.impl.ICommImpl;
 import org.ignis.executor.core.modules.impl.IExecutorServerModuleImpl;
 import org.ignis.executor.core.modules.impl.IOModule;
 
-/**
- * @author César Pomar
- */
+
 public class ICallBack {
 
     private static final Logger LOGGER = LogManager.getLogger();

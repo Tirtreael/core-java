@@ -22,9 +22,7 @@ import org.ignis.driver.core.IClientPool;
 import org.ignis.rpc.ISource;
 import org.ignis.rpc.driver.IDataFrameId;
 
-/**
- * @author César Pomar
- */
+
 public class IDataFrame {
 
     private final IDataFrameId id;

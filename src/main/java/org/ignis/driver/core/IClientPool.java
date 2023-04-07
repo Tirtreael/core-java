@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * @author César Pomar
- */
+
 public class IClientPool {
 
     private int port;

@@ -21,9 +21,7 @@ import org.ignis.driver.core.IClient;
 import org.ignis.driver.core.IClientPool;
 import org.ignis.rpc.driver.IWorkerId;
 
-/**
- * @author César Pomar
- */
+
 public class IWorker {
 
     private ICluster cluster;

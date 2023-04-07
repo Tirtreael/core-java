@@ -23,9 +23,7 @@ import org.ignis.driver.core.IClientPool;
 import java.util.Map;
 import java.util.Properties;
 
-/**
- * @author César Pomar
- */
+
 public class IProperties extends Properties {
 
     private long id;

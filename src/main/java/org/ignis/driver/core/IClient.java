@@ -26,9 +26,7 @@ import org.ignis.rpc.driver.*;
 
 import static java.lang.Thread.sleep;
 
-/**
- * @author César Pomar
- */
+
 public class IClient {
 
     private TZlibTransport transport;

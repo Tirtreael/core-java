@@ -23,9 +23,6 @@ import org.ignis.driver.core.IClientPool;
 import java.util.List;
 
 
-/**
- * @author César Pomar
- */
 public class ICluster {
 
     private long id;

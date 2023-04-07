@@ -16,8 +16,14 @@
  */
 package org.ignis.driver.api;
 
-/**
- * @author César Pomar
- */
-public class ISource {
+import org.ignis.rpc.IEncoded;
+
+
+public class ISource extends org.ignis.rpc.ISource {
+
+
+    public ISource(String src) {
+        super();
+        super.setObj(new IEncoded(IEncoded._Fields.NAME, src));
+    }
 }

@@ -26,7 +26,6 @@ import org.ignis.executor.core.modules.impl.Module;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
-import org.ignis.rpc.IExecutorException;
 import org.ignis.rpc.executor.ICacheContextModule;
 
 import java.util.ArrayList;
@@ -35,9 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * @author César Pomar
- */
+
 public class IDriverContext extends Module implements ICacheContextModule.Iface {
 
 
@@ -62,7 +59,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
     }
 
     @Override
-    public synchronized long saveContext() throws IExecutorException, TException {
+    public synchronized long saveContext() throws TException {
         try {
             long id = this.nextId;
             this.nextId += 1;
@@ -75,7 +72,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
     }
 
     @Override
-    public synchronized void clearContext() throws IExecutorException, TException {
+    public synchronized void clearContext() throws TException {
         try {
             this.getExecutorData().deletePartitions();
             this.getExecutorData().clearVariables();
@@ -85,7 +82,7 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
     }
 
     @Override
-    public synchronized void loadContext(long id) throws IExecutorException, TException {
+    public synchronized void loadContext(long id) throws TException {
         try {
             this.getExecutorData().setPartitions(this.getContext(id));
         } catch (Exception ex) {
@@ -94,17 +91,17 @@ public class IDriverContext extends Module implements ICacheContextModule.Iface 
     }
 
     @Override
-    public void loadContextAsVariable(long id, String name) throws IExecutorException, TException {
+    public void loadContextAsVariable(long id, String name) throws TException {
         this.packException(new RuntimeException("Driver does not implement loadContextAsVariable"));
     }
 
     @Override
-    public void cache(long id, byte level) throws IExecutorException, TException {
+    public void cache(long id, byte level) throws TException {
         this.packException(new RuntimeException("Driver does not implement cache"));
     }
 
     @Override
-    public synchronized void loadCache(long id) throws IExecutorException, TException {
+    public synchronized void loadCache(long id) throws TException {
         try {
             IPartitionGroup partitionGroup = this.data.get(id).get();
             if (partitionGroup == null) {
