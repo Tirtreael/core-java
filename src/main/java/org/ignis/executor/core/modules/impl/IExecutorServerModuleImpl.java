@@ -12,7 +12,6 @@ import org.apache.thrift.transport.TTransportException;
 import org.ignis.executor.core.IExecutorData;
 import org.ignis.executor.core.modules.IExecutorServerModule;
 import org.ignis.executor.core.transport.IZlibTransportFactory;
-import org.ignis.mpi.Mpi;
 import org.ignis.rpc.IExecutorException;
 
 import java.util.Map;
@@ -72,7 +71,7 @@ public class IExecutorServerModuleImpl extends Module implements IExecutorServer
         try {
 //            MPI.Finalize();
             if (this.server != null) {
-                TServer aux = this.server;
+                IThreadedServer aux = this.server;
                 this.server = null;
                 aux.stop();
             }

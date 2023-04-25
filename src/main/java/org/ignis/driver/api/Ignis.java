@@ -29,9 +29,8 @@ import java.io.InputStreamReader;
 
 public class Ignis {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     public static final Ignis instance = new Ignis();
+    private static final Logger LOGGER = LogManager.getLogger();
     private Process backend;
     private IClientPool pool;
     private ICallBack callback;
@@ -69,7 +68,7 @@ public class Ignis {
                 throw new IDriverException(ex.getMessage(), ex.getCause());
             }
 
-            this.backend.wait();
+            this.backend.waitFor();
             this.pool.destroy();
             try {
                 this.callback.stop();

@@ -1,10 +1,11 @@
 package org.ignis.executor.core.modules.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +13,9 @@ import java.util.List;
 
 public class IThreadedServer extends TServer {
 
-    org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Module.class);
-
-    private boolean stop;
+    private static final Logger LOGGER = LogManager.getLogger();
     private final List<TTransport> clients;
+    private boolean stop;
 
     public IThreadedServer(AbstractServerArgs args) {
         super(args);
@@ -69,7 +69,7 @@ public class IThreadedServer extends TServer {
             }
         } catch (Exception e) {
             if (!this.stop) {
-                LOGGER.info(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
         trans.close();
