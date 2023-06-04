@@ -68,7 +68,7 @@ public class IClientPool {
         public synchronized IClient getClient() {
             try {
                 if (this.queue.size() > 0)
-                    this.queue.pop();
+                    this.client = this.queue.pop();
                 if (this.client == null) {
                     this.client = new IClient(this.port, this.compression);
                     this.clients.add(this.client);
