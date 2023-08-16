@@ -1,0 +1,39 @@
+package org.ignis.driver.minebench;
+
+import org.ignis.driver.api.*;
+
+public class Driver {
+    public static void main(String[] args) throws InterruptedException {
+        //Initialization of the framework
+        Ignis.getInstance().start();
+        // Resources/Configuration of the cluster
+        IProperties props = new IProperties();
+        props.set("ignis.executor.image", "ignishpc/java");
+        props.set("ignis.executor.instances", "1");
+        props.set("ignis.executor.cores", "2");
+        props.set("ignis.executor.memory", "1GB");
+        props.set("ignis.modules.load.type", "false");
+        // Construction of the cluster
+        ICluster cluster = new ICluster(props, "");
+        // Initialization of a Python Worker in the cluster
+        IWorker worker = new IWorker(cluster, "java", "", 0, 1);
+
+        ISource iSourceMap = new ISource("ignis-core-java-1.0-minebenchFunctions.jar:org.ignis.driver.minebench.Minebench");
+
+
+        // Task 1 - Tokenize text into pairs ('word', 1)
+        IDataFrame text = worker.textFile("blocks.csv", 0);
+        // words = text.flatmap(lambda line: [(word, 1) for word in line.split()])
+        IDataFrame words = text.map(iSourceMap);
+        // Print results to file
+        //wordsPair = words.toPair()
+        //worker.partitionTextFile("words.txt")
+        words.saveAsTextFile("output.txt");
+
+//        words.saveAsTextFile("output2.txt");
+        //text.saveAsJsonFile("text.json")
+        // Stop the framework
+        Ignis.getInstance().stop();
+    }
+
+}
