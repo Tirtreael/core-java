@@ -67,8 +67,7 @@ public class IOModule extends Module implements IIOModule {
     @Override
     public long partitionApproxSize() {
         LOGGER.info("IO: calculating partition size");
-        return this.getExecutorData().getPartitionGroup().stream()
-                .mapToLong(IPartition::bytes).sum();
+        return this.getExecutorData().getPartitionGroup().stream().mapToLong(IPartition::bytes).sum();
     }
 
     @Override
@@ -131,9 +130,7 @@ public class IOModule extends Module implements IIOModule {
         this.executorData.setPartitions(group);
 
         for (int i = 0; i < partitions; i++) {
-            try (FileInputStream fileIS = new FileInputStream(this.partitionFileName(path, (int) (first + i)));
-                 ObjectInputStream ois = new ObjectInputStream(fileIS)
-            ) {
+            try (FileInputStream fileIS = new FileInputStream(this.partitionFileName(path, (int) (first + i))); ObjectInputStream ois = new ObjectInputStream(fileIS)) {
                 IPartition partition = this.executorData.getPartitionTools().newPartition();
 //                IWriteIterator writeIterator = partition.writeIterator();
                 Object obj = ois.readObject();
@@ -190,11 +187,7 @@ public class IOModule extends Module implements IIOModule {
     public void textFile(String path, int minPartitions, String delim) throws IOException {
         LOGGER.info("IO: reading text file");
 
-        try (
-                FileInputStream fileIS = new FileInputStream(path);
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader(fileIS, StandardCharsets.UTF_8))
-        ) {
+        try (FileInputStream fileIS = new FileInputStream(path); BufferedReader br = new BufferedReader(new InputStreamReader(fileIS, StandardCharsets.UTF_8))) {
             long size = Files.size(Path.of(path));
             int executorId = this.executorData.getContext().executorId();
             int executors = this.executorData.getContext().executors();
@@ -208,13 +201,11 @@ public class IOModule extends Module implements IIOModule {
 
             if (executorId > 0) {
                 long pos;
-                if (exChunkInit > 0)
-                    pos = exChunkInit - 1;
+                if (exChunkInit > 0) pos = exChunkInit - 1;
                 else pos = exChunkInit;
                 br.skip(pos);
                 exChunkInit = pos + br.readLine().length();
-                if (executorId == executors - 1)
-                    exChunkEnd = (int) size;
+                if (executorId == executors - 1) exChunkEnd = (int) size;
             }
 
             if ((exChunk / minPartitionsSize) < minPartitions) {
@@ -238,8 +229,7 @@ public class IOModule extends Module implements IIOModule {
                 }
 
                 String bb = br.readLine();
-                if(bb == null)
-                    break;
+                if (bb == null) break;
                 if (bb.charAt(bb.length() - 1) == delim.charAt(0))
                     writeIterator.write(new String(bb.substring(0, bb.length() - 1).getBytes(StandardCharsets.UTF_8)));
                 else writeIterator.write(new String(bb.getBytes(StandardCharsets.UTF_8)));
@@ -248,8 +238,7 @@ public class IOModule extends Module implements IIOModule {
             }
             exChunkEnd = fileIS.getChannel().position();
 
-            LOGGER.info("IO: created " + partitionGroup.size() + " partitions, " + elements
-                    + " lines and " + (exChunkEnd - exChunkInit) + "Bytes read ");
+            LOGGER.info("IO: created " + partitionGroup.size() + " partitions, " + elements + " lines and " + (exChunkEnd - exChunkInit) + "Bytes read ");
 
         } catch (TException | Mpi.MpiException e) {
             e.printStackTrace();
@@ -297,14 +286,14 @@ public class IOModule extends Module implements IIOModule {
 
     @Override
     public void saveAsObjectFile(String path, String compression, int first) {
-        LOGGER.info("IO: saving as text file");
+        LOGGER.info("IO: saving as object file");
         IPartitionGroup group = this.executorData.getAndDeletePartitions();
         for (int i = 0; i < group.size(); i++) {
             try {
                 String fileName = this.partitionFileName(path, (int) (first + i));
                 FileOutputStream fileOS = new FileOutputStream(fileName);
                 ObjectOutputStream oos = new ObjectOutputStream(fileOS);
-                LOGGER.info("IO: saving text file " + fileName);
+                LOGGER.info("IO: saving object file " + fileName);
                 oos.writeObject(group.get(i).getElements());
 //                for(Object elem : group.get(i)){
 //                    oos.writeObject(elem);
@@ -324,15 +313,13 @@ public class IOModule extends Module implements IIOModule {
     public void saveAsTextFile(String path, long first) {
         LOGGER.info("IO: saving as text file");
         IPartitionGroup group = this.executorData.getAndDeletePartitions();
-        for (IPartition objects : group) {
+        for (int i = 0; i < group.size(); i++) {
             try {
-                FileWriter file = new FileWriter(path);
+                String fileName = this.partitionFileName(path, (int) (first + i));
+                FileWriter file = new FileWriter(fileName);
                 BufferedWriter bw = new BufferedWriter(file);
-//                FileOutputStream fileOS = new FileOutputStream(fileName);
-//                ObjectOutputStream oos = new ObjectOutputStream(fileOS);
-                LOGGER.info("IO: saving text file " + path);
-//                oos.writeObject(group.get(i).getElements());
-                for (Object elem : objects) {
+                LOGGER.info("IO: saving text file " + fileName);
+                for (Object elem : group.get(i)) {
                     bw.write(elem + "\n");
                 }
                 bw.flush();
@@ -370,5 +357,6 @@ public class IOModule extends Module implements IIOModule {
         }
         group.clear();
     }
+
 
 }

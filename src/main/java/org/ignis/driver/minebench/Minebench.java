@@ -98,6 +98,7 @@ public class Minebench implements IFunction {
     public static void main(String[] args) {
         System.out.println("\nMinebench v0.1.5 (Python 3.6+)\n");
         LOGGER.atLevel(Level.INFO);
+        LOGGER.info("Processors: " + Runtime.getRuntime().availableProcessors());
         int processesNum = Runtime.getRuntime().availableProcessors();
         List<Integer> processId = IntStream.range(1, processesNum + 1).boxed().toList();
 
@@ -144,7 +145,7 @@ public class Minebench implements IFunction {
 
     @Override
     public Object call(Object obj, IContext context) {
-        return Minebench.getBlockHeader((String) obj);
+        return Minebench.getBlockHeader((String) obj).mine();
     }
 
     @Override

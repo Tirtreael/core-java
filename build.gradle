@@ -47,6 +47,13 @@ task functionsJar(type: Jar, dependsOn: classes,
     include 'org/ignis/executor/api/functions/**'
 }
 
+task minebenchJar(type: Jar, dependsOn: classes,
+        description: 'Creates a jar from the org.ignis.driver.minebench classes.') {
+    archiveClassifier.set('minebenchFunctions')
+    from sourceSets.main.output
+    include 'org/ignis/driver/minebench/**'
+}
+
 artifacts {
     archives jar
     archives sourcesJar
@@ -74,9 +81,9 @@ repositories {
 dependencies {
     implementation group: 'org.apache.thrift', name: 'libthrift', version: '0.15.0'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.14.0'
-    implementation group: 'org.json', name: 'json', version: '20210307'
+    implementation group: 'org.json', name: 'json', version: '20230227'
     implementation group: 'org.openjdk.jol', name: 'jol-core', version: '0.10'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
@@ -90,6 +97,8 @@ test {
 
 task jarAndLibs(type: Copy, description: 'Copy project dependencies.') {
     dependsOn "jar"
+    dependsOn "functionsJar"
+    dependsOn "minebenchJar"
     delete("$buildDir/libs")
     from project.configurations.runtimeClasspath
     into "$buildDir/libs"
