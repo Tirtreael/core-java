@@ -3,6 +3,7 @@ package org.ignis.driver.minebench;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -16,21 +17,16 @@ public class BlockHeader {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private int ver;
-    private String prevBlock;
-    private String merkleRoot;
-    private int time;
-    private int bits;
-    private boolean sequentialNonce;
+    private final int ver;
+    private final String prevBlock;
+    private final String merkleRoot;
+    private final int time;
+    private final int bits;
+    private final boolean sequentialNonce;
     private int nonce;
-    private Set<Integer> usedNonces;
+    private final Set<Integer> usedNonces;
     private byte[] headerBin;
 
-
-    @Override
-    public String toString() {
-        return ver + "," + prevBlock + "," + time; //+ "," + HexFormat.of().formatHex(headerBin);
-    }
 
     public BlockHeader(int ver, String prevBlock, String merkleRoot, int time, int bits, boolean sequentialNonce, int nonce) {
         this.ver = ver;
@@ -42,6 +38,11 @@ public class BlockHeader {
         this.nonce = 0;
         this.usedNonces = new HashSet<>();
         this.headerBin = this.getBin();
+    }
+
+    @Override
+    public String toString() {
+        return ver + "," + prevBlock + "," + time; //+ "," + HexFormat.of().formatHex(headerBin);
     }
 
     public String mine() {
@@ -71,9 +72,9 @@ public class BlockHeader {
 
     public String getTarget() {
         String bitsBigEndianHex = FormatUtils.uint32ToHexBigEndian(this.bits);
-        int exp = FormatUtils.hexToInt(bitsBigEndianHex.substring(0, 1));
+        int exp = FormatUtils.hexToInt(bitsBigEndianHex.substring(0, 2));
         int coeff = FormatUtils.hexToInt(bitsBigEndianHex.substring(2));
-        BigInteger target = BigInteger.valueOf((int) Math.pow(coeff * 2, 8 * (exp - 3)));
+        BigInteger target = BigDecimal.valueOf(coeff * Math.pow(2, 8 * (exp - 3))).toBigIntegerExact();
         return FormatUtils.uint256ToHexBigEndian(target);
     }
 

@@ -1,5 +1,9 @@
 package org.ignis.driver.minebench;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -9,12 +13,15 @@ import java.security.NoSuchAlgorithmException;
 
 public class FormatUtils {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     public static String swapHex(String hexString) {
-        String swappedString = "";
+        StringBuilder swappedString = new StringBuilder();
         for (int i = 0; i < hexString.length(); i += 2) {
-            swappedString += hexString.charAt(i + 1) + hexString.charAt(i);
+            swappedString.append(hexString.charAt(i + 1));
+            swappedString.append(hexString.charAt(i));
         }
-        return swappedString;
+        return swappedString.toString();
     }
 
     public static String sha256ToHexLittleEndian(String string) {
@@ -22,30 +29,22 @@ public class FormatUtils {
     }
 
     public static String uint32ToHexLittleEndian(int integer) {
-        byte[] bytesInteger = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN).putInt(integer).array();
-        StringBuilder st = new StringBuilder();
-        for (byte b : bytesInteger) {
-            st.append(String.format("%032X", b));
-        }
-        return st.toString();
+        byte[] bytesInteger = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(integer).array();
+        return new String(Hex.encodeHex(bytesInteger));
     }
 
     public static String decode(byte[] bytes) {
-        StringBuilder st = new StringBuilder();
-        for (byte b : bytes) {
-            st.append(String.format("%032X", b));
-        }
-        return st.toString();
+        return new String(Hex.encodeHex(bytes));
     }
 
     public static String uint32ToHexBigEndian(int integer) {
-        byte[] bytesInteger = ByteBuffer.allocate(32).order(ByteOrder.BIG_ENDIAN).putInt(integer).array();
-        return decode(bytesInteger);
+        byte[] bytesInteger = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(integer).array();
+        return new String(Hex.encodeHex(bytesInteger));
     }
 
     public static String uint256ToHexBigEndian(BigInteger bigInteger) {
-        byte[] bytesInteger = ByteBuffer.allocate(32).order(ByteOrder.BIG_ENDIAN).put(bigInteger.toByteArray()).array();
-        return decode(bytesInteger);
+        byte[] bytesInteger = ByteBuffer.allocate(64).order(ByteOrder.BIG_ENDIAN).put(bigInteger.toByteArray()).array();
+        return new String(Hex.encodeHex(bytesInteger));
     }
 
     public static byte[] hexToBin(String hexString) {
@@ -54,11 +53,7 @@ public class FormatUtils {
     }
 
     public static String binToHex(byte[] bytes) {
-        StringBuilder st = new StringBuilder(32);
-        for (byte b : bytes) {
-            st.append(String.format("%032x", b));
-        }
-        return st.toString();
+        return new String(Hex.encodeHex(bytes));
     }
 
     public static int hexToInt(String hexString) {
@@ -75,7 +70,7 @@ public class FormatUtils {
     }
 
     public static byte[] binToSha256_Sha256Bin(byte[] headerBin) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
@@ -83,7 +78,6 @@ public class FormatUtils {
         }
         byte[] firstHashBin = digest.digest(headerBin);
         byte[] secondHashBin = digest.digest(firstHashBin);
-//        return new StringBuilder(binToHex(secondHashBin)).reverse().toString();
         int len = secondHashBin.length;
         byte[] secondHashBinReverse = new byte[len];
         for (int i = 0; i < len; i++) {
