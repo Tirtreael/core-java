@@ -6,19 +6,20 @@ import java.util.regex.Pattern;
 
 public class IPropertyParser {
 
-    public Properties getProperties() {
-        return properties;
-    }
-
+    public static IPropertyParser instance;
     private final Properties properties;
     private final Pattern bool = Pattern.compile("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON");
-
     public IPropertyParser() {
         this.properties = new Properties();
+        instance = this;
     }
 
     public IPropertyParser(Properties properties) {
         this.properties = properties;
+    }
+
+    public Properties getProperties() {
+        return properties;
     }
 
     public int cores() {

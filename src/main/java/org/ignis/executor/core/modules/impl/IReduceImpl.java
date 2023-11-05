@@ -1,6 +1,5 @@
 package org.ignis.executor.core.modules.impl;
 
-import org.ignis.mpi.Mpi;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
@@ -11,10 +10,11 @@ import org.ignis.executor.api.Pair;
 import org.ignis.executor.api.function.IFunction2;
 import org.ignis.executor.api.function.IVoidFunction0;
 import org.ignis.executor.core.IExecutorData;
-import org.ignis.executor.core.ithreads.IThreadPool;
+import org.ignis.executor.core.ithreads.IThreadPool2;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.mpi.Mpi;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,14 +83,18 @@ public class IReduceImpl extends Module {
 
         LOGGER.info("Reduce: reducing all elements in the executor");
         if (elemPart.size() > 1) {
-            if (IThreadPool.defaultCores == 1) {
+            if (IThreadPool2.cores == 1) {
                 elemPart.getElements().set(0, reducePartition(f, elemPart));
             } else {
                 int n = elemPart.size();
                 int n2 = n / 2;
                 while (n2 > 0) {
                     int finalN = n;
-                    IThreadPool.parallel((i) -> elemPart.getElements().set(i, f.call(elemPart.getElements().get(i), elemPart.getElements().get(finalN - i - 1), context)), n2);
+                    try {
+                        IThreadPool2.parallel((i) -> elemPart.getElements().set(i, f.call(elemPart.getElements().get(i), elemPart.getElements().get(finalN - i - 1), context)), n2);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     n = (int) Math.ceil(n / 2.0);
                     n2 = n / 2;
                 }

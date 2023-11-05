@@ -6,7 +6,7 @@ import org.apache.thrift.TException;
 import org.ignis.executor.api.IReadIterator;
 import org.ignis.executor.api.IWriteIterator;
 import org.ignis.executor.core.IExecutorData;
-import org.ignis.executor.core.ithreads.IThreadPool;
+import org.ignis.executor.core.ithreads.IThreadPool2;
 import org.ignis.executor.core.storage.IMemoryPartition;
 import org.ignis.executor.core.storage.IPartition;
 import org.ignis.executor.core.storage.IPartitionGroup;
@@ -216,17 +216,21 @@ public class ISortImpl extends Module {
 
     private void parallelLocalSort(IPartitionGroup group, Comparator<Object> cmp) {
         boolean inMemory = this.executorData.getPartitionTools().isMemory(group);
-        IThreadPool.parallel((i) -> {
-            IPartition part = group.get(i);
-            if (inMemory) {
-                sortPartition((IMemoryPartition) part, cmp);
-            } else {
-                IPartition newPart = this.executorData.getPartitionTools().newMemoryPartition(part.size());
-                part.moveTo(newPart);
-                group.set(i, newPart);
-                sortPartition((IMemoryPartition) part, cmp);
-            }
-        }, group.size());
+        try {
+            IThreadPool2.parallel((i) -> {
+                IPartition part = group.get(i);
+                if (inMemory) {
+                    sortPartition((IMemoryPartition) part, cmp);
+                } else {
+                    IPartition newPart = this.executorData.getPartitionTools().newMemoryPartition(part.size());
+                    part.moveTo(newPart);
+                    group.set(i, newPart);
+                    sortPartition((IMemoryPartition) part, cmp);
+                }
+            }, group.size());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

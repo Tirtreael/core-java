@@ -1,9 +1,11 @@
 package org.ignis.executor.core.ithreads;
 
 
+import org.ignis.executor.core.IPropertyParser;
 import org.ignis.executor.core.storage.IPartitionGroup;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,7 +13,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class IThreadPool2 {
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    public static final int cores = IPropertyParser.instance.cores();
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(cores);
     private static final List<Callable<Void>> taskQueue = new ArrayList<>();
 
 

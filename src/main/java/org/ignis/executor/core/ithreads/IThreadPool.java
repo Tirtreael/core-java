@@ -1,18 +1,14 @@
 package org.ignis.executor.core.ithreads;
 
-import org.apache.thrift.TException;
-import org.ignis.executor.api.IWriteIterator;
-import org.ignis.executor.core.storage.IPartitionGroup;
+import org.ignis.executor.core.IPropertyParser;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public class IThreadPool {
 
-    public static int defaultCores = Runtime.getRuntime().availableProcessors();
+    public static int defaultCores = IPropertyParser.instance.cores(); //Runtime.getRuntime().availableProcessors();
     //    private CyclicBarrier cyclicBarrier = new CyclicBarrier();
 //    private RuntimeContextData rctxData = new RuntimeContextData();
 //    private IRuntimeContext rctxImpl = new RuntimeContext();
