@@ -6,11 +6,14 @@ public class Driver {
     public static void main(String[] args) throws InterruptedException {
         String blocksFile = "50k_blocks.csv";
         int minePartitions = 0;
+        int cores = 1;
 
         if (args.length > 0)
             blocksFile = args[0];
         if (args.length > 1)
             minePartitions = Integer.parseInt(args[1]);
+        if (args.length > 2)
+            cores = Integer.parseInt(args[2]);
 
         //Initialization of the framework
         Ignis.getInstance().start();
@@ -18,7 +21,7 @@ public class Driver {
         IProperties props = new IProperties();
         props.set("ignis.executor.image", "ignishpc/java");
         props.set("ignis.executor.instances", "1");
-        props.set("ignis.executor.cores", "2");
+        props.set("ignis.executor.cores", Integer.toString(cores));
         props.set("ignis.executor.memory", "1GB");
         props.set("ignis.modules.load.type", "false");
         props.set("ignis.transport.minimal", "1GB");
