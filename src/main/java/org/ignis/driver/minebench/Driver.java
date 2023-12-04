@@ -1,8 +1,12 @@
 package org.ignis.driver.minebench;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ignis.driver.api.*;
 
 public class Driver {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     public static void main(String[] args) throws InterruptedException {
         String blocksFile = "50k_blocks.csv";
         int minePartitions = 0;
@@ -14,6 +18,8 @@ public class Driver {
             minePartitions = Integer.parseInt(args[1]);
         if (args.length > 2)
             cores = Integer.parseInt(args[2]);
+        if (args.length > 3)
+            Minebench.setDefaultBits(Integer.decode(args[3]));
 
         //Initialization of the framework
         Ignis.getInstance().start();
@@ -27,23 +33,23 @@ public class Driver {
         props.set("ignis.transport.minimal", "1GB");
         // Construction of the cluster
         ICluster cluster = new ICluster(props, "");
-        // Initialization of a Python Worker in the cluster
+        // Initialization of a Java Worker in the cluster
         IWorker worker = new IWorker(cluster, "java", "", 0, 1);
-
+        worker.start();
+        // Iniciar contador
+        long startTime = System.nanoTime();
+        // Load MineBench funcion
         ISource iSourceMap = new ISource("ignis-core-java-1.0-minebenchFunctions.jar:org.ignis.driver.minebench.Minebench");
-
-
-        // Task 1 - Tokenize text into pairs ('word', 1)
+        // Load blocks file
         IDataFrame text = worker.textFile(blocksFile, minePartitions);
-        // words = text.flatmap(lambda line: [(word, 1) for word in line.split()])
+        // Launch maps
         IDataFrame words = text.map(iSourceMap);
         // Print results to file
-        //wordsPair = words.toPair()
-        //worker.partitionTextFile("words.txt")
         words.saveAsTextFile("output.txt");
-
-//        words.saveAsTextFile("output2.txt");
-        //text.saveAsJsonFile("text.json")
+        // Parar contador
+        long stopTime = System.nanoTime();
+        long elapsedTime = stopTime - startTime;
+        LOGGER.info("Elapsed time: {}", (float) (elapsedTime / 1000000000));
         // Stop the framework
         Ignis.getInstance().stop();
     }

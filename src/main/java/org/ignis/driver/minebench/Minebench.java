@@ -19,6 +19,15 @@ public class Minebench implements IFunction {
 
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private static int defaultBits = 0x1F888888;
+
+    public static int getDefaultBits() {
+        return defaultBits;
+    }
+
+    public static void setDefaultBits(int defaultBits) {
+        Minebench.defaultBits = defaultBits;
+    }
 
     public static void processJob(String fileName, int startRow, int rowsNum, int bits, boolean sequentialNonce, int processId) {
         Random random = new Random(1984);
@@ -88,11 +97,11 @@ public class Minebench implements IFunction {
     }
 
     public static BlockHeader getBlockHeader(String row) {
-        return getBlockHeader(row, 0x1FFFFFFF, false);
+        return getBlockHeader(row, defaultBits, false);
     }
 
     public static BlockHeader getBlockHeader(String row, int bits) {
-        return getBlockHeader(row, bits, true);
+        return getBlockHeader(row, bits, false);
     }
 
     public static void main(String[] args) {
@@ -111,7 +120,8 @@ public class Minebench implements IFunction {
         int numLines = InputUtils.getFileLines(fileName);
         int splitSize = numLines / processesNum;
 
-        int bits = 0x1F888888;
+        Minebench.setDefaultBits(0x1FFFFFFF);
+        int bits = defaultBits;
         List<Thread> processes = new ArrayList<>();
         long startTime = FormatUtils.currentTimeStampMillis();
         for (int i : processId) {

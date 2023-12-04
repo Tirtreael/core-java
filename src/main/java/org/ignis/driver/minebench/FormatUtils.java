@@ -43,7 +43,7 @@ public class FormatUtils {
     }
 
     public static String uint256ToHexBigEndian(BigInteger bigInteger) {
-        byte[] bytesInteger = ByteBuffer.allocate(64).order(ByteOrder.BIG_ENDIAN).put(bigInteger.toByteArray()).array();
+        byte[] bytesInteger = ByteBuffer.allocate(32).order(ByteOrder.BIG_ENDIAN).put(bigInteger.toByteArray()).array();
         return new String(Hex.encodeHex(bytesInteger));
     }
 

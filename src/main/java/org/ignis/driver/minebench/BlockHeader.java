@@ -3,7 +3,6 @@ package org.ignis.driver.minebench;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -74,7 +73,15 @@ public class BlockHeader {
         String bitsBigEndianHex = FormatUtils.uint32ToHexBigEndian(this.bits);
         int exp = FormatUtils.hexToInt(bitsBigEndianHex.substring(0, 2));
         int coeff = FormatUtils.hexToInt(bitsBigEndianHex.substring(2));
-        BigInteger target = BigDecimal.valueOf(coeff * Math.pow(2, 8 * (exp - 3))).toBigIntegerExact();
+        BigInteger target = BigInteger.TWO.pow(8 * (exp - 3));
+        target = target.multiply(BigInteger.valueOf(coeff));
+//        BigInteger target = BigDecimal.valueOf(coeff * Math.pow(2, 8 * (exp - 3))).toBigIntegerExact();
+//        LOGGER.info("bitsBigEndianHex: " + this.bits);
+//        LOGGER.info("bitsBigEndianHex: " + bitsBigEndianHex);
+//        LOGGER.info("exp: " + exp);
+//        LOGGER.info("coeff-hex: " + bitsBigEndianHex.substring(2));
+//        LOGGER.info("coeff: " + coeff);
+//        LOGGER.info("Target0: " + target);
         return FormatUtils.uint256ToHexBigEndian(target);
     }
 
