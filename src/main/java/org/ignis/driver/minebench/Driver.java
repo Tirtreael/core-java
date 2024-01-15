@@ -21,11 +21,17 @@ public class Driver {
         if (args.length > 3)
             Minebench.setDefaultBits(Integer.decode(args[3]));
 
+
+        LOGGER.info("Blocks file: {}", blocksFile);
+        LOGGER.info("minPartitions: {}", minePartitions);
+        LOGGER.info("cores: {}", cores);
+        LOGGER.info("difficulty: {}", Minebench.getDefaultBits());
+
         //Initialization of the framework
         Ignis.getInstance().start();
         // Resources/Configuration of the cluster
         IProperties props = new IProperties();
-        props.set("ignis.executor.image", "ignishpc/java");
+        props.set("ignis.executor.image", "nodo1:3000/ignishpc/java");
         props.set("ignis.executor.instances", "1");
         props.set("ignis.executor.cores", Integer.toString(cores));
         props.set("ignis.executor.memory", "1GB");
