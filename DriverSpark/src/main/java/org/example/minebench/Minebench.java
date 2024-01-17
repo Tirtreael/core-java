@@ -1,10 +1,8 @@
-package org.ignis.driver.minebench;
+package org.example.minebench;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ignis.executor.api.IContext;
-import org.ignis.executor.api.function.IFunction;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,7 +13,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-public class Minebench implements IFunction {
+public class Minebench {
 
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -149,18 +147,13 @@ public class Minebench implements IFunction {
         System.out.println("\n- Bits: " + bits + "\n");
     }
 
-    @Override
-    public void before(IContext context) {
-
+    public class MapArgument {
+        public String row;
+        public Integer bits;
     }
 
-    @Override
-    public Object call(Object obj, IContext context) {
-        return Minebench.getBlockHeader((String) obj).mine();
+    public static String call(String s) throws Exception {
+        return Minebench.getBlockHeader(s).mine();
     }
 
-    @Override
-    public void after(IContext context) {
-
-    }
 }

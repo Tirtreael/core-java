@@ -1,10 +1,12 @@
-package org.ignis.driver.minebench;
+package org.example.minebench;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ignis.driver.api.*;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 
-public class Driver {
+public class DriverSpark {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] args) throws InterruptedException {
@@ -27,7 +29,7 @@ public class Driver {
         LOGGER.info("cores: {}", cores);
         LOGGER.info("difficulty: {}", Minebench.getDefaultBits());
 
-        //Initialization of the framework
+        /*//Initialization of the framework
         Ignis.getInstance().start();
         // Resources/Configuration of the cluster
         IProperties props = new IProperties();
@@ -57,7 +59,35 @@ public class Driver {
         long elapsedTime = stopTime - startTime;
         LOGGER.info("Elapsed time: {}", (float) (elapsedTime / 1000000000));
         // Stop the framework
-        Ignis.getInstance().stop();
+        Ignis.getInstance().stop();*/
+
+
+        SparkConf sparkConf = new SparkConf().setAppName("SparkExample").setMaster("local[" + cores + "]");
+        JavaSparkContext sc;
+        try {
+            sc = new JavaSparkContext(sparkConf);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Iniciar contador
+        long startTime = System.nanoTime();
+
+        // Read input data from a text file
+        JavaRDD<String> lines = sc.textFile("/home/miguelr/Documents/ignis-deploy/50k_blocks.csv", minePartitions);
+
+        // Perform transformations and actions
+        JavaRDD<String> minebenchMap = lines.map(Minebench::call);
+
+        minebenchMap.saveAsTextFile("output.txt");
+
+        // Parar contador
+        long stopTime = System.nanoTime();
+        long elapsedTime = stopTime - startTime;
+        LOGGER.info("Elapsed time: {}", (float) (elapsedTime / 1000000000));
+
+        // Stop Spark context
+        sc.stop();
     }
 
 }

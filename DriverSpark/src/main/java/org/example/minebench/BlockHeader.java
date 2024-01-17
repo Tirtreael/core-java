@@ -1,4 +1,4 @@
-package org.ignis.driver.minebench;
+package org.example.minebench;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import static org.ignis.driver.minebench.FormatUtils.binToHex;
+import static org.example.minebench.FormatUtils.binToHex;
 
 public class BlockHeader {
 
@@ -45,22 +45,21 @@ public class BlockHeader {
     }
 
     public String mine() {
-        String networkTarget = "00" + this.getTarget();
+        String networkTarget = this.getTarget();
         LOGGER.debug("Target: " + networkTarget);
-        byte[] networkTargetBin = FormatUtils.hexToBin(networkTarget);
         long startTime = FormatUtils.currentTimeStampMillis();
         long blockSeconds = 0;
         int attemps = 1;
 
         byte[] currentHash = this.getHash(this.headerBin);
-        while (binToHex(currentHash).compareTo(networkTarget) > 0) {
+        while (binToHex(currentHash).compareTo("00" + networkTarget) > 0) {
             this.setNewNonce();
             currentHash = this.getHash(this.headerBin);
             blockSeconds = FormatUtils.currentTimeStampMillis() - startTime;
             attemps++;
         }
 
-        String currentHashStr = FormatUtils.binToHex(currentHash);
+        String currentHashStr = binToHex(currentHash);
         LOGGER.debug("Block found: " + binToHex(currentHash));
         LOGGER.debug("Nonce: " + this.nonce);
         LOGGER.debug("Attempts: " + attemps);
